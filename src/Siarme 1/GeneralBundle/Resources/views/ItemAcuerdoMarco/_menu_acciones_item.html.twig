@@ -1,0 +1,13 @@
+{# Siarme\GeneralBundle\Resources\views\ItemAcuerdoMarco\_menu_acciones_item.html.twig #}
+
+{% if   itemSolicitado is defined and edit %}
+    <a href="{{ path('itemsolicitado_quitar_item', { 'id': itemSolicitado.id }) }}" role="button" data-toggle="tooltip" data-placement="top" title='Quita la relacion de este ítem del A. M. con el ítem del PEDIDO'> <span class="glyphicon glyphicon-remove-sign text-danger"></span>Quitar</a>
+{% else %}
+{# 
+    {% if expediente.tramite | length > 0 %}
+          <a  class="text-muted" data-toggle="tooltip" data-placement="top" title='Se habilita la opcion cuando no existen PEDIDOS'  role="button" ><span class="glyphicon glyphicon-trash"></span> Eliminar</a>
+    {% else %}
+          <a  data-href="{{ path('itemacuerdomarco_eliminar', { 'id': itemAcuerdo.id }) }}" class="btn-eliminar-item" role="button" ><span class="glyphicon glyphicon-trash text-danger"></span> Eliminar</a>
+    {% endif %}
+#}
+{% endif %}

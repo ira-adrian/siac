@@ -1,0 +1,66 @@
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block stylesheets %}   
+{{ parent() }}
+      <link href="{{ asset('bundles/expediente/select2/css/select2.min.css') }}" rel="stylesheet">     
+{% endblock %}
+{% block menu_li %}
+         <li>
+            <a  href="{{ path('expediente_index') }}" role="button"> <span class="glyphicon glyphicon-list-alt"> Lista de Expts. </span></a>
+        </li>  
+{% endblock %}
+
+{% block main %} 
+    <div class="panel panel-default">
+        <div class="panel-heading text-center">  
+             <h4>MODIFICAR EXPEDIENTE</h4>
+            <h3>{{ expediente.agente }} </h3>
+        </div>
+        <div class="panel-body">
+            {{ form_start(edit_form) }}
+                {{ form_widget(edit_form) }}
+            <ul class="list-inline text-right"> 
+                <li>    <a  class="btn btn-primary" href="{{ path('expediente_show',    { 'id': expediente.id }) }}"> CANCELAR </span></a> </li>
+                <li>  <input class="btn btn-danger" type="submit" onclick= "return confirm('¿Desea GUARDAR?');" value="GUARDAR" /></li>
+            </ul>
+            {{ form_end(edit_form) }}
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %} 
+{{ parent() }}
+        <script src="{{ asset('bundles/expediente/select2/js/select2.min.js') }}"></script>
+         <script> /*-- $('select').select2({  allowClear:true, placeholder:""});*/
+          $('select').select2();
+           </script>
+         <script>          
+          $('select').select2();          
+           /*-- $('select').select2({  minimumInputLength: 2, allowClear:true, placeholder:""});
+          $('select').select2();*/
+          $("#siarme_expedientebundle_expediente_agente").select2({
+           placeholder: 'APELLIDO Y NOMBRE O DNI',
+           minimumInputLength: 3,
+           cache: true,
+           ajax: {
+               url: "{{ path('agente_search') }}",
+               dataType: 'json',            
+               delay: 5000,
+               data: function (params) {
+                  return {
+                          q: params.term // search term
+                         };
+               },
+               processResults: function (data) {
+                 return {
+                          results: $.map(data, function(obj) {
+                             return { id: obj.id, text: obj.text };
+                          })
+                        };
+               },
+               
+           },
+
+           });
+          </script>
+{% endblock %}

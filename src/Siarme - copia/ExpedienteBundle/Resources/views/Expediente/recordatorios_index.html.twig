@@ -1,0 +1,45 @@
+{# Siarme\ExpedienteBundle\Resources\views\Expediente\recordatorios_index.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %}AGENDA{% endblock %}
+{% block header %}
+  {{ include('ExpedienteBundle:Default:_breadcrumb_principal.html.twig') }}
+{% endblock %}
+{% block contenido %}
+        {{ app.session.set('modulo', 'AGENDA') }}
+        {{ app.session.set('glyphicon', 'glyphicon glyphicon-calendar') }}
+        {{ app.session.set('route', 'recordatorios_index') }}
+      <div class="nav nav-tabs nav-justified" style="padding-top:5px;">
+        <li role="presentation"><a class="glyphicon glyphicon-wrench" href="{{ path('recordatorios_index') }}"> TAREAS{% if movimientoPendiente is defined and movimientoPendiente is not empty  %} <span class="glyphicon-folder-open"><small>+</small></span>{% endif %}</a></li>
+        <li role="presentation"><a class="glyphicon glyphicon-tent" href="{{ path('organismo_index', {'id': app.user.departamentoRm.id }) }}"> SAFS</a></li>
+        <li role="presentation"><a class="glyphicon glyphicon-user" href="{{ path('agente_index', {'id': app.user.departamentoRm.id }) }}"> USUARIOS</a>
+       {#  <li role="presentation" class="active"><a class="glyphicon glyphicon-folder-open" href="{{ path('expediente_recordatorios_index') }}"> EXPEDIENTES</a></li>#}
+      </div> 
+ 
+        <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Informacion</th>
+                <th>N°</th>
+                <th>Descripcion</th>
+                <th>Reparticion</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for recordatorio in recordatorios %}
+                    {% set expediente = recordatorio.expediente %}
+                    <tr><td colspan=100%><span class="glyphicon glyphicon-calendar text-info"></span> {{recordatorio | upper }} - {{ include('ExpedienteBundle:Tramite:_agenda_etiqueta.html.twig') }} </td></tr>
+                     {{ include('ExpedienteBundle:Expediente:_tbody_completo.html.twig') }}   
+            {% endfor %}
+
+        </tbody>
+    </table>
+
+{% endblock %}
+{% block javascripts %}  
+{{ parent() }}
+<script> 
+ $("#link-2").addClass('active');
+</script> <!-- DataTables  -->
+{% endblock %}

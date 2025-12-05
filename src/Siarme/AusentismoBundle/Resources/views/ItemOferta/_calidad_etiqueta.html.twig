@@ -1,0 +1,21 @@
+      {# calidad con etiquetas label #}
+<div role="presentation" class="dropdown" >
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+      <span id="etiqueta-calidad" class="etiqueta-calidad text-info">
+          {% if itemOferta.calidad == 0 %}<span class="text-warning">Ninguna</span>{% endif %}
+          {% if itemOferta.calidad == 1 %}<span class="text-danger">No se Ajusta</span>{% endif %}
+          {% if itemOferta.calidad == 2 %} Bueno {% endif %} 
+          {% if itemOferta.calidad == 3 %} Muy Bueno {% endif %} 
+         <span class="caret"></span>
+       </span>
+    </a>
+{# if (itemOferta.oferta.expediente | default(null) | movimiento_estado(app.user)) and  itemOferta.proceso.departamentoRm == app.user.departamentoRm  and not itemOferta.proceso.adjudicado #}
+{% if edit %}
+    <ul class="dropdown-menu">
+                <li><a class="btn-calidad" data-href="{{ path('item_oferta_calidad', { 'id': itemOferta.id }) }}" data-etiqueta= "<span class='text-warning'>Ninguna</span> <span class='caret'></span>">Ninguna</a></li>
+                <li><a class="btn-calidad" data-href="{{ path('item_oferta_calidad', { 'id': itemOferta.id, 'calidad':1 }) }}" data-etiqueta="<span class='text-danger'>No se Ajusta</span> <span class='caret'></span>" >No se Ajusta</a></li>
+                <li><a class="btn-calidad" data-href="{{ path('item_oferta_calidad', { 'id': itemOferta.id, 'calidad':2 }) }}" data-etiqueta="Bueno <span class='caret'></span>" >Bueno</a></li>
+                <li><a class="btn-calidad" data-href="{{ path('item_oferta_calidad', { 'id': itemOferta.id, 'calidad':3 }) }}" data-etiqueta="Muy Bueno <span class='caret'></span>">Muy Bueno</a></li>
+    </ul>
+ {% endif %}
+</div>

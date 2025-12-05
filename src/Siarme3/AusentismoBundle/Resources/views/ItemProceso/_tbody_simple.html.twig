@@ -1,0 +1,17 @@
+{# Siarme\AusentismoBundle\Resources\views\Itempedido\_tbody_completo.html.twig #}
+<tr>
+    <td>     
+        <div class="dropdown text-left hidden-print" style="margin:0px;"> 
+                    {% include 'AusentismoBundle:ItemPedido:_menu_info_item.html.twig' with {'entidad': itemPedido, 'tipo':constant('TIPO_ENTIDAD', itemPedido) } %}
+        </div>
+    </td>
+    <td>{{ itemPedido.numero }}</td>
+    <td><a data-toggle="tooltip" data-placement="top" title='Ver ítem' href="{{ path('itempedido_show', { 'id': itemPedido.id }) }}" target="_blank">{{ itemPedido.codigo }}</a></td>
+    {# <td>{% if itemPedido.fecha %}{{ itemPedido.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>
+    <td><a href="{{ path('itempedido_show', { 'id': itemPedido.id }) }}" target="_blank"> {{ itemPedido.codigo }}</a></td>#}
+    <td width="45%"><small>{{ itemPedido.item }}</small></td>
+    <td>$ {{ itemPedido.precio  | default(0) | number_format(2, ',', '.')  }}</td>
+    <td>{{ itemPedido.cantidad }}</td>
+    <td class="estado">{% if itemPedido.estado %}Válido{% else %}No válido{% endif %}</td>
+</tr>
+

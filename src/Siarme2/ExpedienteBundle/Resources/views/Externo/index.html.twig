@@ -1,0 +1,90 @@
+{# Siarme\ExpedienteBundle\Resources\views\Externo\index.html.twig #}
+
+{% extends 'frontend.html.twig' %}
+{% block title %} PEDIDOS{% endblock %}
+{% block stylesheets %}   
+     <link href="{{ asset('bundles/expediente/plugins/boostrap3/css/bootstrap_cerulean.min.css') }}" type="text/css" rel="stylesheet"> 
+    <link rel="stylesheet" href="{{ asset('bundles/expediente/plugins/font-awesome/css/font-awesome.min.css') }}">  
+    <link href="{{ asset('bundles/expediente/plugins/datatables/jquery.dataTables.min.css')}}" type="text/css" rel="stylesheet">
+    <style type="text/css" media="print">
+        @media print {
+            a[href]:after {
+                content: none !important;
+            }
+        }
+    </style>     
+{% endblock %}
+{% block body %}
+
+<header>
+  <nav class="navbar navbar-inverse hidden-print"  role = "navigation">
+      <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <a class="navbar-brand"><span  class="glyphicon glyphicon-shopping-cart"> {{app.user.departamentoRm}}</span></a>
+    </div>
+        <ul class="nav navbar-nav">       
+        <li class="active"><a href=""><span class="glyphicon glyphicon-home" aria-hidden="true"></span> INICIO</a></li>    
+        <li><a href="{{ path('externo_items_adjudicados') }}"  target="_blank"> <span class="glyphicon glyphicon-tasks" ></span> ÍTEMS ADJUDICADOS</a></li>
+      </ul> 
+      <ul class="nav navbar-nav navbar-right">           
+        <li>
+             <a href="{{ path('usuario_logout') }}" >
+                  <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
+                  Salir
+              </a>           
+        </li>        
+      </ul> 
+    </div><!-- /.container-fluid -->    
+</nav>
+</header>
+
+
+ <div class="row" style="padding: 5px;">
+
+    {% for tramite in tramites %}
+            {% if loop.first %}
+             <table id="tablaTramite" class="table table-hover table-responsive">
+                <thead>
+                  {{ include('ExpedienteBundle:Externo:_thead_completo.html.twig') }}  
+                </thead>
+                <tbody>
+            {% endif %}        
+            {{ include('ExpedienteBundle:Externo:_tbody_completo.html.twig') }}
+    {% else %}
+        <h2>No hay pedidos sin credito</h2>    
+    {% endfor %}
+                </tbody>
+            </table>
+</div>
+{% endblock %}
+{% block javascripts %}   
+   <script src="{{ asset('bundles/expediente/plugins/jquery/jquery.min.js') }}">
+    </script>
+    <script src="{{ asset('bundles/expediente/plugins/boostrap3/js/bootstrap.min.js') }}">
+    </script>         
+    <script src="{{ asset('bundles/expediente/plugins/print/printArea.js') }}">
+    </script> 
+    <script src="{{ asset('bundles/expediente/plugins/dropzone/dist/dropzone.js') }}"></script>
+    <script src="{{ asset('bundles/expediente/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('bundles/expediente/plugins/clipboard/dist/clipboard.min.js') }}"></script>
+   <script>
+    $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip(); 
+
+            var options = {mode:"popup", popHt: 500,   popWd: 400, popX: 100,   popY: 100, popTitle:"", popClose: false, strict: undefined};
+            $("#printer").click(function(){
+            $("div.print").printArea(options); 
+            }); 
+
+     });
+    
+    $(function () {
+    $("#tablaTramite").DataTable({"searching": true,"lengthChange": true, "order": [[ 1, "desc" ]],"pageLength": 10,
+            "language": {
+                "url": "{{asset('bundles/expediente/plugins/datatables/extensions/language/Spanish.json')}}"
+            },"lengthMenu": [[10, 25, 50, 100,-1], [10, 25, 50, 100, "Todo"]],
+        });
+    });
+   </script>
+{% endblock %}

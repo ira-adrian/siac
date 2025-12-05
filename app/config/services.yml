@@ -1,0 +1,137 @@
+# Learn more about services, parameters and containers at
+# https://symfony.com/doc/current/service_container.html
+parameters:
+    #parameter_name: value
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        # automatically injects dependencies in your services
+        autowire: true
+        # automatically registers your services as commands, event subscribers, etc.
+        autoconfigure: true
+        # this means you cannot fetch services directly from the container via $container->get()
+        # if you need to do this, you can override this setting on individual services
+        public: false
+
+
+    # add more services, or override services that need manual wiring
+    # AppBundle\Service\ExampleService:
+    #     arguments:
+    #         $someArgument: 'some_value'
+
+    app.email_sender:
+        class: Siarme\DocumentoBundle\Service\EmailService
+        arguments: ['@mailer', '@templating'] # Inyección de dependencias
+        public: true    
+
+    compartir.twig.extension:
+        class: Siarme\DocumentoBundle\Twig\Extension\CompartirExtension
+        public: false
+        arguments: ['@doctrine.orm.entity_manager']
+        autowire: true
+        tags:
+            - { name: twig.extension }
+
+    compartido.twig.extension:
+        class: Siarme\DocumentoBundle\Twig\Extension\CompartidoExtension
+        public: false
+        arguments: ['@doctrine.orm.entity_manager']
+        autowire: true
+        tags:
+            - { name: twig.extension }
+
+    app.twig.cupon_extension:
+        class: Siarme\DocumentoBundle\Twig\Extension\CuponExtension
+        tags:
+            - { name: twig.extension }
+
+    numero_a_letras.twig.extension:
+        class: Siarme\DocumentoBundle\Twig\Extension\numeroALetrasExtension
+        tags:
+            - { name: twig.extension }
+
+    comentario.twig.extension:
+        class: Siarme\DocumentoBundle\Twig\Extension\ComentarioExtension
+        public: false
+        arguments: ['@doctrine.orm.entity_manager']
+        autowire: true
+        tags:
+            - { name: twig.extension }
+
+    entidad.twig.extension:
+        class: Siarme\DocumentoBundle\Twig\Extension\EntidadExtension
+        public: false
+        arguments: ['@doctrine.orm.entity_manager']
+        autowire: true
+        tags:
+            - { name: twig.extension }
+
+    historial.twig.extension:
+        class: Siarme\DocumentoBundle\Twig\Extension\HistorialExtension
+        public: false
+        arguments: ['@doctrine.orm.entity_manager']
+        autowire: true
+        tags:
+            - { name: twig.extension }
+
+    historial_entidad.twig.extension:
+        class: Siarme\DocumentoBundle\Twig\Extension\HistorialEntidadExtension
+        public: false
+        arguments: ['@doctrine.orm.entity_manager']
+        autowire: true
+        tags:
+            - { name: twig.extension }
+
+    item_pedido.twig.extension:
+        class: Siarme\DocumentoBundle\Twig\Extension\ItemPedidoExtension
+        public: false
+        arguments: ['@doctrine.orm.entity_manager']
+        autowire: true
+        tags:
+            - { name: twig.extension }
+
+    tramite.twig.extension:
+        class: Siarme\DocumentoBundle\Twig\Extension\TramiteExtension
+        public: false
+        arguments: ['@doctrine.orm.entity_manager']
+        autowire: true
+        tags:
+            - { name: twig.extension }
+
+    long_time.twig_extension:
+        class: Siarme\DocumentoBundle\Twig\Extension\LongTimeExtension
+        public: false
+        tags:
+            - { name: twig.extension }
+
+    twig.extension.date:
+        class: Siarme\DocumentoBundle\Twig\Extension\AgeExtension
+        tags:
+            - { name: twig.extension }
+
+    twig.extension.intl:
+        class: Twig_Extensions_Extension_Intl
+        tags:
+            - { name: twig.extension }
+
+    twig.extension.loader:
+        class: Twig_Extension_StringLoader
+        tags:
+            - { name: 'twig.extension' }
+
+    turnos.twig.extension:
+        class: Siarme\DocumentoBundle\Twig\Extension\TurnosExtension
+        public: false
+        arguments: ['@doctrine.orm.entity_manager']
+        autowire: true
+        tags:
+            - { name: twig.extension }
+
+    movimiento_estado.twig.extension:
+        class: Siarme\DocumentoBundle\Twig\Extension\MovimientoEstadoExtension
+        public: false
+        arguments: ['@doctrine.orm.entity_manager']
+        autowire: true
+        tags:
+            - { name: twig.extension }

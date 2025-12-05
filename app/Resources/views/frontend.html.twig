@@ -1,0 +1,71 @@
+{% extends '::base.html.twig' %}
+
+{% block stylesheets %}
+
+  {# Cambio del del Theme por defecto de bootstrap por el theme Cerulean #}
+          <link href="{{ asset('bundles/expediente/plugins/boostrap3/css/bootstrap_paper.min.css') }}" type="text/css" rel="stylesheet">
+
+
+{#
+  {% stylesheets '@bootstrap_cerulean_css' %}
+        <link rel="stylesheet" href="{{ asset_url }}" />
+  {% endstylesheets %}
+#}
+
+{% endblock %}
+
+{% block body %}
+{% block header %}
+<header>
+  <nav class="navbar navbar-inverse hidden-print"  role = "navigation">
+  <div class="container-fluid">
+
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <a class="navbar-brand"><span data-toggle="tooltip" data-placement="bottom"  title="SIAC" class="glyphicon glyphicon-shopping-cart"></a>
+    </div>
+        <ul class="nav navbar-nav">       
+        <li class="active">
+            <a href="">
+              <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> 
+              Inicio
+            </a>            
+        </li>        
+      </ul> 
+      <ul class="nav navbar-nav navbar-right">           
+        <li>
+            <a href="{{ path ('usuario_login')}}">
+              <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> 
+              Ingresar
+            </a>            
+        </li>        
+      </ul> 
+  </div><!-- /.container-fluid -->
+</nav>
+</header>
+{% endblock %}
+
+
+
+{% for flashMessage in app.session.flashbag.get('mensaje-warning') %}
+<div class="alert alert-dismissible alert-warning">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+
+    <div class="flash-notice">
+        {{ flashMessage | raw }}
+    </div>
+    </div>
+{% endfor %}
+
+{% for flashMessage in app.session.flashbag.get('mensaje-info') %}
+<div class="alert alert-dismissible alert-info">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+
+    <div class="flash-notice">
+        {{ flashMessage | raw }}
+    </div>
+    </div>
+{% endfor %}
+
+{% endblock %}
+

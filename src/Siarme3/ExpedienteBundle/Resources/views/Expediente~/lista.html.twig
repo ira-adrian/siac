@@ -1,0 +1,52 @@
+<table id="tablaExpediente" class="table table-responsive table-hover text-capitalize tablaExpediente"  style="margin:0px;">
+  <thead>
+        <tr class="text-muted">
+            <th>N°</th>
+            <th>Estado</th>
+            <th>Expediente</th> 
+            <th>Extracto</th>
+            <th>Acciones</th>
+        </tr>
+      
+  </thead>
+      <tbody>         
+          {% for expediente in pagination  | sort | reverse %}
+
+          <tr   {% if expediente.departamentoRm != app.user.departamentoRm  %} style="background-color:#E4D8B6;"  class="text-muted"  data-toggle="tooltip" data-placement="top" title="Repartcio {{ expediente.departamentoRm  }}" {% endif %} >
+              <td>
+                   {{ loop.revindex }}
+              </td>
+              <td>
+                  <div class="dropdown text-left" style="margin:0px;"> 
+                  {# El tipo puede ser ['EX','DOC','AG'] corresponde con las entidades Expediente, Documento, Agente #}
+                 {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': expediente, 'tipo': 'EXP'} %}
+  
+                  {% include 'ExpedienteBundle:Expediente:_menu_expediente_panel_heading.html.twig' with {'entidad': expediente, 'tipo': 'EXP'} %}
+                </div>
+              </td>
+              <td><span aria-hidden="true" class="glyphicon glyphicon-folder-open text-primary">  </span>
+                 <a href="{{ path('expediente_show', { 'id': expediente.id }) }}">
+              {% if expediente.letra == "LIC" or  expediente.letra == "IN"  %}
+                {{ expediente.letra ~ "-" ~ expediente.numero ~ "/" ~ expediente.anio }}
+                {% set extracto = expediente.extracto %}
+               {% else %}
+                 {% if expediente | length > 10 %}
+                      {{ expediente | default ("N/D") | upper | replace({ (find) :'<mark>'~find~'</mark>' })  | raw  }}{% set extracto = expediente.extracto %}
+                 {% else %}
+                  
+                     {{ expediente.extracto[:14] | default ("N/D") | upper | replace({ (find) :'<mark>'~find~'</mark>' })  | raw  }} {% set extracto = expediente.extracto[14: ] %}        
+                 {% endif %}
+
+               {% endif %}
+                 </a>
+              </td>
+              <td>                
+                {{ extracto | default ("N/D") | upper | replace({ (find) :'<mark>'~find~'</mark>' })  | raw }}
+              </td>
+              <td> 
+
+              </td>
+          </tr>        
+          {% endfor %}          
+    </tbody>
+</table>

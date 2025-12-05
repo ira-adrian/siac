@@ -1,0 +1,23 @@
+{# Siarme\ExpedienteBundle\Resources\views\Expediente\_lista.html.twig #}
+             {% set year = 'now' | date('Y')%}
+             
+            <tr {% if (expediente | movimiento_pendiente(app.user) )  %} style="background-color:#FFFFE0;" data-toggle="tooltip" data-placement="top" title='No tiene TAREAS asignadas el Expediente'{% endif %} >  
+                <td class="hidden">{{ expediente.id}}</td>  
+                <td>{{ expediente.numeroInterno}}</td>  
+                <td><a href="{{ path('expediente_show', { 'id': expediente.id }) }}" target="_blank">{{ expediente.numeroGde | default('INT-'~ year ~'-'~ expediente.numeroInterno)}}</a></td>
+                <td>{{ expediente.extracto | raw | nl2br }}</td>
+                <td width="30%"> 
+                  {% for tramite in expediente.tramite if tramite.tipoTramite.slug == "tramite_proceso" %}
+                     <span class="pull-left">{{ include('ExpedienteBundle:Tramite:_estado_etiqueta.html.twig') }}</span><a  href="{{ path('tramite_show', { 'id': tramite.id }) }}" target="_blank"> &nbsp;{{ tramite.numeroComprar | default('100-0000-n/d')}}</a> | Monto Adjudicado: ${{ tramite.montoAdjudica | default(0) | number_format(2, ',', '.')  }}<br>
+                {% endfor %}
+               </td>     
+               <td>
+                    {% set movimiento = expediente | movimiento_estado(app.user) %}
+                     {% if (expediente | movimiento_pendiente(app.user)) or expediente.tramite | length == 0  %}
+                        <span  class="label label-warning">Ingreso</span>
+                    {% else %}
+                        {% if ( movimiento )  %} <span  class="label label-primary">Activo</span>{% else %} <span  class="label label-success">Completo</span> {% endif %}
+                    {% endif %}
+                </td> 
+                <td></td>
+            </tr>

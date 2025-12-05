@@ -1,0 +1,53 @@
+<table id="tablaExpediente" class="table table-responsive table-hover text-capitalize">
+  <thead>
+        <tr class="text-muted">
+            <th>N°</th>
+            <th>Expediente</th> 
+            {% if find is not empty %}  
+            <th>Iniciador</th>
+            {% endif %}
+            <th>Tramite</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+      
+  </thead>
+      <tbody>         
+          {% for expediente in pagination  | sort | reverse %}
+
+          <tr>
+              <td>
+                   {{ loop.revindex }}
+              </td>
+              <td width="40%">
+                {{ expediente.extracto | default ("N/D") | upper | replace({ (find) :'<mark>'~find~'</mark>' })  | raw  }}
+              </td>
+{% if find is not empty %}
+              <td>  {{ expediente.agente.apellidoNombre | default ("N/D")  }} </td>
+        {% endif %}          
+
+              <td>                
+                {{ expediente.datoAt.estado | default ("N/D") | upper | replace({ (find) :'<mark>'~find~'</mark>' }) | raw }}
+              </td>
+              <td>
+                  {% if  (expediente.tramite | length > 0)%}
+                  {% if expediente.estado %}
+      
+                  <span  class="text-success">INICIADO...</span> 
+
+                  {% else %}
+                  <span class="text-muted">CONCLUIDO...</span>
+                  {% endif %}
+                  {% endif %}
+              </td> 
+              <td> 
+                  {% if  (expediente.departamentoRm  == app.user.departamentoRm )  %}
+                <a data-toggle="tooltip" data-placement="top" title="Ver detalle de Expediente" href="{{ path('expediente_show', { 'id': expediente.id }) }}"><span class="glyphicon glyphicon-folder-open"> VER </span></a>
+              {% else %} 
+                   <a class="text-muted"data-toggle="tooltip" data-placement="top" title="NO PERTENECE AL DEPARTAMENTO"><span class="glyphicon glyphicon-folder-open"> VER </span></a>
+              {% endif %}
+              </td>
+          </tr>        
+          {% endfor %}          
+    </tbody>
+</table>

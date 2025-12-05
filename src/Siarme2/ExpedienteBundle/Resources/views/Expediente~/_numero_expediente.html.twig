@@ -1,0 +1,11 @@
+{% if expediente.letra == "LIC" %}
+                {{ expediente.letra ~ "-" ~ expediente.numero ~ "/" ~ expediente.anio }}
+                {% set extracto = expediente.extracto %}
+               {% else %}
+                 {% if expediente | length > 10 %}
+                      {{ expediente | default ("N/D") | upper | replace({ (find) :'<mark>'~find~'</mark>' })  | raw  }}{% set extracto = expediente.extracto %}
+                 {% else %}
+                  
+                     {{ expediente.extracto[:14] | default ("N/D") | upper | replace({ (find) :'<mark>'~find~'</mark>' })  | raw  }} {% set extracto = expediente.extracto[14: ] %}        
+                 {% endif %}
+{% endif %}

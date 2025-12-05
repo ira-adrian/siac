@@ -1,0 +1,36 @@
+    <table class="table table-responsive">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Usuaio</th>
+                <th>Texto</th>
+                <th>Tiempo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for historial in historials %}
+            <tr>
+                <td>{% if historial.fecha %}{{ historial.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>                           
+                    {% if ( app.user.id == historial.usuario.id) %}
+                                      <a data-toggle="tooltip" data-placement="top" title='{{ historial.usuario}}' class='glyphicon glyphicon-user glyphicon text-success small'>
+                                       </a>  
+                                 {% else %}       
+                                       <a data-toggle="tooltip" data-placement="top" title='{{ historial.usuario}}' class='glyphicon glyphicon-user text-muted'></a> 
+                                     
+                    {% endif %}
+                                  <span class="text-muted">  {{ historial.usuario.usuario}}</span></td>
+                <td>{{ historial.texto | raw }}</td>
+                <td>
+                    {% if historial.fecha %}{{ historial.fecha|long_time }}{% endif %}
+                </td>
+                <td>
+                     {% if   historial.accion != "CREADO" and edit %}
+                            <a  data-href="{{ path('historial_eliminar', { 'id': historial.id }) }}" class="btn-eliminar-item" role="button" ><span class="glyphicon glyphicon-trash text-danger"></span> Eliminar</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>

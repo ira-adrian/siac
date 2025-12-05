@@ -1,0 +1,11 @@
+{#  Siarme\ExpedienteBundle\Resources\views\Tramite\_registro.html.twig#}
+
+<tr>
+    <th>N°</th>
+    <th>Nota SAF</th>
+    <th>Trimestre</th>
+    <th>SAF</th>
+    <th>Objeto</th>
+    <th>Presupuesto</th>
+    <th>Solicitud de Credito</th>
+</tr>

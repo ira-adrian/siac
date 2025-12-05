@@ -1,0 +1,49 @@
+<?php
+
+namespace Siarme\AusentismoBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * GrupoEnfermedad
+ *
+ * @ORM\Table(name="grupo_enfermedad")
+ * @ORM\Entity
+ */
+class GrupoEnfermedad
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="grupo", type="string", length=4)
+     */
+    private $Grupo;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="grupo_enfermedad", type="string", length=150)
+     */
+    private $GrupoEnfermedad;
+    /** 
+     *@ORM\OneToMany(targetEntity="Siarme\AusentismoBundle\Entity\Enfermedad", mappedBy="grupoEnfermedad") 
+     */
+    private $enfermedad;
+
+    /*
+     * ToString
+     */
+    public function __toString()
+    {
+         return   $this->getMinisterio();
+    }
+}

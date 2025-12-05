@@ -1,0 +1,12 @@
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %}PROVEEDOR{% endblock %} 
+{% block main %}
+    <h1>Nuevo Proveedor</h1>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+    <div class="text-right">
+       <input class="btn btn-danger text-right" type="submit" value="GUARDAR" />
+   </div>
+    {{ form_end(form) }}
+{% endblock %}

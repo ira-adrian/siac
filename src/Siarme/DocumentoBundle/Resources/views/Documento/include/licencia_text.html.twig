@@ -1,0 +1,18 @@
+    <p style="text-align:center"> 
+        Horario: {{ date() |date('H:i:s') }}
+        <br>
+        <strong> 
+        CERTIFICACIÓN MÉDICA   N°: 0{{ documento.numero }} -{{ documento.anio }} 
+        </strong> 
+    </p> 
+   <p class="text-uppercase text-left"> 
+        <strong>Referencia: </strong>LICENCIA POR ESTADO SANITARIO <br>
+        <strong>Agente: </strong><br>
+         {{documento.licencia.agente}}<br> 
+        Edad: {{ documento.licencia.agente.fechaNacimiento | age }}  - Antiguedad: {{ documento.licencia.agente.fechaInicioLaboral | age }} - Departamento: {{ documento.licencia.agente.localidad.departamento | default("N/D") }} <br>
+        <strong>Cargos:</strong> <br>
+       {% for cargo in documento.licencia.agente.cargo %} {{ cargo }} - {{ cargo.funcion }} {% endfor %} 
+        <br>
+        
+        </p> 
+<p style="margin-left:0cm; margin-right:0cm; text-align:justify"><span style="font-size:12pt"><span style="font-family:&quot;Times New Roman&quot;,serif"><strong>Observaciones:<strong>&emsp; </strong><br><strong>&emsp;&emsp;&emsp; </strong> </span></span></p>

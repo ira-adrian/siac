@@ -1,0 +1,19 @@
+<p style="text-align:center"> 
+    <br>
+    <strong> 
+    {{ documento.nombreDocumento | upper }}    N°: 0{{ documento.numero }} -{{ documento.anio }} 
+    </strong> 
+</p> 
+
+<p >
+    <strong>VISTO: </strong> <br> 
+&emsp;&emsp;&emsp;El Expediente: {{documento.tramite.expediente.extracto | upper}}
+</p> 
+<p style="text-align: justify"><strong>CONSIDERANDO:</strong> <br>
+&emsp;&emsp;&emsp;Los elementos de juicio presentados en los autos de referencia, y teniendo en cuenta la valoración 
+    Clínica del examinado en el día de la fecha, esta  Junta  Medica, dependiente de la Dirección de Inspección Laboral:
+</p>
+<p style="font-size:16px; text-align: justify"> <strong> DICTAMINA:</strong> <br>
+&emsp;&emsp;&emsp;Que el agente: {{documento.tramite.expediente.agente}} D.N.I. N°: {{documento.tramite.expediente.agente.dni}} Edad:{{documento.tramite.expediente.agente.fechaNacimiento | age }} ,  Antigüedad:{{documento.tramite.expediente.agente.fechaInicioLaboral | age }} , Lugar de Trab: {% for cargo in documento.tramite.expediente.agente.cargo %} {{ cargo.organismo}} - {% endfor %}
+<br>&emsp;&emsp;&emsp;
+</p>

@@ -1,0 +1,351 @@
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} {{organismo.codigoGde}}{% endblock %}
+{% block contenido %}
+ <div class="container"> 
+ <ul class="nav nav-pills hidden-print"> 
+      <li><a  data-toggle="tooltip" data-placement="bottom" title="Modificar los datos del organismo" href="{{ path('organismo_edit', { 'id': organismo.id }) }}"><span class="glyphicon glyphicon-pencil">Modificar</span></a>
+      </li> 
+      
+       <!-- Menu DERECHO *** IMPRIMIR - COPIAR -->
+    <div class="pull-right">
+            <li  role="presentation">
+              
+                <a href="javascript:if(window.print)window.print()" value="Imprimir" role="button"><!-- Printer-imprime el texto de clase="print" -->
+                <span class="glyphicon glyphicon-print" ></span> Imprimir</a>
+
+                <a class="btn" data-clipboard-target="#copy"><!-- clipboard-copiar texto de id="copy" -->
+                  <span class="glyphicon glyphicon-copy"></span>Copiar</a>
+            </li>
+    </div> 
+</ul> 
+<div id="copy" class="panel panel-warning print"> 
+        <style type="text/css" media="print">
+        @media print {
+            a[href]:after {
+                content: none !important;
+            }
+        }
+      </style> 
+        <div class="panel-heading"> 
+                SAF N°  {{ organismo.saf.numeroSaf }} - {{ organismo.organismo }} -  {{ organismo.codigoGde}}
+        </div>
+<div class="panel-body"> 
+                  <ul class="list-inline">
+                    <li>CUIT: {{ organismo.saf.cuil }}</li>
+                    <li> 
+                      <span class='glyphicon glyphicon-phone'>Telefono:</span> <strong> {{ organismo.saf.telefonoMovil }} {% if organismo.saf.telefonoMovil | length > 9 %} 
+                                  <a data-tel='{{ organismo.saf.telefonoMovil}}' data-msj='Mensaje de {{ app.user}} de la SCA: ' style="font-size:16px;" class="btn-enviar-mensaje bg-success img-circle"><span data-toggle="tooltip" data-placement="top" title='Enviar Mensaje Whatsapp' class="glyphicon glyphicon-earphone text-success" ></span>Msj</a>
+                         {% endif %}
+                       </strong>
+                    </li>
+                    <li>
+                       Email: <strong>{{ organismo.saf.email }}</strong>   
+                        {% if organismo.saf.email | length > 5 %}             
+                                      <span role="presentation" class="dropdown" >
+                                                <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"> <span class="glyphicon glyphicon-send"></span> Email<span class="caret"></span>
+                                          </a>
+                                          <ul class="dropdown-menu text-left dropdown-menu-right">
+                                            <li>
+                                                <form class="navbar-form"  method="post" action="{{ path('email_enviar') }}">
+                                                    <div class="input-group">
+                                                      <label for="to">Email:</label>
+                                                     <input type="email" class="form-control" name="to" value='{{ organismo.saf.email }}' readonly>
+                                                     </div> <br><br>
+                                                    <div class="input-group">
+                                                    <label for="subjet">Asunto:</label> <br>  
+                                                     <input type="text" class="form-control" name="subjet" value='Mensaje de {{ app.user}} de la SCA' style="width:320px" readonly>
+                                                     </div><br>
+                                                     <div class="form-group">
+                                                      <label for="texto">Texto:</label>
+                                                     <textarea class="form-control" name="texto" rows="7" cols="50"> {{ organismo }},  </textarea>
+                                                     </div>
+                                                     <br>
+                                                     <button type="submit" class="button btn-sm btn-primary pull-right">Enviar</button>
+                                                </form> 
+                                            </li>
+                                          </ul>
+                                </span>
+                            {% endif %} 
+                    </li>                    
+                  </ul>
+ </div>
+ <div class="panel-group" id="accordion">
+    <ol class="breadcrumb hidden-print"  style="margin-bottom:1px;"> 
+        {% for year in ( ('now' | date("Y") - 2) .. ('now' | date("Y"))) %} 
+            {% if year != anio %}
+              <li><a href="{{ path('organismo_show', { 'id': organismo.id, 'anio': year }) }}"> <span class="glyphicon glyphicon-calendar"></span>{{year}}</a></li>
+            {% else %}
+                <li class="active"> 
+                  <span class="glyphicon glyphicon-calendar text-success"></span> <strong>{{year}}</strong>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ol>
+{% if (organismo.cargo | length) > 0  %} 
+ <div class="panel panel-warning">
+    <div class="panel-heading">
+      <h4 class="panel-title text-info">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href='#collapseTwo'>
+          <span class="glyphicon glyphicon-plus  text-info" ></span>  <span class="glyphicon glyphicon-user"></span> EMPLEADOS ({{ organismo.cargo | length }})
+        </a>
+      </h4>
+    </div>
+    <div id="collapseTwo" class="panel-collapse collapse">
+      <div  class="panel-body ">                    
+             <table id="tablaAgente" class="table table-condensed text-left">
+                <tbody> 
+               {% for cargo in organismo.cargo %}
+               {% set agente = cargo.agente %}
+                    {{ include('AusentismoBundle:Agente:_tbody_completo.html.twig') }} 
+               {% endfor %}
+                </tbody>
+            </table>     
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+
+{% for tipoTramite in tipoTramites | reverse if (tipoTramite.tramite | length ) > 0  %}
+         {% set cantidad, tramitesSaf = 0, {} %} 
+         {% for tramite in tipoTramite.tramite if tramite.organismoOrigen == organismo %} 
+              {% set cantidad = cantidad + 1 %} 
+              {% set tramitesSaf = tramitesSaf | merge([tramite]) %}  
+         {% else %}
+              {% set cantidad = cantidad + 1 %} 
+              {% set tramitesSaf = tramitesSaf | merge([tramite]) %}  
+         {% endfor %}
+
+  <div class="panel panel-warning">
+    <div class="panel-heading">
+      <h4 class="panel-title text-info">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href='#{{tipoTramite}}'>
+          <span {% if loop.first %}class="glyphicon glyphicon-minus"{% else %}class="glyphicon glyphicon-plus  text-info" {% endif %} ></span>  <span class="{{tipoTramite.glyphicon}}"></span> {{tipoTramite}} ({{cantidad}})
+        </a>
+      </h4>
+    </div>
+    <div id="{{tipoTramite}}" class="panel-collapse collapse {% if loop.first %}in{% endif %}">
+      <div  class="panel-body ">       
+                       
+              {% for tramite in tramitesSaf  %}        
+                        {# cabecera de tabla #}
+                         {% if loop.first %}
+                              <table id="tablaTramite"  class="table table-hover">
+                                  <thead>
+                                    {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_thead_completo.html.twig') }}         
+                                  </thead>
+                                  <tbody>
+                          {% endif %}   
+                                      {# filtro los tramites que no tienen expedientes #}
+                                     {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_tbody_completo.html.twig') }}    
+              {% endfor %}
+                                  </tbody>
+                              </table>          
+      </div>
+    </div>
+  </div>
+
+{% endfor %}
+
+
+  {% set cantidad, itemsPedidos = 0, {} %} 
+  {% for tramite in organismo.tramite if tramite.fechaDestino | date('Y') ==  anio %}  
+         {% set cantidad = cantidad + tramite.itemPedido | length %}  
+         {% set itemsPedidos = itemsPedidos | merge(tramite.itemPedido) %}           
+ {% endfor %}
+
+  <div class="panel panel-warning">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseCero">
+          <span class="glyphicon glyphicon-plus  text-info"></span> <span class="fa fa-bars"></span> ÍTEMS ({{cantidad}})
+        </a>
+      </h4>
+    </div>
+    <div id="collapseCero" class="panel-collapse collapse">
+      <div  class="panel-body ">
+            <table id="tablaItemPedido" class="table table-hover text-left">
+              <thead>
+                {{ include('AusentismoBundle:ItemPedido:_thead_simple.html.twig') }}
+              </thead>
+              <tbody>
+                 {% for itemPedido in itemsPedidos %}
+                     {{ include('AusentismoBundle:ItemPedido:_tbody_simple.html.twig') }}
+                 {% endfor %}
+              </tbody>
+            </table> 
+      </div>
+    </div>
+  </div>
+{% if app.user.departamentoRm.slug == "dppr" %}
+  <div class="panel panel-warning">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#reporte">
+          <span class="glyphicon glyphicon-plus  text-info"></span> <span class="glyphicon glyphicon-stats"></span> REPORTE
+        </a>
+      </h4>
+    </div>
+    <div id="reporte" class="panel-collapse collapse">
+      <div  class="panel-body ">
+          <div class="list-group-item" style="height: 100%;">
+            <table class="table table-striped">
+            <thead class="text-center">
+              <tr> <h3> CANTIDAD DE ITEMS POR TRIMESTRE </h3> </tr>
+             <tr>
+                <th>Trimestres</th>
+                <th>Cantidad</th>
+                <th>Presupuesto</th>
+             </tr>
+           </thead>
+            <tbody>
+              {% set resportePorTrimestreSaf, sumaCantidad, sumaPresupuesto = items_por_trimestre_saf(app.user.departamentoRm, anio, organismo.id), 0, 0 %}
+      
+              {% for reporte  in resportePorTrimestreSaf %}
+                <tr> 
+                  <th>{{reporte.trimestre}}° Trimestre</th>
+                  <td> {{reporte.cantidad}} </td>
+                  <td>$ {{reporte.presupuesto | number_format(2, ',', '.')}}</td>
+                </tr> 
+                {% set sumaCantidad, sumaPresupuesto = 
+                              sumaCantidad + reporte.cantidad , 
+                              sumaPresupuesto +  reporte.presupuesto 
+
+                %}
+              {% endfor %}
+              <tr>
+                <th>Totales</th>
+                <th>{{sumaCantidad}}</th>
+                <th>$ {{sumaPresupuesto | number_format(2, ',', '.')}}</th>
+              </tr> 
+            </tbody>
+          </table>
+            <div id="chartTrimestre" style="height: 300px; max-width: 80%"></div>
+          </div>
+          
+          <div class="list-group-item">
+          <table class="table table-striped">
+            <thead class="text-center">
+              <tr> <h3> CANTIDAD DE ITEMS POR RUBRO</h3> </tr>
+             <tr>
+                <th>Rubro</th>
+                <th>Cantidad</th>
+                <th>Presupuesto</th>
+             </tr>
+           </thead>
+            <tbody>
+              {% set resportePorRubroSaf, sumaCantidad, sumaPresupuesto = items_por_rubro_saf(app.user.departamentoRm, anio, organismo.id), 0, 0 %}
+      
+              {% for reporte  in resportePorRubroSaf %}
+                <tr> 
+                  <th>{{reporte.item.tramite.rubro}}</th>
+                  <td> {{reporte.cantidad}} </td>
+                  <td>$ {{reporte.presupuesto | number_format(2, ',', '.')}}</td>
+                </tr> 
+                {% set sumaCantidad, sumaPresupuesto = 
+                              sumaCantidad + reporte.cantidad , 
+                              sumaPresupuesto +  reporte.presupuesto 
+
+                %}
+              {% endfor %}
+              <tr>
+                <th>Totales</th>
+                <th>{{sumaCantidad}}</th>
+                <th>$ {{sumaPresupuesto | number_format(2, ',', '.')}}</th>
+              </tr> 
+            </tbody>
+          </table>
+              <div id="chartRubro"  style="height: 700px; max-width: 80%;"></div>
+          </div>
+
+      </div>
+    </div>
+  </div>
+{% endif %}
+</div> <!-- Panel Accordion-->
+<div class="clearfix"></div>
+
+</div>
+</div>
+
+{% endblock %}
+ {% block footer %}
+<dir class="footer"></dir>
+{% endblock %} 
+
+{% block javascripts %}  
+{{ parent() }}
+
+{# obtengo los reportes para ITEMPEDIDO #}
+{% set itemsPorTrimestreSaf, itemsPorRubroSaf= items_por_trimestre_saf(app.user.departamentoRm,anio, organismo.id), items_por_rubro_saf(app.user.departamentoRm,anio, organismo.id) %}
+    <script src="{{ asset('bundles/expediente/plugins/chart.js/Chart.min.js') }}">
+    </script>    
+    <script src="{{ asset('bundles/expediente/plugins/pages/dashboard3.js') }}">
+    </script> 
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"> </script>
+<script type="text/javascript">
+$(function () {
+
+  CanvasJS.addCultureInfo("es", 
+    {      
+      decimalSeparator: ",",// Observe ToolTip Number Format
+      digitGroupSeparator: ".", // Observe axisY labels                   
+      days: ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"]
+      
+    });
+
+///GRAFICO CANTIDAD DE ITEMS POR TRIMESTRE
+var chart = new CanvasJS.Chart("chartTrimestre", {
+  theme: "light2", // "light2", "dark1", "dark2"
+  culture: "es",
+  animationEnabled: false, // change to true    
+  title:{
+    text: ""
+  },
+  data: [
+  {
+    // Change type to "bar", "area", "spline", "pie",etc.
+    type: "column",
+    toolTipContent: "<b>{label}</b><br>Cantidad de ítems: {cantidad}<br>Presupuesto: $ {presupuesto}",
+    dataPoints: [
+      {% for reporte in itemsPorTrimestreSaf %}
+        { label: "{{reporte.trimestre}} ° Trimestre",  y: {{reporte.presupuesto}}, cantidad:'{{reporte.cantidad}}', presupuesto:'{{reporte.presupuesto | number_format(2, ',', '.')}}' },
+      {% endfor %}
+    ]
+  }
+  ]
+});
+chart.render();
+
+///GRAFICO RUBRO POR TOTAL POR RUBRO Y AÑO
+var chart = new CanvasJS.Chart("chartRubro", {
+  culture: "es",
+  animationEnabled: true,
+  
+  title:{
+    text:""
+  },
+  axisX:{
+    interval: 1
+  },
+  axisY2:{
+    interlacedColor: "rgba(1,77,101,.2)",
+    gridColor: "rgba(1,77,101,.1)",
+    title: ""
+  },
+  data: [{
+    type: "bar",
+    name: "Rubros",
+    axisYType: "secondary",
+    toolTipContent: "<b>{rubro}</b><br>Cantidad de ítems: {cantidad}<br>Presupuesto: $ {presupuesto}",
+    dataPoints: [
+          {% for reporte in itemsPorRubroSaf %}
+                { y: {{reporte.presupuesto}}, label: '{{reporte.item.tramite.rubro.ipp}}', rubro:'{{reporte.item.tramite.rubro}}', cantidad:'{{reporte.cantidad}}', presupuesto:'{{reporte.presupuesto | number_format(2, ',', '.')}}'},
+          {% endfor %} 
+    ]
+  }]
+});
+chart.render();
+});
+</script>
+{% endblock %}

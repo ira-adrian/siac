@@ -1,0 +1,289 @@
+{# Siarme/ExpedienteBundle/Resources/views/expediente/show.html.twig#}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %}
+    {% if expediente | length > 10 %}
+           {{ expediente }}
+    {% else %}
+          {{ expediente.extracto[:14] }}        
+    {% endif %} 
+{% endblock %} 
+{#
+{% block izquierdo %}
+<div id="compartir">
+{{ render(controller('DocumentoBundle:Compartir:index',
+            { 'tipoid': expediente.id, 'tipo': "EXP" }
+        )) }} 
+</div>
+{% endblock %}
+#}
+{% block izquierdo %}
+</br>
+<div id="compartir">
+{{ render(controller('DocumentoBundle:Compartir:index',
+            { 'tipoid': expediente.id, 'tipo': "EXP" }
+        )) }} 
+</div>
+{% endblock %}
+{% block main %}
+ <ul class="nav nav-pills hidden-print">   
+             <li role="presentation" class="dropdown" data-toggle="tooltip" data-placement="top"  title="Compartir el Expediente">
+                    <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-share-alt"></span> Compartir<span class="caret"></span></a>             
+                 <ul class="dropdown-menu">
+                        <li class="dropdown-header" style="width:300px">
+                          {# El tipo puede ser ['EXP','DOC','AG','MSJ'] corresponde con las entidades Expediente, Documento, Agente, Mensaje #}
+                          {{ render(controller('DocumentoBundle:Compartir:new',
+                         { 'tipoid': expediente.id, 'tipo':"EXP" }
+                                  )) }} 
+                      </li>
+                 </ul>
+            </li>
+
+       {% if expediente.estado %}
+       {% if expediente.datoAt.id is defined %}
+
+           <li role="presentation" class="dropdown" data-toggle="tooltip" data-placement="top" title="Otorgar Turno" >
+                    <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-pushpin"></span> Dar Turno<span class="caret"></span></a>
+                       <ul class="dropdown-menu" >
+                              <li id="turno" class="dropdown-header" style="width:25em">
+                                {# El tipo puede ser ['EX','DOC','AG','MSJ'] corresponde con las entidades Expediente, Documento, Agente, Mensaje #}
+                                {{ render(controller('ExpedienteBundle:DatoAT:turnoNew',
+                         { 'id': expediente.datoAt.id} )) }}  
+                            </li>
+                       </ul>
+           </li>
+          {% endif %}
+     
+      <li role="presentation" class="dropdown" data-toggle="tooltip" data-placement="top" title="Agrega un nuevo documento al expediente">
+              <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-paperclip "></span> <span class="label label-success">Nuevo Documento</span> <span class="caret"></span></a>
+              <ul class="dropdown-menu" style="width:300px">           
+                      <ul class="list-inline text-center text-info" style="margin:2px;">                             
+                            {# REVISAR EL CODIGO: DEBEN CREARSE DOCUMENTOS POR CADA TRAMITE#}
+                       {% for tramite in expediente.tramite %}  
+                            {% for tipo in tiposdocumento if (tipo.visible) %}
+                            <li>                                 
+                              <a href="{{ path( 'documento_new' , { 'id': expediente.id, 'tramite_id': tramite.id, 'slug': tipo.slug  } ) }}" role="button"> 
+                            <span style="font-size:25px; margin:2px;"  class= '{{ tipo.glyphicon}} ~ text-info'> </span>
+                            <br> {{ tipo.nombredocumento }}</a>                                   
+                            </li> 
+                            {% endfor %}
+                      {% endfor %}
+                      
+                      </ul> 
+              </ul>
+        
+      </li>
+
+  {# if expediente.articulo is not empty %}
+          <li role="presentation" class="dropdown" data-toggle="tooltip" data-placement="top" data-toggle="tooltip" data-placement="top" title="Nueva Licencia">
+          <a href="{{ path('documento_licencia_new', { 'id': expediente.agente.id, 'articulo': expediente.articulo.id }) }}"><span class='glyphicon glyphicon-tags'></span> <span  class="label label-warning"> Nueva Licencia</span></a>
+          </li> 
+{% endif #}
+          <li role="presentation" class="dropdown" data-toggle="tooltip" data-placement="top" title="Eliminar el Expediente">
+             {% if (expediente.tramite | length <= 1)  %}
+                         {% set botonDelet %}                     
+                            {{ form_start(delete_form, {'attr': {'onclick': 'return confirm("¿Desea ELIMINAR el expediente?")'}}) }}                       
+                 <button class="btn btn-danger btn-sm"  type="submit" value="Eliminar" role="presentation"><span class="glyphicon glyphicon-trash"> Eliminar  </span> </button>
+                             {{ form_end(delete_form) }}
+                        {% endset %}
+
+                           {% if (expediente.tramite | length == 0)  %} 
+                                <li role="presentation"> 
+                                {{ botonDelet }}
+                                </li>
+                            {% else %}
+                                {% for tramite in expediente.tramite %}  
+                                {% if (tramite.documento | length == 0)  %} 
+                                <li role="presentation">                   
+                                     {{ botonDelet }}
+                                </li>
+                                {% endif %}
+                                {% endfor %}
+
+                            {% endif %}
+             {% endif %}
+          </li>
+         <li  role="presentation" data-toggle="tooltip" data-placement="top" title="Modificar el Expediente">
+                <a  type="button"  data-toggle="modal" data-target="#myModalEdit"  role="button"><span class="glyphicon glyphicon-pencil"></span>Modificar</a>
+          </li>
+    {% else %}
+         <li  role="presentation" data-toggle="tooltip" data-placement="top"  title="Debe ABRIR Nuevamente el Expediente para agregar nuevos documentos" >
+            <a class="text-muted" href="#" role="button"><span class="glyphicon glyphicon-paperclip"></span> Documento</a>
+         </li> 
+           <li role="presentation"  data-toggle="tooltip" data-placement="top" title='ABRIR Nuevamente el Expediente"'> 
+             <a OnClick="return confirm('¿Desea ABRIR el Expediente?');" href="{{ path('expediente_datoat_estado' , { 'id': expediente.datoAt.id , 'estado': "abrir" }) }}"> Abrir<span aria-hidden="true">&rarr;</span> <span aria-hidden="true" class="glyphicon glyphicon-folder-open text-success"></span></a> 
+        
+           </li>
+    {% endif %}
+             <li  role="presentation">
+                <a id="printer"  value="Imprimir" role="button"><span class="glyphicon glyphicon-print"></span> Imprimir</a>
+            </li>
+</ul>
+
+ {{ render(controller('ExpedienteBundle:Expediente:modalEdit',
+            { 'id': expediente.id }
+        )) }}
+
+<div id="print" class="panel panel-default print"><!--Panel Print-->
+  <div class="panel-heading  text-center" > <!--Panel Heading-->
+    <ul class="list-inline text-center" style="margin:0px" >
+       {% if expediente.estado %}
+          <li>
+            <h3 style="margin:0px">
+               <span class="glyphicon glyphicon-folder-open"></span> 
+            </h3>
+
+              {% if expediente.letra == "LIC" %}
+                {{ expediente.letra ~ "-" ~ expediente.numero ~ "/" ~ expediente.anio }}
+                 | {{ expediente.clasificacion | default ("N/D") }}<br> </strong>
+                  {{ expediente.extracto }}<br>{{ expediente.agente  }}
+               {% else %}
+               {% if expediente | length > 10 %} 
+                  <strong>{{ expediente | default ("N/D") }}          
+                    <span class="dropdown hidden-print" data-toggle="tooltip" data-placement="top" title="Modificar N° GDE" >
+                      <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-pencil"></span><span class="caret"></span></a>
+                       <ul class="dropdown-menu" >
+                        <li style="margin:5px;">
+                                {{ render(controller('ExpedienteBundle:Expediente:gdeEdit',
+                         { 'id': expediente.id} )) }}  
+                         </li>
+                       </ul>
+                     </span> 
+           | {{ expediente.clasificacion | default ("N/D") }}<br> </strong>
+                  {{ expediente.extracto }}<br>{{ expediente.agente  }}
+                {% else %}
+                    {% set find = expediente.extracto[:14] %}
+                    {{ expediente.extracto | replace({ (find) :'<strong>'~find~'</strong><br>' }) | raw }}<br>{{ expediente.agente  }} 
+                {% endif %}
+
+               {% endif %}
+          </li>
+
+      {% else %}
+
+          <li data-toggle="tooltip" data-placement="top" title="Expediente CERRADO">
+            <h3 style="margin:0px">
+              <span class="glyphicon glyphicon-folder-close"></span>  
+            </h3> {% if expediente | length > 8 %} 
+                  <strong>{{ expediente | default ("N/D") }} | {{ expediente.clasificacion | default ("N/D") }}<br> </strong>
+                  {{ expediente.extracto }}<br>{{ expediente.agente  }} 
+                {% else %}
+                    {% set find = expediente.extracto[:14] %}
+                    {{ expediente.extracto | replace({ (find) :'<strong>'~find~'</strong><br>' }) | raw }}<br>{{ expediente.agente  }} 
+                {% endif %}
+          </li>
+      {% endif %}
+    </ul>
+  </div>
+
+  <div style="margin-bottom:5px"  class="panel panel-default">
+    
+    <div class="panel-heading" role="tab" id="headingFive">     
+        <a class="collapsed " role="button" data-toggle="collapse" data-parent="#accordion1" href="#collapseFive" aria-expanded="false" aria-controls="collapseFive"><span class="glyphicon glyphicon-minus-sign"></span> </a>Documentos
+    </div>
+
+    <div id="collapseFive" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingFive">
+      <div class="panel-body">     
+               {% for tramite in expediente.tramite | reverse %} 
+   
+      {% if loop.first  %} 
+           <ul class="list-inline text-center text-info"> 
+              {% for documento in tramite.documento | reverse %}  
+          {{ include('DocumentoBundle:Documento:_lista_documento.html.twig') }}
+              {% endfor %}
+           </ul> 
+          {% else %}
+            <ul class="list-inline text-center">
+              {% for documento in tramite.documento | reverse %}  
+         {{ include('DocumentoBundle:Documento:_lista_documento.html.twig') }}
+              {% endfor %}
+            </ul>     
+        {% endif %}    
+       {% endfor %}
+      </div>
+    </div>
+</div>
+
+<div class="panel-footer">
+         {% if  (expediente.departamentoRm  == app.user.departamentoRm ) %}
+  <ul class="pager" style="margin:2px" >
+     {% if expediente.estado and (expediente.datoAt.id is defined) %}
+
+        {% if expediente.datoAt.estado == "Aceptado" %}          
+               <li class="previous hidden-print" data-toggle="tooltip" data-placement="top" title="Quitar el estado ACEPTADO"><a href="{{ path('expediente_datoat_estado' , { 'id': expediente.datoAt.id , 'estado': "quitar" }) }}"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>Quitar</a>
+               </li>
+         {% else %}
+            <li class="previous hidden-print" data-toggle="tooltip" data-placement="top" title="ACEPTADO Juridicamente"><a href="{{ path('expediente_datoat_estado' , { 'id': expediente.datoAt.id , 'estado': "aceptado" }) }}"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span> Aceptado </a>
+               </li>
+          {% endif %}
+          {% if expediente.datoAt.estado == "Denegado" %} 
+             <li class="previous hidden-print"  data-toggle="tooltip" data-placement="top" title="Quitar el estado DENEGADO"><a href="{{ path('expediente_datoat_estado' , { 'id': expediente.datoAt.id, 'estado': "quitar" }) }}"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Quitar</a></li>
+           {% else %} 
+             <li class="previous hidden-print"  data-toggle="tooltip" data-placement="top" title="DENEGADO Juridicamente"><a href="{{ path('expediente_datoat_estado' , { 'id': expediente.datoAt.id, 'estado': "denegado" }) }}"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span> Denegado</a></li>
+           {% endif %}
+             
+
+            {% if expediente.datoAt.altaMedica %}
+              <li class="next hidden-print"  data-toggle="tooltip" data-placement="top" title="Quitar el estado de Alta Medica"><a href="{{ path('expediente_datoat_altamedica' , { 'id': expediente.datoAt.id, 'estado': 0 }) }}"><span class="glyphicon glyphicon-heart text-info" aria-hidden="true"></span>Quitar</a></li>
+            {% else %}              
+              <li class="next hidden-print"  data-toggle="tooltip" data-placement="top" title="Cambia el estado, a expediente con Alta Medica"><a href="{{ path('expediente_datoat_altamedica' , { 'id': expediente.datoAt.id, 'estado': 1 }) }}"><span class="glyphicon glyphicon-heart" aria-hidden="true"></span> Alta Medica</a></li>
+            {% endif %}
+          {% if expediente.datoAt.altaLaboral %}
+             <li class="next hidden-print" data-toggle="tooltip" data-placement="top" title="Quitar el estado de Alta Laboral"><a href="{{ path('expediente_datoat_altalaboral' , { 'id': expediente.datoAt.id , 'estado': 0 }) }}"><span class="glyphicon glyphicon-heart-empty text-info" aria-hidden="true"></span> Quitar</a>
+               </li>
+            {% else %}
+               <li class="next hidden-print" data-toggle="tooltip" data-placement="top" title="Cambia el estado, a Expediente con Alta Laboral"><a href="{{ path('expediente_datoat_altalaboral' , { 'id': expediente.datoAt.id , 'estado': 1 }) }}"><span class="glyphicon glyphicon-heart-empty" aria-hidden="true"></span> Alta Laboral</a>
+               </li>
+            {% endif %}
+
+      {% else %}
+      
+
+    {% endif %}  
+   {% else %}
+ <h2 class="bg-success text-center"> Sector: {{ expediente.departamentoRm }}</h2>
+
+    {% endif %}   
+
+      {# en la Base se guarda "Aceptado" pero en pantalla se muestra "otorgado" 
+       <li> <span class="glyphicon glyphicon-folder-close text-default" aria-hidden="true">Cerrado </span></li>
+ <li> <span class="glyphicon glyphicon-folder-close text-default" aria-hidden="true"> Cerrado </span></li>
+       
+    {% if expediente.datoAt.estado == "Aceptado" %}
+             <li> <span class="glyphicon glyphicon-thumbs-up " aria-hidden="true"> Aceptado</span> </li> 
+    {% elseif expediente.datoAt.estado == "Denegado"   %}
+             <li><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"> Denegado </span> </li>
+     {% else %} 
+             <li> <span class="glyphicon glyphicon-folder-open text-success" aria-hidden="true"> Abierto</span> </li>
+      {% endif %}#}
+                              
+  </ul>
+</div>
+
+</div>
+ {#  </div> <!--Panel Body-->
+          {{ include('ExpedienteBundle:Expediente:_lista_tramite.html.twig') }}
+</div> <!--Panel print-->#}
+{% endblock %}
+ 
+ {% block derecho %}
+<div id="comentario">
+ {{ render(controller('ExpedienteBundle:Comentario:index',
+            { 'tipoid': expediente.id, 'tipo': "EXP" }
+        )) }}
+        
+ {{ render(controller('ExpedienteBundle:Comentario:new',
+            { 'tipoid': expediente.id, 'tipo': "EXP" }
+        )) }}
+</div>
+
+ {% endblock %}
+{% block javascripts %} 
+{{ parent() }}
+
+ <script type="text/javascript">
+          $("#siarme_expedientebundle_datoat_hora_hour").select2({width: '20%', allowClear:true, placeholder:"Seleccionar"});
+          $("#siarme_expedientebundle_datoat_hora_minute").select2({width: '20%', allowClear:true, placeholder:"Seleccionar"});
+  </script>
+
+
+{% endblock %}

@@ -1,0 +1,97 @@
+{# Siarme/AusentismoBundle/Resources/views/Agente/index.html.twig #}
+
+<ul class="nav nav-tabs nav-justified">
+    {% if tramite.itemSolicitado | length  > 0 %} 
+       <li  class="active"><a data-toggle="tab" href="#menu1">ITEMS PEDIDOS ({{tramite.itemSolicitado | length }})</a></li>
+    {% else %}
+      <li  ><a class="text-muted" data-toggle="tab" href="#menu1"><span {% if tramite.itemSolicitado | length == 0 %}  tabindex="0" data-placement="top" id="popover-nuevo" data-toggle="popover" data-trigger="show" data-content="Puedes cargar manualemente los items haciendo click aquí y seleccionando la opcion (+)Nuevo Item Pedido"{% endif %}></span>ITEMS PEDIDOS ({{tramite.itemSolicitado | length }})</a></li>
+    {% endif %}
+    <li {% if tramite.itemSolicitado | length  == 0 %} class="active"{% endif %}> <a data-toggle="tab" href="#menu2">DOCUMENTOS ({{tramite.documento | length}}) </a></li>
+    <li><a data-toggle="tab" href="#menu3">TAREAS</a></li> 
+  </ul>
+
+  <div class="tab-content">
+    <div id="menu1" class="tab-pane fade  {% if tramite.itemSolicitado | length  > 0 %} in active {% endif %} ">
+
+                  {% if  tramite.itemSolicitado | length > 0 %}
+                    <div style="margin-top: 10px" class="list-group-item-heading text-center">
+                                    {% if ( tramite.expediente | movimiento_estado(app.user)) %}
+                {% if app.user.departamentoRm.slug == "dppr"  %}
+                     <a data-href="{{ path('itemsolicitado_new', { 'id': tramite.id }) }}" role="button" class="btn-nuevo-item"> <span class='glyphicon glyphicon-plus-sign' data-toggle="tooltip" data-placement="bottom"  title='Crea una nueva Solicitud del SAF para este PEDIDO' ></span>Nuevo Ítem Pedido</a>  
+
+                {% endif %}
+             {% endif %}             
+                       <a class="btn text-info" href="#" data-clipboard-target="#tablaItemTodo"><!-- clipboard-copiar texto de id="copy" --><span class="glyphicon glyphicon-copy text-info">Copiar</span></a>
+                       {% if ( app.user.departamentoRm == tramite.departamentoRm ) and (( tramite.expediente | default(null) | movimiento_estado(app.user)) or tramite.expediente.id is not defined) %}
+                          {% if  not tramite.estado %}  
+                           <a class="btn text-info" onclick= "return confirm('¿Desea eliminar todos los ítems de la SOLICITUD?');" href="{{ path('itemsolicitado_delete_all', { 'id': tramite.id}) }}"><span class='glyphicon glyphicon-trash text-danger'></span>Quitar Todos</a>
+                           {% else %}
+                            <a class="btn text-muted"><span class='glyphicon glyphicon-trash'></span>Quitar Todos</a>
+                           {% endif %}
+
+
+                       {% endif %}
+                    </div>
+                  {% endif %}
+                  <hr>
+                     <table id="tablaItemTodo" class="table table-hover tablaItemTodo text-left">
+                      <thead>
+                        {{ include('GeneralBundle:ItemSolicitado:_thead_completo.html.twig') }}
+                      </thead>
+                      <tbody>
+                         {% for itemSolicitado in tramite.itemSolicitado %}
+                             {{ include('GeneralBundle:ItemSolicitado:_tbody_completo.html.twig') }}
+                         {% endfor %}
+                      </tbody>
+                    </table>
+    </div>
+    <div id="menu2" class="tab-pane fade  {% if tramite.itemSolicitado | length == 0 %} in active {% endif %} ">
+
+      <div style="margin-top: 10px" class="list-group-item-heading text-center">
+
+          {% if ( app.user.departamentoRm == tramite.departamentoRm ) and (( tramite.expediente | default(null) | movimiento_estado(app.user)) or tramite.expediente.id is not defined) %}
+                  &nbsp;&nbsp;&nbsp;<span role="presentation"  class="dropdown overflow hidden-print"    
+                    {% if tramite.documento | length == 0 %}  tabindex="0" data-placement="top" id="popover-dos" data-toggle="popover" data-trigger="show" title="Nuevo Documento" data-content="Has click para cargar los ÍTEMS desde un archivo Excel, seleccionando la opcion (x)Pedido del SAF"             {% endif %}>
+                  <a class="dropdown-toggle" href="#" role="presentation" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span style="font-size:18px;" class='glyphicon glyphicon-plus-sign'></span> Nuevo Documento<span class="caret"></span></a>
+                  <div class="dropdown-menu" style="width: 400px;" aria-labelledby="dropdownMenuLink">
+                    <ul class="list-inline text-center"> 
+
+                      {% for tipo in tramite.tipoTramite.tipoDocumento if (tipo.visible) %}   
+                        <li>                           
+                          <a  href="{{ path( 'documento_new' , {'tramite_id': tramite.id, 'slug': tipo.slug  } ) }}" role="button"><span style="font-size:20px; margin:2px;"  class= '{{ tipo.glyphicon}}'></span>
+                          </br> 
+                          {{ tipo.nombredocumento }}</a> 
+                          {# if tipo.esArchivo %}<span class='text-success'><strong>I</strong></span> {% else %}<span class='text-success'><strong>L</strong></span>{% endif #}
+                        </li>  
+                      {% endfor %}
+                    </ul>
+                  </div>
+                  </span>
+            {% endif %}
+       </div>
+        <hr>
+          <ul id="documentos" class="list-inline text-center text-info"> 
+                  {% for documento in tramite.documento | reverse %}  
+                    {{ include('DocumentoBundle:Documento:_lista_documento.html.twig') }}
+                  {% endfor %}
+          </ul> 
+        {{ render(controller('DocumentoBundle:Documento:uploadsModal', {'tramite_id': tramite.id, 'slug': 'archivo' }))}}
+    </div>
+    <div id="menu3" class="tab-pane fade">
+          {% set tareas = tramite.tarea %}
+            <table class="table table-hover text-left">
+                    <tbody> 
+                      {% for tarea in tareas %}
+                            {% set tramite = tarea.tramite %}
+                            {{ include('ExpedienteBundle:Tarea:_tbody_completo.html.twig') }}      
+                     {% endfor %}
+                    </tbody>
+            </table>
+       
+        <div class="list-group-item-text">
+            {{ render(controller('DocumentoBundle:Compartir:index', { 'tipoid': tramite.id, 'tipo': constant('TIPO_ENTIDAD', tramite) } )) }} 
+        </div>
+            {% set historials = tramite.id | default(null)| Historial(constant('TIPO_ENTIDAD', tramite)) %}
+            {{ include('DocumentoBundle:Historial:index.html.twig') }}
+    </div>
+  </div>

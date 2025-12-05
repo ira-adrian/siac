@@ -1,0 +1,22 @@
+ <!-- Modal -->
+  <div class="modal fade" id="myModalEdit" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header text-center">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+           <h4>MODIFICAR EXPEDIENTE</h4>
+        </div>
+       <div class="modal-body">
+            {{ form_start(edit_form,  {'action': path('expediente_modal_edit', { 'id':expediente.id }), 'method': 'POST'}) }}
+                                    {{ form_widget(edit_form) }}
+                                <ul class="list-inline text-right"> 
+                                    <li> <button type="button" class="btn btn-default" data-dismiss="modal">CANCELAR </button> </li>
+                                    <li>  <input class="btn btn-danger" type="submit" onclick= "return confirm('¿Desea GUARDAR?');" value="GUARDAR" /></li>
+                                </ul>
+          {{ form_end(edit_form) }}
+        </div>
+      </div>
+    </div>
+</div>

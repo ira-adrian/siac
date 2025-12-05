@@ -1,0 +1,89 @@
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} {{itemCatalogo.codigo }}  {% endblock %}
+{% block contenido %}
+ <div class="container"> 
+ <div class="row text-center">
+    <h4>BUSCAR POR CÓDIO O PALABRA CLAVE</h4>
+    <form class="navbar-form navbar" method="GET" action="{{ path('item_catalogo_index')}}" role="search">
+       <div class="form-group">
+          <div class="input-group">
+            <input style="width=100%;" id="buscar" name="consulta"  type="text" class="form-control" placeholder="Buscar ítem"  required />
+             <span class="input-group-btn"><button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button></span>
+         </div>
+       </div>
+    </form> 
+</div>
+    <div class="nav nav-pills hidden-print"> 
+        <li role="presentation" class="disabled"><a href="#">Menu</a></li>
+        <!-- Menu DERECHO *** IMPRIMIR - COPIAR -->
+        <div class="pull-right">
+                <li  role="presentation">
+                  <a id="printer"  value="Imprimir" role="button"><!-- Printer-imprime el texto de clase="print" -->
+                    <span class="glyphicon glyphicon-print"></span> Imprimir</a>
+
+                    <a class="btn" data-clipboard-target="#copy"><!-- clipboard-copiar texto de id="copy" -->
+                      <span class="glyphicon glyphicon-copy"></span>Copiar</a>
+                </li>
+        </div>
+    </div>
+    <div id="copy" class="panel panel-default print">
+            <style type="text/css" media="print">
+            @media print {
+                a[href]:after {
+                    content: none !important;
+                }
+            }
+          </style> 
+      <!-- Default panel contents -->
+      <div class="panel-heading"> <span class="glyphicon glyphicon-shopping-cart"></span> ITEM CATALOGO </div>
+      <div class="panel-body"> 
+            <dl class="text-center">
+             <dt>Código</dt>
+             <dd>{{ itemCatalogo.codigo }}</dd>
+             <dt>Rubro</dt>
+             <dd>{{ itemCatalogo.rubro }}</dd>    
+             <dt>Descripción del ítem solicitado</dt>
+             <dd>{{ itemCatalogo.item }}</dd>                   
+            </dl>
+      </div>
+    {% set buscar = true %}
+    {% set itemsPedidos = itemCatalogo | item_pedido_por_codigo(100) %}
+    {% set  itemsAdjudicados = itemCatalogo | item_oferta(100) %}
+             <!-- Nav tabs -->
+            <ul class="nav nav-tabs nav-justified hidden-print" role="tablist">
+                <li role="presentation"  {% if app.user.departamentoRm.slug == "dppr" %} class="active" {% endif %}><a href="#dppr" aria-controls="dppr" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-user"></span> ÍTEM DE NOTA PEDIDO ({{  itemsPedidos | length}}) </a></li>
+                <li role="presentation" {% if app.user.departamentoRm.slug == "dpcbs" %} class="active" {% endif %}><a href="#dpcbs" aria-controls="dpcbs" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-user"></span> ÍTEM OFERTADO ({{  itemsAdjudicados | length}}) </a></li>
+            </ul>
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane fade in   {% if app.user.departamentoRm.slug == "dppr" %} active {% endif %}" id="dppr">
+                    <table id="#" class="table table-hover tablaSinOrdenar text-left">
+                        <thead>
+                           {{ include('AusentismoBundle:ItemPedido:_thead_completo.html.twig') }}
+                        </thead>
+                         <tbody>
+                                {# Si item_pedido(true) devuelve todas la coincidencias de codigos de itms pedidos #}
+                                {% for itemPedido in itemsPedidos %}
+                                    {{ include('AusentismoBundle:ItemPedido:_tbody_completo.html.twig') }}
+                                {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div role="tabpanel" class="tab-pane fade in   {% if app.user.departamentoRm.slug == "dpcbs" %} active {% endif %}" id="dpcbs">
+                    <table id="#" class="table table-hover tablaSinOrdenar text-left">
+                        <thead>
+                           {{ include('AusentismoBundle:ItemOferta:_thead_ponderado.html.twig') }}
+                        </thead>
+                         <tbody>
+                        {% for itemOferta in itemsAdjudicados %}
+                            {{ include('AusentismoBundle:ItemOferta:_tbody_ponderado.html.twig') }}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+    </div>
+</div>
+{% endblock %}
+{% block footer %}
+<dir class="footer"></dir>
+{% endblock %}

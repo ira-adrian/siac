@@ -1,0 +1,212 @@
+{% set procesos = documento.tramite.expediente | tramite_por_expediente_slug("tramite_proceso") %}
+{% set desierto, fracasado = false, false %}
+{% if procesos | length > 1 %}
+    {% if procesos[0].estadoTramite.slug == "desierto" %}
+        {% set proceso = procesos[0] %}
+        {% set desierto = true %}
+        {% set docP = proceso | documento_palabra_clave("PLIEG-")%}
+    {% endif %}
+    {% if procesos[0].estadoTramite.slug == "fracasado" %}
+        {% set proceso = procesos[0] %}
+        {% set fracasado = true %}
+        {% set docP = proceso | documento_palabra_clave("PLIEG-")%}
+    {% endif %}
+{% endif %}
+
+{% set numero = 1 %}
+{% set tramites = documento.tramite.expediente | tramite_por_expediente_slug("tramite_pedido") %}
+
+{% set extracto = documento.tramite.expediente.extracto | replace({'<br>': ", ", '<br />': ", "}) | split('SAF') %}
+{% set extracto = extracto[0] | replace({'ADQUISICIÓN DE': "", 'ADQUISICION DE': "", 'ADQUISICIÓN': "", 'ADQUISICION': "", 'ADQ. DE': "", 'ADQ.DE': "", 'ADQ.': ""}) | upper  %}
+{% set organismos = "" %}
+     {% for tramite in tramites %} 
+        {% if loop.first %}
+            {% set organismos =  organismos ~ tramite.organismoOrigen.organismo | upper %}
+        {% elseif loop.last %}
+            {% set organismos =  organismos ~ " Y " ~ tramite.organismoOrigen.organismo | upper %}
+        {% else %}
+            {% set organismos =  organismos ~ ", " ~ tramite.organismoOrigen.organismo | upper ~ ", " %}
+        {% endif %}
+     {% endfor %} 
+{% set extracto = "ADQUISICIÓN DE " ~ extracto ~ " DESTINADO AL " ~ organismos %}
+
+{% set docP1 = documento.tramite | documento_palabra_clave("PLIEG-")%}
+{% set year, agenda = 'now' | date('Y') , agenda_ultima(documento.tramite, "llamado") %}
+
+{% set tipoPliego, marcoLegal = "el Pliego de Bases y Condiciones Particulares", "" %}
+{% if documento.tramite.tipoProceso.codigo == "CDI" %}
+    {% set tipoPliego = "las Bases de Condiciones" %}
+    {% set marcoLegal = "en el marco del Artículo 98° Inc. a) de la Ley N°4938 y modificatorios," %}
+{% endif %}
+{% if documento.tramite.tipoProceso.codigo == "LPR" %}
+       {% set marcoLegal = "en el marco del Artículo 97° de la Ley N° 4938," %}
+{% endif %}
+<p><strong>VISTO:</strong></p>
+<p style="text-align:justify">El    expediente  {{documento.tramite.expediente.numeroGde | default('EX-' ~ year ~'-000-   -CAT-DPCBS#MEC')}}, 
+    {% if desierto or fracasado %}
+        por el cual se persigue a esta instancia, se Declare {% if desierto %} Desierto {% endif %}{% if fracasado %} Fracasado {% endif %} {{proceso.tipoProceso | title }}  Nº {{proceso.numeroComprar | default('100-00000-n')}} y se autorice Nuevo Llamado a
+    {% else %}
+        por el  cual    se  tramita el  llamado
+    {% endif %}
+{{documento.tramite.tipoProceso | title }} Nº {{documento.tramite.numeroComprar | upper}}, {{marcoLegal}} {{documento.tramite.tipo | default("")}}, modalidad  {{documento.tramite.modalidad}}, para la {{extracto}}; y</p>
+
+<p><strong>CONSIDERANDO:</strong></p>
+{% if desierto or fracasado %}
+    <p style="text-align:justify">    
+    Que a orden 00, obra Resolución RESOL-{{year}}-000-E-CAT-SCA#MEC, de fecha 00 de ... de {{year}} de la Secretaría de Compras dependiente del Ministerio de Economía, mediante la cual resuelve: Autorizar el llamado a {{proceso.tipoProceso | title }}  Nº {{proceso.numeroComprar | default('100-00000-n')}}, modalidad  {{documento.tramite.modalidad}}, para la para la {{extracto}}; se aprueban {{tipoPliego}}, con sus respectivos Anexos; establece fecha y hora termino para la presentación y apertura de ofertas y designa a los integrantes de la Comisión Evaluadora de Ofertas.
+    </p>
+    <p style="text-align:justify">Que en orden 12, glosa {{tipoPliego}}, conforme lo aprobado por la Resolución mencionada, con un presupuesto oficial es de {{ numero_a_letras(proceso.expediente.PresupuestoOficial ,2, proceso.moneda | default("PESOS")) }} (${{ proceso.expediente.PresupuestoOficial | default(0) | number_format(2, ',', '.')  }}).</p>
+
+    <p style="text-align:justify">Que en orden 00, obra documento importado por el sistema GEDO desde el Sistema Electrónico COMPR.AR. con Datos del Proceso de Compra; Información básica del proceso; Cronograma; Requisitos Mínimos de Participación; Garantías; Información del contrato; Supervisor y Publicaciones BORA. (publicidad en el Sistema Electrónico COMPR. AR).</p>
+    <p style="text-align:justify">Que a orden 17, se adjunta Documento de Invitaciones a Proveedores importado por el sistema GEDO, {{docP.nombreArchivo | default('PLIEG-' ~ year ~'-000-CAT-DPCBS#MEC') }}</p>
+    <p style="text-align:justify">Que en orden 00, se anexan Acuse de recibo y Constancia de Publicación en la página web oficial de Contaduría General de la Provincia (del día 00/00/{{year}})</p>
+
+    <p style="text-align:justify">Que a orden 00, consta Acta de Apertura: mediante IF-{{year}}-00000-CAT-DPCBS#MEC con fecha 00 de ... de {{year}}, a horas 00:00 a.m., con el Listado de ofertas, siendo los Proveedores participantes: 00, y las Ofertas confirmadas: 
+        {% if desierto %} CERO (0).{% endif %}
+        {% if fracasado %}
+             {{proceso.oferta | length }}, la presentación de las ofertas:
+            {% for oferta in proceso.oferta | reverse  %}
+                {{ oferta.oferente   | default("-")}},
+            {% endfor %}
+        {% endif %} 
+    </p>
+    {% if desierto %} 
+        <p style="text-align:justify">Que a orden 00, obra Cuadro comparativo por renglón de oferta: Número de proceso: {{proceso.numeroComprar | default('100-00000-n')}}, Nombre descriptivo del proceso y Cuadro comparativo de ofertas, donde consta Renglón 1 – Estado del renglón: Desierto</p>
+    {% endif %} 
+    {% if fracasado %}   
+        {% for oferta in proceso.oferta | reverse  %}
+         <p style="text-align:justify">Que en orden 00, glosa Oferta económica y demás documentación del oferente {{ oferta.oferente   | default("-")}}, presentada mediante los formularios otorgados por el Sistema Electrónico COMPR.AR.</p>
+        {% endfor %}
+        <p style="text-align:justify">Que a orden 00, obra Cuadro Comparativo de Ofertas por Renglón, emitido por el Sistema Electrónico de
+Contrataciones de la Provincia.</p>
+        <p style="text-align:justify">Que a ordenes 00, glosa Documentación Complementaria presentada por el oferente: ..., en cumplimiento de la intimación realizada por la Dirección Provincial de Contrataciones de Bienes y Servicios, Secretaría de Compras del Ministerio de Economía, realizada a través del COMPR.AR.</p>
+        <p style="text-align:justify">Que a orden 00, se agrega Informe Externo IF-{{year}}-000-CAT-nn, Informe Técnico de evaluación de calidad de los bienes ofrecidos, realizado por el área competente.</p>        
+        <p style="text-align:justify">Que a orden 00, corre consulta del estado de inscripción, antecedentes y sanciones en el Registro de
+Proveedores del Estado Provincial de donde se observa: .... se encuentran en estado “Inscripto” en los rubros ...., no registran antecedentes ni sanciones; y la firma ... se encuentra en estado “Inscripto”, en los rubros ..., registrando antecedente de penalidad aplicada el </p>        
+        <p style="text-align:justify">Que a orden 00, glosa Dictamen Evaluación IF-{{year}}-000-CAT-DPCBS#MEC, realizado por la comisión constituida al efecto. Donde se expresa: <i>"....."</i></p>        
+        <p style="text-align:justify">Que a órdenes 38 a 41, toma debida intervención Contaduría General de la Provincia, mediante IF-{{year}}-
+000-CAT-SCGP#CGP, expresando:<i>"....."</i></p>        
+    {% endif %} 
+
+
+{% else %}
+    <p style="text-align:justify">Que en orden 02, se adjunta RESOL-2022-28-E-CAT-CGP#MHF, de fecha 17 de julio de 2020, por la que se aprueba el Pliego de Bases y Condiciones Generales, único y de utilización obligatoria para todos los procedimientos de contrataciones.</p>
+
+    <p style="text-align:justify">Que a orden 00, obra Nota {{documento.tramite.expediente.ccoo | default('NO-' ~ year ~'-000-CAT-DPPR#MEC')}}, de firma conjunta de la Dirección Provincial de Planificación y Registro, Secretaria de Compra y Abastecimiento, adjuntando como archivos embebidos:    
+    {% for tramite in tramites %}
+        {% set creditos = tramite.credito %}
+        <br>
+        - Nota  <a  href="{{ path('tramite_show', { 'id': tramite.id }) }}" target="_blank">{{ tramite.ccoo | default('NO-'~ year ~ '-n/d')}}</a> de firma conjunta de xxxx, {{tramite.organismoOrigen}}, por la cual se eleva el pedido del {{tramite.trimestre}}° Trimestre {{ tramite.fechaDestino | date('Y')}}, del rubro {{tramite.texto | capitalize}}. Adjuntando como archivo embebido: Solicitud de Gasto {% for credito in creditos %} {{ credito.texto | upper }} - {% endfor %} , Pedido de Necesidades Trimestrales, Nota de Pedido  Nº 00/{{year}} y Autorización para Gastar.    
+    {% endfor %}
+    </p>
+
+    <p style="text-align:justify">Que a orden 00, obra Proyecto de {{tipoPliego}}, {{documento.tramite.tipoProceso | title }}  Nº {{documento.tramite.numeroComprar | default('100-00000-n')}}, {{docP1.nombreArchivo | default('PLIEG-' ~ year ~'-000-CAT-DPCBS#MEC') }} {% if desierto or fracasado %}  - Nuevo Llamado{% endif %}, cuyo presupuesto oficial es de {{ numero_a_letras(documento.tramite.expediente.PresupuestoOficial ,2, documento.tramite.moneda | default("PESOS")) }} (${{ documento.tramite.expediente.PresupuestoOficial | default(0) | number_format(2, ',', '.')  }}).</p>
+
+    <p style="text-align:justify">Que en orden 00, tomo intervención mediante IF-{{year}}-000-CAT-DLT#MEC, la  Dirección  de  Legal y Técnica de la Secretaría de Compras, el cual concluye que: <i>"....."</i></p>
+{% endif %}
+
+{#
+TIPO DE PROCESO
+1   Licitación Pública  LPU
+2   Concurso de Precios     LPR
+3   Concurso Mérito y Antecedentes  CPU
+4   Concurso de Proyectos Integrales    CPR
+5   Contratación Directa    CDI
+#}
+{% if documento.tramite.tipoProceso.codigo == "LPR" %}
+    <p style="text-align:justify">Que, por el monto estimado del presupuesto oficial, corresponde encuadrar el procedimiento de selección en CONCURSO DE PRECIOS, de conformidad con lo establecido en Artículos 31° y 32° del Reglamento Parcial N° 2, aprobado por Decreto Acuerdo N° 1127/2020 y sus modificatorios.</p>
+
+    <p style="text-align:justify">Que el artículo 21° del Reglamento Parcial Nº 2 de la Ley 4938– Decreto Acuerdo Nº 1127/2020, modificado por Decreto Acuerdo N° 1573/2020 y Decreto Acuerdo N°2036/2020, en cuanto a los Procedimientos y Tipos de Selección, establece: <i>“(…) C. CONCURSO DE PRECIOS: Este procedimiento se utilizará para la adquisición de bienes normalizados o de características homogéneas o la contratación de servicios que tengan un mercado permanente. (…)”</i>.</p>
+{% endif %}
+{% if documento.tramite.tipoProceso.codigo == "CDI" %}
+    <p style="text-align:justify">Que, por el monto estimado del contrato corresponde encuadrar el procedimiento de selección en CONTRATACIÓN DIRECTA, de conformidad con lo establecido en Artículos 31° y 32° del Reglamento Parcial N°2 aprobado por Decreto Acuerdo N°1127/2020- modificado por Decreto Acuerdo N°1573/2020 y 2036/2020.</p>
+
+    <p style="text-align:justify">Que, el artículo 21° del Reglamento Parcial Nº 2 de la Ley N°4938– Decreto Acuerdo Nº 1127/2020, y sus modificatorias, determina: <i>“(…) D. CONTRATACION DIRECTA: El procedimiento de contratación directa sólo será procedente en los casos expresamente previstos en el artículo 98° de la Ley N° 4938, sus modificatorias y complementarias. Las contrataciones directas podrán efectuarse por compulsa abreviada    o por adjudicación simple, según lo determine el presente reglamento. 1. Las contrataciones por compulsa abreviada serán aquellas en que exista más de un potencial oferente con capacidad para satisfacer la prestación. (…)”</i></p>
+{% endif %}
+{% if documento.tramite.tipoProceso.codigo == "LPU" %}
+    <p style="text-align:justify">Que el artículo 174º de la Constitución Provincial, prevé con relación a las contrataciones del estado, lo siguiente: <i>“Toda enajenación de bienes de la Provincia, compras, suministros y demás contratos realizados por la misma, se harán mediante subasta o licitación pública bajo pena de nulidad y sin perjuicio de las responsabilidades administrativas, civiles y penales de los funcionarios que autoricen, ejecuten, o consientan la transgresión de estas normas. Quedan exceptuados los casos que expresamente provea la ley de la materia”.</i></p>
+
+    <p style="text-align:justify">Que la Ley N° 4938 y sus modificatorias, en su artículo 93º establece: <i>“La Licitación Pública es el procedimiento administrativo de preparación de la voluntad contractual por el cual el Sector Público Provincial, en ejercicio de sus funciones administrativas, invita a los interesados mediante la publicidad pertinente para que, sujetándose a las bases fijadas en los pliegos de condiciones, formulen propuestas de entre las cuales seleccionará y aceptará la más ventajosa a los intereses del Estado Provincial...”</i></p>
+
+    <p style="text-align:justify">Que por el monto estimado del contrato corresponde encuadrar el procedimiento de selección en LICITACIÓN PÚBLICA, de conformidad con lo establecido en Artículos 31° y 32° del Reglamento Parcial N° 2 Decreto Acuerdo N° 1127/2020 y sus modificatorios.</p>
+
+    <p style="text-align:justify">Que el artículo 21° del Reglamento Parcial Nº 2 de la Ley N°4938– Decreto Acuerdo Nº 1127/2020, modificado por Decreto Acuerdo N° 1573/2020 y Decreto Acuerdo N°2036/2020, en cuanto a los Procedimientos y Tipos de Selección, establece: <i>“(…) A. LICITACIÓN PÚBLICA: este procedimiento se utilizará cuando el llamado a participar esté dirigido a una cantidad indeterminada de posibles oferentes para que, sujetándose a las bases fijadas en los respectivos Pliegos de condiciones, formulen propuestas de entre las cuales el Estado Provincial seleccionara la más ventajosa, y será aplicado obligatoriamente, cuando el monto estimado de la contratación supere el mínimo establecido en la presente Reglamentación. (…)”</i></p>
+{% endif %}
+{#
+MODALIDAD
+1   Acuerdo Marco
+2   Compra Determinada
+3   Compulsa Inversa de Precios
+4   Compra Abierta
+5   Compra Consolidada
+6   Llave en Mano
+#}
+{% if documento.tramite.modalidad.id == 1 %}
+    <p style="text-align:justify">Que, la presente contratación se encuentra comprendida en el artículo 22° y 28° del Reglamento Parcial Nº 2 de la Ley N°4938– Decreto Acuerdo Nº 1127/2020, y sus modificatorias, estableciendo este último: <i>“(...) ACUERDO MARCO. El Acuerdo Marco es una modalidad de contratación mediante la cual se selecciona a uno o más proveedores para procurar el suministro directo de bienes y servicios a las Jurisdicciones o Entidades de la Administración Provincial, en la forma, plazo y demás condiciones establecidas en dicho acuerdo (...)”</i>.</p>  
+{% endif %}
+{% if documento.tramite.modalidad.id == 2 %}
+    <p style="text-align:justify">Que, la presente contratación  se encuentra  comprendida en el artículo 22° y 25° del Reglamento Parcial Nº 2 de la Ley N°4938– Decreto Acuerdo Nº 1127/2020, y sus modificatorias, estableciendo este último: <i>“COMPRA DETERMINADA. La modalidad de Compra Determinada procederá cuando la cantidad de bienes o servicios se establezca en forma específica y con una única entrega total”</i> .</p>
+{% endif %}
+{% if documento.tramite.modalidad.id == 4 %}
+    <p style="text-align:justify">Que, la presente contratación se encuentra comprendida en el artículo 22° y 23° del Reglamento Parcial Nº 2 de la Ley 4938– Decreto Acuerdo Nº 1127/2020, y sus modificatorias, estableciendo este último: <i>“COMPRA ABIERTA. La modalidad de Compra Abierta se podrá efectuar cuando no se pudiere prefijar en {{tipoPliego}}, con suficiente precisión, la cantidad de unidades de los bienes o servicios a adquirir o contratar, o las fechas o los plazos de entrega, de manera tal que la jurisdicción o entidad contratante pueda realizar los requerimientos de acuerdo con sus necesidades durante el lapso de duración del contrato, al precio unitario adjudicado”</i>.</p>
+{% endif %}
+{% if documento.tramite.modalidad.id == 5 %}
+    <p style="text-align:justify">Que, la presente contratación se encuentra comprendida en el artículo 22° y 24° del Reglamento Parcial Nº 2 de la Ley N°4938– Decreto Acuerdo Nº 1127/2020, y sus modificatorias, estableciendo este último: <i>“COMPRA CONSOLIDADA.  La modalidad de Compra Consolidada será aplicable cuando DOS 2 o más Jurisdicciones o Entidades contratantes requieran una misma prestación y ello permita unificar la gestión del procedimiento de selección, con el fin de obtener mejores condiciones que las que obtendría cada uno individualmente”</i>.</p>
+{% endif %}
+{% if documento.tramite.modalidad.id == 6 %}
+    <p style="text-align:justify">Que, la presente contratación se encuentra comprendida en el artículo 22° e) y 27° del Reglamento Parcial Nº 2 de la Ley N°4938– Decreto Acuerdo N.º 1127/2020, y sus modificatorias, estableciendo este último: <i>“(...) LLAVE EN MANO. Los procedimientos de selección con modalidad Llave en Mano se podrán efectuar cuando se estime conveniente para los fines públicos concentrar en un único proveedor la responsabilidad de la realización integral de un proyecto. Se aplicará esta modalidad cuando la contratación tenga por objeto la provisión de servicios, elementos o sistemas complejos a entregar instalados; o cuando comprenda, además de la provisión, la prestación de servicios vinculados con la puesta en marcha, operación, coordinación o funcionamiento de dichos bienes o sistemas entre sí o con otros existentes. (...)”</i></p>
+{% endif %}
+<p style="text-align:justify">Que por Ley N°5636, promulgada mediante Decreto N°62/2020, se  introdujeron  modificaciones sustanciales a la Ley N°4938 de Administración Financiera, de los Bienes y Sistemas de Control del Sector Público, en lo que respecta al Sistema de  Contrataciones. En ese sentido, en segundo párrafo del Artículo 88° se establece una excepción a  la regla de  la descentralización  operativa de la gestión de contrataciones,  a saber: <i>“Sin perjuicio de ello y en virtud de los principios rectores  en  la materia,  el Poder Ejecutivo  podrá graduar los alcances de la descentralización operativa,  y  establecer en qué  casos y en qué etapas del procedimiento de contrataciones resulte conveniente su concentración”</i> .</p>
+{% if documento.tramite.sistema == "COMPRAR" %}
+    <p style="text-align:justify">Que mediante Decreto Acuerdo N° 751/2018 se aprobó la implementación del Sistema Electrónico de Contrataciones de la Administración Provincial "COMPR.AR".</p>
+
+    <p style="text-align:justify">Que por Resolución RESOL-2020-23-E-CAT-CGP#MHF, el Órgano Rector del Sistema de Contratacionesimplementa el Sistema Electrónico de Contrataciones de la Administración Provincial "COMPR.AR".</p>
+{% endif %}
+{% if documento.tramite.sistema == "BIONEXO" %}
+    <p style="text-align:justify">Que con fecha 24 de julio de 2020, Contaduría General de la Provincia emite la Resolución RESOL-2020-29-E-CAT-CGP#MHF, que autoriza la utilización de la Plataforma BIONEXO en los procedimientos de selección que realicen las Unidades Responsables de Compras y Contrataciones o la Secretaría de Compras, según corresponda, para la adquisición de insumos médicos y hospitalarios.</p>
+{% endif %}
+<p style="text-align:justify">Que por Artículo 8ᵒ de Anexo I –Reglamento Parcial Nº 2 de la Ley Nᵒ 4938– aprobado por Decreto Acuerdo Nº 1127/2020, establece a la Secretaría de Compras y Abastecimiento, dependiente del Ministerio de Economía, como órgano ejecutor del sistema de contrataciones.</p>
+
+<p style="text-align:justify">Que por Resolución RESOL-2020-26-E-CAT-CGP#MHF el Órgano Rector del Sistema de Contrataciones establece la concentración operativa de los procedimientos de contrataciones de bienes y servicios, a través de la Secretaría de Compras y Abastecimiento, dependiente del Ministerio de Economía.</p>
+
+<p style="text-align:justify">Que el presente acto se dicta en uso de las facultades otorgadas  por  el  Decreto Acuerdo Nᵒ 21/2019  (segunda numeración), modificado por Decreto Acuerdo Nᵒ 955/2020; Artículos 17° y 18° de Anexo I – Reglamento Parcial Nº 2 de la Ley N°4938– aprobado por Decreto Acuerdo Nº 1127/2020 y sus modificatorios.</p>
+<p>Por ello,</p>
+
+<p style="text-align:center"><strong>EL SECRETARIO DE COMPRAS Y ABASTECIMIENTO RESUELVE:</strong></p>
+{% if fracasado %}
+    {% for oferta in proceso.oferta | reverse  if  oferta.estado == false %}
+           <p style="text-align:justify"><strong>ARTÍCULO {{numero}}º</strong>.-  TENGASE POR INADMISIBLE la oferta presentada por la firma {{ oferta.oferente   | default("-")}}, por .... </p> 
+           {% set numero = numero + 1 %}  
+    {% endfor %}  
+{% endif %}   
+{% if desierto or fracasado %}
+        <p style="text-align:justify"><strong>ARTÍCULO {{numero}}º</strong>.- DECLARAR {% if desierto %} DESIERTO {% endif %} {% if fracasado %} FRACASADO {% endif %} el llamado al procedimiento de {{documento.tramite.tipoProceso | upper}} Nº {{documento.tramite.numeroComprar | upper}}, modalidad  {{documento.tramite.modalidad}}, para la {{extracto}}, cuyo presupuesto oficial es de {{ numero_a_letras(documento.tramite.expediente.PresupuestoOficial ,2, documento.tramite.moneda | default("PESOS")) }} ($ {{ documento.tramite.expediente.PresupuestoOficial | default(0) | number_format(2, ',', '.')  }}). </p>
+        {% set numero = numero + 1 %} 
+{% endif %} 
+<p style="text-align:justify"><strong>ARTÍCULO {{numero}}°</strong>.- AUTORIZAR el {% if desierto or fracasado %} Nuevo {% endif %} llamado al procedimiento de {{documento.tramite.tipoProceso | upper}} Nº {{documento.tramite.numeroComprar | upper}} , {{marcoLegal}} {{documento.tramite.tipo}}, modalidad  {{documento.tramite.modalidad}}, para la {{extracto}}, cuyo presupuesto oficial es de {{ numero_a_letras(documento.tramite.expediente.PresupuestoOficial ,2, documento.tramite.moneda | default("PESOS")) }} ($ {{ documento.tramite.expediente.PresupuestoOficial | default(0) | number_format(2, ',', '.')  }}).</p>
+{% set numero = numero + 1 %} 
+<p style="text-align:justify"><strong>ARTÍCULO {{numero}}º</strong>.- APROBAR {{tipoPliego}} con sus respectivos Anexos, de la {{documento.tramite.tipoProceso | upper}} Nº {{documento.tramite.numeroComprar | upper}}, elaborado por la Dirección Provincial de Contratación de Bienes y Servicios dependiente de la Secretaría de Compras del Ministerio de Economía.
+{% if documento.tramite.sistema == "COMPRAR" %}
+    El mismo no tendrá costo y podrá consultarse y/o descargarse desde la página del Sistema Electrónico de Contrataciones Públicas sito http://comprar.catamarca.gob.ar/ y desde la página de Contaduría General de la Provincia, sito http://www.cgp-catamarca.gob.ar/
+{% endif %}
+{% if documento.tramite.sistema == "BIONEXO" %}
+     El mismo no tendrá costo alguno, pudiendo ser descargado de manera totalmente gratuita del Sistema BIONEXO, cuyo sitio de internet es: http://ar.bionexo.com/. Además, podrá ser visualizado en el sitio de internet de la Contaduría General de la Provincia: http://www.cgp-catamarca.gob.ar/
+{% endif %}
+.</p>
+{% set numero = numero + 1 %} 
+{% set tarea1 = 0 %}
+{% for tarea in documento.tramite.tarea  %} 
+    {% if loop.last  %} 
+        {% set tarea1 = tarea %}
+    {% endif %}
+{% endfor %}
+<p style="text-align:justify"><strong>ARTÍCULO {{numero}}°</strong>.- DESIGNAR como integrantes de la Comisión Evaluadora de Ofertas de la presente contratación al Director Provincial de Contrataciones de Bienes y Servicios de la Secretaría de Compras, C.P.N. Gastón Nahuel Carrizo; {% for tramite in tramites %} la xxx - {{tramite.organismoOrigen.organismo | title }}, {% endfor %} y por la Secretaría de Compras, al C.P.N. {{tarea1.usuario.agente | title}}.</p>
+{% set numero = numero + 1 %} 
+<p style="text-align:justify"><strong>ARTÍCULO {{numero}}°</strong>.- ESTABLECER como fecha y hora límite para la presentación y apertura de ofertas de la {{documento.tramite.tipoProceso | upper}} Nº {{documento.tramite.numeroComprar | upper}}, el día {% if agenda.fecha | default(false)%}{{ agenda.fecha | default("now") | localizeddate('full', 'none', 'es')   }}{% else %} el día XX de XXXX de 2023 {% endif %} a horas {{ agenda.hora | default("09:00:00") | date('H:i:s')}}, en la modalidad establecida en {{tipoPliego}} que se aprueban en el presente instrumento.</p>
+{% set numero = numero + 1 %} 
+<p style="text-align:justify"><strong>ARTÍCULO {{numero}}º</strong>.- AUTORIZAR a la Dirección Provincial de Contrataciones de Bienes y Servicios a incorporar al Expediente electrónico {{documento.tramite.expediente.numeroGde | default('EX-' ~ year ~'ear-000-   -CAT-DPCBS#MEC')}} {{tipoPliego}} aprobada con el número del presente instrumento legal.</p>
+{% set numero = numero + 1 %} 
+<p style="text-align:justify"><strong>ARTÍCULO {{numero}}º</strong>.- Tomen conocimiento a sus efectos: {% for tramite in tramites %} {{tramite.organismoOrigen.organismo | title }}, {% endfor %} Dirección Provincial de Contrataciones de Bienes y Servicios de la Secretaría de Compras y Abastecimiento, y Contaduría General de la Provincia.</p>
+{% set numero = numero + 1 %} 
+<p style="text-align:justify"><strong>ARTÍCULO {{numero}}º</strong>.- Comuníquese, publíquese, dese al Registro Oficial y Archívese.
+</p>

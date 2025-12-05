@@ -1,0 +1,30 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\_lista.html.twig#}
+         {% if expedientesPendientes is defined and expedientesPendientes is not empty %}
+            <div class="panel panel-default hidden-print" style="margin-top: 5px; margin-bottom:0px;">
+                    <div class="panel-heading">
+                        <span class="glyphicon glyphicon-folder-open text-warning"></span> NUEVOS EXPEDIENTES <span class="badge">{{ expedientesPendientes | length }} </span>
+                    </div>
+                    <div class="panel-body table-responsive">
+                          <table id="tablaExpedienteIniciados"  class="table table-condensed">
+                          <thead>
+                              <tr>
+                                  <th>Informacion</th>
+                                  <th>N°</th>
+                                  <th>Expediente</th>
+                                  <th>CCOO DPPR</th>
+                                  <th>Descripcion</th>
+                                  <th>Pedidos</th>
+                                  <th>Estado</th>
+                                  <th>Acciones</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                          {% for expediente in expedientesPendientes %}  
+                                       {{ include('ExpedienteBundle:Expediente:_tbody_completo.html.twig') }}
+                           {% endfor %}
+                          </tbody>
+                        </table>
+                    </div>
+            </div>
+        {% endif %}
+

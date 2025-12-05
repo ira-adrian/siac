@@ -1,0 +1,148 @@
+{# Siarme\AusentismoBundle\Resources\views\Itempedido\_tbody_completo.html.twig #}
+<tr>
+    <td>     
+        <div class="dropdown text-left hidden-print" style="margin:0px;"> 
+                    {% include 'AusentismoBundle:ItemPedido:_menu_info_item.html.twig' with {'entidad': itemPedido, 'tipo':constant('TIPO_ENTIDAD', itemPedido) } %}
+        </div>
+    </td>
+    <td>{{ itemPedido.tramite.organismoOrigen.codigoGde }}</td>
+    <td>{{ itemPedido.numero }} </td>
+    {# <td>{% if itemPedido.fecha %}{{ itemPedido.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>#}
+    <td><a href="{{ path('itempedido_show', { 'id': itemPedido.id }) }}" target="_blank">{{ itemPedido.codigo }}</a></td>
+    {% set esComprar = itemPedido.tramite.sistema == "COMPRAR" %}
+    {% if esComprar %}{% set itemCatalogo  = itemPedido | item_catalogo  %}{% endif %}
+    <td style="width: 40%;" {% if itemCatalogo.item |default("") != itemPedido.item and esComprar %} class="bg-warning" {% endif %}>
+       <div id="-{{itemPedido.id}}">{{ itemPedido.item }}
+             {% if itemPedido.rubro == itemCatalogo.rubro | default("") or itemCatalogo.rubro is not defined  %}
+                 <small><span class="pull-right">{{itemPedido.ipp  |default("-")}}-<i>{{itemPedido.rubro  |default("-")| title}}</i></span></small>
+             {% else %}
+                <small><span class="pull-right text-warning" data-toggle="tooltip" data-placement="top" title="Catálogo: {{itemCatalogo.rubro  |default("-")| title}}">{{itemPedido.ipp  |default("-")}}-<i>{{itemPedido.rubro | title}}</i></span></small>
+             {% endif %}
+       </div>
+       {% if itemCatalogo.item |default("") != itemPedido.item and esComprar %}
+            <div class="dropdown text-left hidden-print" style="margin:0px;">  
+                <a aria-hidden="true" class="dropdown-toggle overflow {% if (itemCatalogo is not empty ) %} text-info {% else %}  text-danger {% endif %}" data-toggle="dropdown" role="button" aria-expanded="false"><span class="fa fa-file-o" data-toggle="tooltip" data-placement="top" title='Ver Descripcion del Catálogo COMPRAR'></span></a>
+                <div  class="dropdown-menu" style="width: 400px;">  
+                    <table id="tablaItemDuplicado" class="table table-condensed">
+                        <thead>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding:3px">{{itemCatalogo.item |default("Codigo inexistente en el catálogo COMPRAR")}}</td>
+                            </tr>
+                        </tbody>
+                    </table>   
+                </div>
+            </div>
+       {% endif %}
+        {% if ( edit or itemConsolidado is defined )  and app.user.departamentoRm.slug == "dppr" %}
+            <span class="glyphicon glyphicon-ok pull-right hidden-print" style="display:none"></span>
+            <textarea class="form-control" data-href="{{ path('item_pedido_detalle', { 'id': itemPedido.id }) }}"   placeholder="Especificaciones" >{{ itemPedido.detalle | striptags }}</textarea>
+        {% else %}
+            {% if itemPedido.detalle  %}<p style="font-size:11px; padding:0px; margin:0px;" class="text-muted"><strong>{{itemPedido.detalle | striptags }}</strong></p>{% endif %}
+        {% endif %}
+    </td>
+    <td>{{ itemPedido.unidadMedida | default('N/D')}}</td>
+    <td>$ {{ itemPedido.precio  | default(0) | number_format(2, ',', '.')  }}
+        {% if tramite is defined %}
+            {% set itemsOferta = itemPedido | item_oferta_adjudicado(3) %}
+            {% set itemOferta = itemsOferta[0] | default(0) %}
+            {% if itemsOferta | length == 0 %}
+                 {% set itemOferta = itemPedido | item_oferta %}
+                 {% set itemsOferta = itemPedido | item_oferta(3) %}
+            {% endif %}  
+            {% if itemOferta | length > 0 %}
+                <div class="dropdown text-left hidden-print" style="margin:0px;">  
+                    <a aria-hidden="true" class="dropdown-toggle overflow
+                        {% if (itemPedido.precio > itemOferta.precio) %} 
+                            {% if ((itemPedido.precio / itemOferta.precio) > 1.20 ) %}
+                                text-danger
+                            {% else %}
+                                 text-info 
+                            {% endif %}
+                        {% elseif ((itemPedido.precio / itemOferta.precio) < 0.80 ) %}
+                            text-warning 
+                        {% else %}
+                             text-info 
+                        {% endif %}" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-barcode" data-toggle="tooltip" data-placement="top" title='Ultimas Cotizaciones'></span></a>
+                    <div  class="dropdown-menu dropdown-menu-right" style="width: 600px;">  
+                        <table id="tablaItemDuplicado" class="table table-condensed">
+                            <thead>
+                                <tr>
+                                    <th>Oferta</th>
+                                    <th>Fecha</th>
+                                    <th>N°</th>
+                                    <th>Precio Cotizado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in itemsOferta %}
+                                    <tr>
+                                        <td width="18%">
+                                            <a data-toggle="tooltip" data-placement="top" title='{{ item.oferta.oferente }}' href="{{ path('tramite_show', { 'id': item.oferta.id }) }}" target="_blank"> {{ item.oferta.tipoTramite }} {{ item.oferta.numeroTramite }}</a>
+                                        </td>
+                                        <td>{{item.fecha | date('d-m-Y') }}</td>
+                                        <td><a href="{{ path('itemoferta_show', { 'id': item.id }) }}" target="_blank"><strong> {{ item.numero }} </strong></a></td>
+                                        
+                                        <th>$ {{item.precio  | default(0) | number_format(2, ',', '.')}}</th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            {% if item.estado %}
+                                                {% if item.adjudicado %}
+                                                    <span class="label label-success">Adjudicado</span>
+                                                {% elseif item.proceso.estado %}
+                                                    <span class="label label-default">Sin Adjudicar</span>
+                                                {% else %}
+                                                    <span class="label label-info">Evaluación</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="label label-warning">No válido</span>
+                                            {% endif %}
+                                        </td>
+                                        <td colspan="3">{{item.item}}
+                                        </td>
+                                        
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>  
+                    </div>
+                </div>
+           {% endif %}
+    {% endif %}
+    </td>
+    <td>{{ itemPedido.cantidad }}</td>
+    <td class="estado">
+        {% set itemsProceso = itemPedido | item_proceso %}
+        {% if (itemsProceso | length > 0 ) %} 
+            {% for itemProceso in itemsProceso | reverse %}
+              {% if  loop.first %}
+                {{ include('AusentismoBundle:ItemProceso:_etiqueta_estado.html.twig') }}
+              {% endif %}
+           {% endfor %}
+        {% else %}
+          - {# {% if itemPedido.estado %}Válido{% else %}Rectificar{% endif %}#}         
+        {% endif %}
+    </td>
+    <td>
+        {# {% if ( app.user.departamentoRm == itemPedido.tramite.departamentoRm ) and (( itemPedido.tramite.expediente | default(null) | movimiento_estado(app.user)) or itemPedido.tramite.expediente.id is not defined) %} #}
+        {# {% if edit %}
+           {{ include('AusentismoBundle:ItemPedido:_menu_acciones_item.html.twig') }}
+        {% endif %} #}
+        {% if itemProceso.id is defined and edit %}
+            {% if itemPedido.itemProceso is empty %}
+                <a href="{{ path('item_pedido_agregar_item', { 'id': itemPedido.id, 'item_proceso_id':itemProceso.id | default(0)}) }}"  role="button"> <span class="glyphicon glyphicon-plus-sign"> </span>Relacionar</a>
+            {% else %}
+                    {% if  itemProceso == itemPedido.itemProceso  %}
+                             <a href="{{ path('item_pedido_quitar_item', { 'id': itemPedido.id }) }}" role="button" > <span class="glyphicon glyphicon-remove-sign text-danger">  </span>Quitar Relación</a>
+                    {% else %}
+                            <span class="text-warning">
+                            Relacionado con: <br/> 
+                            {{itemPedido.itemProceso.proceso.tipoTramite }} {{itemPedido.itemProceso.proceso.numeroTramite }}</span>
+                            <a  data-toggle="tooltip" data-placement="top" title='Ver Proceso'   href="{{ path('tramite_show', { 'id': itemPedido.itemProceso.proceso.id }) }}">{{ itemPedido.itemProceso.proceso.numeroComprar  | default(itemPedido.itemProceso.proceso)}}</a>
+                    {% endif %}
+            {% endif %}
+        {% endif %}
+    </td>
+</tr>

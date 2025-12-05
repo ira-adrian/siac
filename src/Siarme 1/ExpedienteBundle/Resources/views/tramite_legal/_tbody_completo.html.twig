@@ -1,0 +1,71 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\_registro_completo.html.twig#}
+{% set year = 'now' | date('Y')%}
+          <tr{# if tramite.departamentoRm != app.user.departamentoRm  %} style="background-color:#E4D8B6;"  class="text-muted"  data-toggle="tooltip" data-placement="top" title="Reparticion {{ tramite.departamentoRm  }}"  {% elseif  tramite.tareaActiva %}  style="background-color:hsla(120,60%,70%,0.3);" {% endif #}>
+  
+                <td>
+                    <div class="dropdown text-left hidden-print" style="margin:0px;"> 
+                    {# El tipo puede ser ['EX','DOC','AG'] corresponde con las entidades Expediente, Documento, Agente #}
+                    {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': tramite, 'tipo': constant('TIPO_ENTIDAD', tramite) } %}
+                    </div>
+                </td>
+                <td class="hidden">{{ tramite.numeroTramite}}</td>
+                <td>
+                    <a  href="{{ path('tramite_show', { 'id': tramite.id }) }}">{{ tramite.tipoTramite}} {{ tramite.numeroTramite}}</a> <br>
+                    <span>{% if tramite.fecha %}{{ tramite.fecha |date('d/m/Y') }} {% endif %}</span> 
+                </td>
+                {% if tramites is defined or  tareas is defined or realizadas is defined %}
+                     <td>{{tramite.expediente.ccoo | default("") }}</td>
+                      <td> <a href="{{ path('expediente_show', { 'id': tramite.expediente.id | default("-") }) }}">{{ tramite.expediente.numeroGde | default('NO-'~ year ~ '-n/d') }}</a>
+                            {% set procesos = tramite.expediente | tramite_por_expediente_slug("tramite_proceso")  %}
+                             {% for tramite1 in procesos %}
+                               <br/><small><span class="{{tramite1.estadoTramite.class}}"  data-toggle="tooltip" data-placement="bottom" title='{{tramite1.estadoTramite}}' >-</span>
+                               {{ tramite1.numeroComprar | default('100-00000-n/d')}}</small>
+                            {% endfor %}
+                      </td>
+                <td style="width: 15%"> <small data-toggle="tooltip" data-placement="top" title="{{tramite.expediente.extracto | replace({'<br>': " - ", '<br />': " - "})  }}">{{tramite.expediente.extracto[0:50] | raw}}<small>...</small></small>
+                </td>  
+                {% endif %}
+                <td>
+                   {% if edit %}
+                            <span role="presentation"  class="dropdown overflow" >
+                                <a class="dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-pencil"></span><span class="caret"></span></a>
+                                <div class="dropdown-menu" style="width: 400px;" aria-labelledby="dropdownMenuLink">
+                                  <div class="list-group-item">
+                                        {{ render(controller('ExpedienteBundle:Tramite:edit', {'id': tramite.id  }))}}
+                                  </div>
+                                </div>
+                          </span> 
+                     {% endif %}
+                     {{tramite.texto}} {% if tramite.fecha %}{% endif %} 
+                </td>     
+                <td>
+                    {% for tarea in tramite.tarea | reverse  %}  
+                            {% if loop.first  %} 
+                                {% if  tarea.esResponsable | default(false) %} 
+                                     {% set title = "Responsable: " ~ tarea.usuario.agente.apellidoNombre | default( tarea.usuario.departamentoRm ) %} 
+                                {% else %}
+                                    {% set title = "Colaborador: " ~ tarea.usuario.agente.apellidoNombre | default( tarea.usuario.departamentoRm ) %}
+                                {% endif %}    
+                                <a href="{{ path('agente_show', { 'id': tarea.usuario.agente.id | default(0) }) }}" target="_blank">{{ tarea.usuario.usuario | default("-") }}</a>
+                           {% endif %}   
+                   {% endfor %}
+                   {% set    despachos, tareas, tarea1 = tramite.expediente | tramite_por_expediente_slug("tramite_despacho"), 0, 0 %}
+                    {% for  despacho in despachos %}
+                        {% if loop.last  %}{% set  tareas = tramite.tarea  %}{% endif %}   
+                    {% endfor %}
+                    {% for tarea in tareas  %} 
+                        {% if loop.last  %} 
+                         {% set tarea1 = tarea %}
+                              {% endif %}
+                    {% endfor %}
+                    <br>    
+                         <a  href="{{ path('agente_show', { 'id': tarea.usuario.agente.id | default(0) }) }}" target="_blank">{{ tarea.usuario.usuario | default("") }}</a>
+                </td>
+                <td>
+                    <span class="pull-left">{{ include('ExpedienteBundle:Tramite:_estado_etiqueta.html.twig') }}</span>
+                    <br>{% if tramite.fechaEstado %}{{ tramite.fechaEstado |long_time}}{% endif %} 
+                </td>
+                <td>
+                    {% include 'ExpedienteBundle:Tramite:_menu_acciones_tramite.html.twig' %}
+                </td>
+            </tr>

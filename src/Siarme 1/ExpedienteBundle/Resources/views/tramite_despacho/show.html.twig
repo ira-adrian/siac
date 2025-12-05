@@ -1,0 +1,271 @@
+{# Siarme/AusentismoBundle/Resources/views/Agente/index.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %}  {{ tramite.tipoTramite }} {{ tramite.numeroTramite }}  {% endblock %} 
+{% block contenido %}
+ <div class="container"> 
+<div class="nav nav-pills hidden-print"> 
+      <li role="presentation" class="disabled"><a href="#">Menu</a></li>
+{% if edit %}
+
+      {#
+    <li role="presentation">
+       {% if (movimientoPendiente is defined) and (movimientoPendiente is not empty) %}
+          {% if   tramite.expediente | length <= 0 %}
+         
+            <a data-toggle="tooltip" data-placement="top" title='Añadir este {{ tramite.tipoTramite }} al expediente iniciado para consolidar' role="button" href="{{ path('tramite_expediente_agregar' , { 'tramite_id': tramite.id }) }}"> <span class="glyphicon glyphicon-folder-open text-warning" onclick= "return confirm('¿Desea consolidar?');" ></span> Añadir</a>
+
+       {% endif %}
+      {% elseif (tramite.expediente | length <= 0)  %}
+
+          <a data-toggle="tooltip" data-placement="top" title='Añade este {{ tramite.tipoTramite }} a un nuevo expediente' role="button" href="{{ path('movimiento_expediente_new' , { 'tramite_id': tramite.id }) }}"><span class="glyphicon glyphicon-folder-open" onclick= "return confirm('¿Desea iniciar una Solicitud?');" ></span> Añadir</a>
+
+      {% endif %}
+    </li>#}
+
+   {% endif %}
+     <li role="presentation" class="dropdown" data-toggle="tooltip" data-placement="bottom" title='Comparte y Notifica a un usuario acerca este PROCESO'>
+              <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-share"></span> Notificar<span class="caret"></span></a>             
+               <ul class="dropdown-menu">
+                 <li class="dropdown-header" style="width:40em">
+                  {# El tipo puede ser ['EX','DOC','AG','MSJ'] corresponde con las entidades Expediente, Documento, Agente, Mensaje #}
+                   {{ render(controller('DocumentoBundle:Compartir:new', { 'tipoid': tramite.id, 'tipo': constant('TIPO_ENTIDAD', tramite)})) }}
+                 </li>
+               </ul>
+      </li>
+      {# if ( app.user.departamentoRm == tramite.departamentoRm | default(null) ) and not tramite.estado #}
+      {% if edit %}
+            <li role="presentation" data-toggle="tooltip" data-placement="top" title='Eliminar el {{ tramite.tipoTramite }}  {{ tramite.numeroTramite }}' >
+                <a  role="button" href="{{ path('tramite_eliminar' , { 'id': tramite.id }) }}"> <span class="glyphicon glyphicon-trash text-danger"> </span> Eliminar</a>
+            </li>  
+   {% endif %} 
+
+    <!-- Menu DERECHO *** IMPRIMIR - COPIAR -->
+    <div class="pull-right">
+            <li  role="presentation">
+              <a id="printer"  value="Imprimir" role="button"><!-- Printer-imprime el texto de clase="print" -->
+                <span class="glyphicon glyphicon-print"></span> Imprimir</a>
+
+                <a class="btn" data-clipboard-target="#copy"><!-- clipboard-copiar texto de id="copy" -->
+                  <span class="glyphicon glyphicon-copy"></span>Copiar</a>
+            </li>
+    </div>
+</div>
+<!-- copiar - imprimir-->
+<div id="copy" class="panel panel-default print">
+
+    <style type="text/css" media="print">
+        @media print {
+            a[href]:after {
+                content: none !important;
+            }
+        }
+    </style> 
+      <!-- Default panel contents -->
+      <div class="panel-heading">
+          &nbsp;&nbsp; <span class='{{ tramite.tipoTramite.glyphicon}}'></span> {{ tramite.tipoTramite }} <strong> {{ tramite.numeroTramite }}</strong> -  Fecha: {% if tramite.fechaDestino %}{{ tramite.fechaDestino|date('d-m-Y') }}{% endif %}</span>
+        <span class="pull-right">{{ include('ExpedienteBundle:Tramite:_estado_etiqueta.html.twig') }}</span>
+      </div>
+      <!-- List group -->
+      <div class="list-group" aria-multiselectable="true">
+        <div class="list-group-item text-center" >
+               <dl class="list-group-item-heading" role="tab" id="headingTwo">
+                   {% if tramite.expediente.id is defined %}
+                <dt>Expediente | CCOO</dt>
+                <dd>
+                    <span class="glyphicon glyphicon-folder-open"></span> <a href="{{ path('expediente_show', { 'id': tramite.expediente.id | default(1) }) }}"><span id="expediente">{{ tramite.expediente.numeroGde | default("") }}</span></a>
+                    
+                        {% if tramite.expediente.numeroGde is not empty %}
+                          <!-- clipboard-copiar texto de id="copy" -->
+                          <a class="btn" data-clipboard-target="#expediente">
+                          <span class="glyphicon glyphicon-copy"></span></a>
+                        {% endif %} 
+                         {% if edit %}
+                            <span role="presentation"  class="dropdown overflow">
+                                    <a class="dropdown-toggle" href="#" role="presentation" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> {% if tramite.expediente.numeroGde is empty %} Agregar {% else %} <span class="glyphicon glyphicon-pencil"></span> {% endif %}<span class="caret"></span></a>
+                                    <div class="dropdown-menu dropdown-menu-right" style="width: 400px;" aria-labelledby="dropdownMenuLink">   
+                                        <div class="list-group-item">
+                                            {{ render(controller('ExpedienteBundle:Expediente:gdeEdit', {'id': tramite.expediente.id  }))}}
+                                      </div>
+                                    </div>
+                             </span>  
+                        {% endif %} 
+                &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;    
+                <a href="{{ path('expediente_show', { 'id': tramite.expediente.id | default(0) }) }}"><span id="ccoo">{{tramite.expediente.ccoo | default("") }}</span></a>
+                <!-- clipboard-copiar texto de id="copy" -->
+                <a class="btn" data-clipboard-target="#ccoo">
+                <span class="glyphicon glyphicon-copy"></span></a>
+                </dd>
+                <dt>Objeto</dt>
+                 <dd>{{tramite.expediente.extracto | nl2br | raw}}</dd>
+                 <dt>Presupuesto Oficial</dt> 
+                  <dd>$ {{ tramite.expediente.presupuestoOficial | default(0) | number_format(2, ',', '.')  }}</dd> 
+                <dd>({{ numero_a_letras(tramite.expediente.presupuestoOficial ,2, 'pesos') }})</dd> 
+             {% endif %}
+                 <hr>
+                 <dt>Fecha de Ingreso  
+                     {% if edit %}  &nbsp;&nbsp;&nbsp; 
+                            <span role="presentation"  class="dropdown overflow" >
+                                <a class="dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-pencil"></span> Modificar <span class="caret"></span></a>
+                                <div class="dropdown-menu dropdown-menu-right" style="width: 400px;" aria-labelledby="dropdownMenuLink">
+                                  <div class="list-group-item">
+                                        {{ render(controller('ExpedienteBundle:Tramite:edit', {'id': tramite.id  }))}}
+                                  </div>
+                                </div>
+                          </span> 
+                     {% endif %}
+
+                 </dt>
+                 <dd>
+                    {% if tramite.fecha %} 
+                          {{ tramite.fecha | localizeddate('full', 'none', 'es')}} -  {{ tramite.fecha | long_time }}
+                    {% else %}
+                       - 
+                    {% endif %}
+                </dd>
+                 <dt>Ingresó De</dt>
+                 <dd>
+                    {{tramite.organismoOrigen | default("-")}}
+                  </dd>
+                <dt>Observaciones</dt>
+                <dd>{{tramite.texto}}</dd>
+                <dt>Proceso por sistema {{tramite.sistema }}</dt>
+                <dd> {{ tramite.tipoProceso}}  {{ tramite.numeroComprar  | default("-")}}</dd>
+                {% if tramite.tipoProceso is not empty %}
+                  <dt>Modalidad</dt>
+                  <dd> {{tramite.tipo}} {{ tramite.modalidad }}</dd>
+                {% endif %}
+                <hr>
+                <dt>Fecha de Pase                   
+                     {% if edit %}  &nbsp;&nbsp;&nbsp; 
+                            <span role="presentation"  class="dropdown overflow" >
+                                <a class="dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-pencil"></span> Modificar <span class="caret"></span></a>
+                                <div class="dropdown-menu dropdown-menu-right" style="width: 400px;" aria-labelledby="dropdownMenuLink">
+                                  <div class="list-group-item">
+                                        {{ render(controller('ExpedienteBundle:Tramite:tramiteDespachoPase', {'id': tramite.id  }))}}
+                                  </div>
+                                </div>
+                          </span> 
+                    {% endif %}
+                 </dt>
+                <dd>
+                    {% if tramite.fechaDestino and tramite.organismoDestino is not empty  %}
+                        {{ tramite.fechaDestino | localizeddate('full', 'none', 'es')}} - {{ tramite.fechaDestino | long_time }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </dd>
+                <dt>Pase A</dt>
+                 <dd>
+                    {{tramite.organismoDestino | default("-")}}
+                  </dd>
+        {% if tramite.montoAdjudica > 0 %}
+                  <dt>Monto Adjudicado</dt>
+                  <dd> {{tramite.moneda}}  ${{ tramite.montoAdjudica | default(0) | number_format(2, ',', '.')  }}</dd>
+        {% endif %}
+          <hr>
+                <dt>Fechas
+                  {% if edit %} 
+                            &nbsp;&nbsp;&nbsp;     
+                     <span role="presentation"  class="dropdown overflow hidden-print">
+                        <a class="dropdown-toggle" href="#" role="presentation" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-calendar"></span> Agregar<span class="caret"></span></a>
+                        <div class="dropdown-menu" style="width: 400px;" aria-labelledby="dropdownMenuLink">
+                          <div class="list-group-item"> 
+                            {{ render(controller('ExpedienteBundle:Recordatorio:recordatorioTramiteNew', {'id': tramite.id  }))}}
+                          </div>
+                        </div>
+                     </span>
+                   {% endif %}  
+                </dt>
+                <dd>           
+                     <table class="table table-hover text-center">
+                        <tbody>
+                            {% for recordatorio in tramite.recordatorio %}
+                                    {% set tramite = recordatorio.tramite %}
+                                    <tr><td colspan=100% ><span class="glyphicon glyphicon-calendar text-info"></span> {{recordatorio.fecha | date('d/m/Y') }} | {{recordatorio | upper }} - {{recordatorio.texto | upper }} -
+                                    {{ include('ExpedienteBundle:Tramite:_agenda_etiqueta.html.twig') }}
+                                    {# if recordatorio.vigente %}
+                                      <span class="label label-success"> Vigente </span>
+                                    {% else %}
+                                      <span class="label label-default"> Finalizado - {{recordatorio.fecha | long_time }}</span>
+                                     {% endif #} 
+                                 {% if edit %}
+                                     &nbsp;&nbsp;
+                                    <a role="button" href="{{ path('recordatorio_eliminar' , { 'id': recordatorio.id }) }}"><span class="glyphicon glyphicon-trash text-danger"></span></a>
+                                {% endif %}
+                                   </td></tr>
+                            {% else %}
+                               LLamado: -
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </dd>  
+                <dt>Tarea</dt>
+                <dd>
+                    {% set tareas = tramite.tarea %}
+                    <table class="table table-hover">
+                            <tbody> 
+                              {% for tarea in tareas %}
+                                    {% set tramite = tarea.tramite %}
+                                    {{ include('ExpedienteBundle:Tarea:_tbody_completo.html.twig') }}      
+                             {% endfor %}
+                            </tbody>
+                    </table>
+                </dd>
+                <dd >
+                    {{ render(controller('DocumentoBundle:Compartir:index', { 'tipoid': tramite.id, 'tipo': constant('TIPO_ENTIDAD', tramite) } )) }} 
+               </dd>
+ 
+</dl>
+</div>
+ {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_panel_body.html.twig') }} 
+</div>
+<!-- Large modal -->
+<div id="modal-ponderacion"class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+<div class="modal-dialog modal-lg" role="document">
+  <div class="modal-content">
+     <div class="modal-header text-center">
+            <h5>MODIFICAR FACTORES DE PONDERACION
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </h5>
+     </div><!-- /.header -->
+         <div id="modal-body-ponderacion" class="modal-body">
+        </div><!-- /.body -->
+    <!--    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button> 
+     </div> /.footer -->
+  </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+</div>
+ {{ render(controller('ExpedienteBundle:Comentario:index',
+            { 'tipoid': tramite.id, 'tipo': constant('TIPO_ENTIDAD', tramite) }
+        )) }}
+ {{ render(controller('ExpedienteBundle:Comentario:new',
+            { 'tipoid': tramite.id, 'tipo': constant('TIPO_ENTIDAD', tramite) }
+        )) }}
+</div>
+
+{% endblock %}
+{% block javascripts %} 
+{{ parent() }}
+<script>
+
+$(".btn-editarPonderacion").unbind('click').click( function(){
+        var $href= $(this).attr("data-href");
+        
+        $.ajax({
+             url: URL+$href,
+             type: 'GET',
+             success: function(response){
+             var msj= document.getElementById("modal-body-ponderacion");
+             msj.innerHTML =response;
+             $('#modal-ponderacion').modal('show');         
+            } 
+        }); 
+    });
+</script>
+{% endblock  %}
+{% block footer %}
+<dir class="footer"></dir>
+{% endblock %}

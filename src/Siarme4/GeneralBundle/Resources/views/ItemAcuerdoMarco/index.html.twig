@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>itemAcuerdos list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Fecha</th>
+                <th>Trimestre</th>
+                <th>Codigo</th>
+                <th>Item</th>
+                <th>Condetalle</th>
+                <th>Unidadmedida</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Estado</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for itemAcuerdo in itemAcuerdos %}
+            <tr>
+                <td><a href="{{ path('itemAcuerdo_show', { 'id': itemAcuerdo.id }) }}">{{ itemAcuerdo.id }}</a></td>
+                <td>{% if itemAcuerdo.fecha %}{{ itemAcuerdo.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{{ itemAcuerdo.trimestre }}</td>
+                <td>{{ itemAcuerdo.codigo }}</td>
+                <td>{{ itemAcuerdo.item }}</td>
+                <td>{{ itemAcuerdo.conDetalle }}</td>
+                <td>{{ itemAcuerdo.unidadMedida }}</td>
+                <td>{{ itemAcuerdo.precio }}</td>
+                <td>{{ itemAcuerdo.cantidad }}</td>
+                <td>{% if itemAcuerdo.estado %}Yes{% else %}No{% endif %}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('itemAcuerdo_show', { 'id': itemAcuerdo.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('itemAcuerdo_edit', { 'id': itemAcuerdo.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('itemAcuerdo_new') }}">Create a new itemAcuerdo</a>
+        </li>
+    </ul>
+{% endblock %}

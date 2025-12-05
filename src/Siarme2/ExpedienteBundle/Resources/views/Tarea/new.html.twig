@@ -1,0 +1,26 @@
+{# Siarme/AusentismoBundle/Resources/views/Agente/index.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} AGENTE{% endblock %}
+
+{% block menu_li%}
+
+{% endblock %}
+{% block contenido %}
+ <div class="container"> 
+{% block mensaje %}
+ {{ include('ExpedienteBundle:Default:_mensaje.html.twig') }}
+{% endblock %}
+
+    <h1>Tarea creation</h1>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <input type="submit" value="Create" />
+    {{ form_end(form) }}
+
+    <ul>
+        <li>
+            <a href="{{ path('tarea_index') }}">Back to the list</a>
+        </li>
+    </ul>
+{% endblock %}

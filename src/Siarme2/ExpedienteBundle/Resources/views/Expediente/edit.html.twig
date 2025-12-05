@@ -1,0 +1,26 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\expediente_edit.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} {{ expediente }}{% endblock %}
+
+{% block main %}
+
+    <div class="panel panel-default">
+      <!-- Default panel contents -->
+      <div class="panel-heading">
+            &nbsp;&nbsp;MODIFICAR  <strong>{{ expediente }}</strong>
+      </div>
+
+        <div class="panel panel-body">
+            {{ form_start(edit_form)}}
+            {{ form_widget(edit_form) }}
+            <div class="text-right">
+              <input class="btn btn-danger" onclick= "return confirm('¿Desea GUARDAR?');" type="submit" value="GUARDAR"/>
+            </div>
+            {{ form_end(edit_form) }}
+        </div>
+    </div>
+
+{% endblock %}
+{% block footer %}
+<dir class="footer"></dir>
+{% endblock %}

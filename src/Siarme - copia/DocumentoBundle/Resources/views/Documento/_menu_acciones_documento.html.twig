@@ -1,0 +1,27 @@
+{# Siarme\DocumentoBundle\Resources\views\Documento\_menu_acciones_documento.html.twig #}
+
+       {% if ( app.user.departamentoRm == documento.usuario.departamentoRm | default(null) ) %}
+           {% if (not documento.papelera) %}
+                    {% if documento.slug != "archivo"%}
+                        <a  data-toggle="tooltip" data-placement="top" title='Modificar el Documento' role="button" href="{{ path('extranet_documento_edit' , { 'id': documento.id }) }}"> <span class="glyphicon glyphicon-pencil"> </span></a> &nbsp;&nbsp;  
+                   {% endif %}
+                      <a data-toggle="tooltip" data-placement="top" title='Enviar a la Papelera' role="button" href="{{ path('documento_papelera' , { 'id': documento.id }) }}"> <span class="glyphicon glyphicon-trash" onclick= "return confirm('¿Desea enviar a la Papelera?');"> </span></a> &nbsp;&nbsp;
+           {% else %}
+             <a data-toggle="tooltip" data-placement="top" title='Restaurar Documento de Papelera'
+             role="button" onclick= "return confirm('¿Desea  Restaurar?');"
+            href="{{ path('documento_restaurar', { 'id': documento.id }) }}"
+           
+            class='glyphicon glyphicon-repeat'>
+            </a>  &nbsp;&nbsp;
+            <a data-toggle="tooltip" data-placement="top" title='Ver Documento en Papelera'
+
+            href="{{ path('documento_show', { 'id': documento.id }) }}"
+           
+            class='glyphicon glyphicon-eye-open'>
+            </a>
+       {% endif %}
+       {% endif %}
+       
+
+
+

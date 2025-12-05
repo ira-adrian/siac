@@ -1,0 +1,32 @@
+<script>
+
+       
+    $('textarea').on('keyup',function(){
+      $chek= $(this).parent().find(".glyphicon-ok");
+        //$chek.fadeOut("low");
+        $chek.fadeIn("low");
+        $chek.removeClass("text-success").addClass("text-muted");
+    });
+
+   $('textarea').on('change paste',function(){
+        var $href= $(this).attr("data-href");
+        var $val= $(this).val();
+         $chek= $(this).parent().find(".glyphicon-ok");
+        $.ajax({
+            type: 'POST',
+            url:  $href,
+            data: { 'q':  $val },
+            success: function(msg){
+              $(this).style.height = 'auto';
+              $(this).style.height = text.scrollHeight+'px';
+               $chek.removeClass("text-muted").addClass("text-success");
+                setTimeout(function () {
+                    $chek.fadeOut("low");
+                    $(this).val($val);
+                }, 2000);
+            }
+        });
+
+    });
+
+</script>

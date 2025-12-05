@@ -1,0 +1,279 @@
+{# Siarme/AusentismoBundle/Resources/views/Agente/index.html.twig #}
+<div class="panel-group" id="accordion">
+  <div class="panel panel-warning  hidden-print">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+          <span class="glyphicon glyphicon-minus"></span> <span class="glyphicon glyphicon-file"></span>DOCUMENTOS ({{tramite.documento | length}})
+        </a>
+ {% if tramite.expediente.id is defined %}
+      {% if edit %}
+            &nbsp;&nbsp;&nbsp;<span role="presentation"  class="dropdown overflow">
+                <a class="dropdown-toggle" href="#" role="presentation" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span style="font-size:18px;" class='glyphicon glyphicon-plus-sign'></span> Nuevo Documento<span class="caret"></span></a>
+                <div class="dropdown-menu" style="width: 400px;" aria-labelledby="dropdownMenuLink">
+                  <ul class="list-inline text-center"> 
+
+                    {% for tipo in tramite.tipoTramite.tipoDocumento if (tipo.visible) %}   
+                      <li>                           
+                        <a  href="{{ path( 'documento_new' , {'tramite_id': tramite.id, 'slug': tipo.slug  } ) }}" role="button"><span style="font-size:20px; margin:2px;"  class= '{{ tipo.glyphicon}}'></span>
+                        </br> 
+                        {{ tipo.nombredocumento }}</a> 
+                        {# if tipo.esArchivo %}<span class='text-success'><strong>I</strong></span> {% else %}<span class='text-success'><strong>L</strong></span>{% endif #}
+                      </li>  
+                    {% endfor %}
+                  </ul>
+                </div>
+           </span>
+    {% endif %}
+{% endif %}
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse in">
+      <div  class="panel-body ">
+          <ul id="documentos" class="list-inline text-center text-info"> 
+                  {% for documento in tramite.documento | reverse %}  
+                    {{ include('DocumentoBundle:Documento:_lista_documento.html.twig') }}
+                  {% endfor %}
+          </ul> 
+         {{ render(controller('DocumentoBundle:Documento:uploadsModal', {'tramite_id': tramite.id, 'slug': 'archivo' }))}}
+      </div>
+    </div>
+  </div>
+ <div class="panel panel-warning">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a  data-toggle="collapse" href="#collapseCero">
+          <span class="glyphicon glyphicon-minus"></span> <span class="glyphicon glyphicon-barcode" aria-hidden="true"></span> ITEM OFERTADO ({{tramite.itemOferta | length }}) - <strong>EVALUACION TÉCNICA</strong>{% if not tramite.proceso.estado %}  <span id="pPFcalidadPonderada" class="glyphicon glyphicon-remove text-warning"></span><i id="textoCalidadPonderada"> </i> {% endif %}
+        </a>
+
+        {% if tramite.itemOferta | length > 0 %}
+        <span class="pull-right hidden-print">
+        &nbsp;
+        {% if edit %}
+        <span id="pPFcalidadPonderada" class="glyphicon glyphicon-remove text-warning"></span><i id="textoCalidadPonderada"> </i>  &nbsp;&nbsp;&nbsp;
+      {% endif %}
+          <a class="btn text-info" data-clipboard-target="#tablaItemPedido"><!-- clipboard-copiar texto de id="copy" --><span class="glyphicon glyphicon-copy"></span>Copiar</a>
+      {% if tramite.expediente.id is defined %}
+           {% if edit %}
+                     <a class="btn text-info" onclick= "return confirm('¿Desea eliminar todos los ítems de la OFERTA?');" href="{{ path('item_oferta_delete_all', { 'id': tramite.id}) }}"> <span class='glyphicon glyphicon-trash text-danger' data-toggle="tooltip" data-placement="bottom"  title='Elimina todos los Ítems'></span>Quitar Todos</a>
+           {% endif %}
+      {% endif %}
+        </span>
+        {# if ( tramite.expediente | movimiento_estado(app.user)) and  tramite.departamentoRm == app.user.departamentoRm and not tramite.proceso.adjudicado #}
+        {% if edit %}
+        <span class="pull-right">
+          {{ include('AusentismoBundle:ItemOferta:_calidad_etiqueta_todo.html.twig') }}
+        </span>
+        {% endif %}
+{% endif %}
+      </h4>
+    </div>
+    <div id="collapseCero" class="collapse {% if not tramite.proceso.estado %} in {% endif %}">
+      <div class="panel-body">
+        <table id="tablaItemPedido" class="table table-hover text-left">
+          <thead>
+            {{ include('AusentismoBundle:ItemOferta:_thead_completo.html.twig') }}
+          </thead>
+          <tbody>
+             
+             {% for itemOferta in tramite.itemOferta %}
+                 {{ include('AusentismoBundle:ItemOferta:_tbody_completo.html.twig') }}
+             {% endfor %}
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+  </div>
+
+  {% set contar = 0 %}
+  {% for item in tramite.itemOferta if item.adjudicado == true %}
+    {% set contar = contar + 1 %}
+  {% endfor %}
+ <div class="panel panel-warning">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapsePonderado">
+          <span class="glyphicon glyphicon-plus  text-info"></span> <span class="glyphicon glyphicon-barcode" aria-hidden="true"></span> ITEM OFERTADO <span class="estadoTramite"> {% if  tramite.proceso.adjudicado %} ({{contar}}) {% else %} (Evaluacion){% endif %} - <strong>CON FACTORES DE PONDERACIÓN</strong></span>
+        </a>
+        {% if tramite.itemOferta | length > 0 %}
+        <span class="pull-right hidden-print">
+          <a class="btn text-info" data-clipboard-target="#tablaItem"><!-- clipboard-copiar texto de id="copy" --><span class="glyphicon glyphicon-copy"></span>Copiar</a></span>
+        {% endif %}
+      </h4>
+    </div>
+    <div id="collapsePonderado" class="panel-collapse collapse {% if tramite.proceso.estado %} in {% endif %}">
+      <div class="panel-body">
+        <table id="tablaItem" class="table table-hover text-left tablaItem">
+          <thead>
+            {{ include('AusentismoBundle:ItemOferta:_thead_ponderado.html.twig') }}
+          </thead>
+          <tbody>
+             {% set itemsPedidosTotal = [] %}
+             {% for itemOferta in tramite.itemOferta | sort((a, b) => a.numero <=> b.numero)  %}
+                {% if itemOferta.adjudicado  %}
+                   {% set itemsPedidos = itemOferta.itemProceso | item_pedido %}
+                   {% set itemsPedidosTotal = itemsPedidosTotal | merge(itemsPedidos) %}
+                {% endif %}
+                {{ include('AusentismoBundle:ItemOferta:_tbody_ponderado.html.twig') }}
+             {% endfor %}
+          </tbody>
+        </table>
+
+      </div>
+    </div>    
+  </div>
+
+  <div class="panel panel-warning">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseItemPedido">
+          <span class="glyphicon glyphicon-plus  text-info"></span> <span class="fa fa-bars" aria-hidden="true"></span> ITEMS ADJUDICADOS POR SAF
+        </a>
+        <span class="pull-right"><a class="btn text-info" data-clipboard-target="#panelItemAdjudicados"><!-- clipboard-copiar texto de id="copy" --><span class="glyphicon glyphicon-copy"></span>Copiar</a></span>
+      </h4>
+    </div>
+    <div id="collapseItemPedido" class="panel-collapse collapse">
+      <div id="panelItemAdjudicados" class="panel-body">
+        {% set  itemsPedidosTotal, itemOferta = itemsPedidosTotal | sort((a, b) => a.tramite.organismoOrigen <=> b.tramite.organismoOrigen), 0  %}
+          {% for itemPedido in itemsPedidosTotal  %}
+             {% set itemsProceso = itemPedido | item_proceso %}
+            {% for itemProceso in itemsProceso %}
+              {% for itemOferta1 in itemProceso.itemOferta if (itemOferta1.adjudicado and itemOferta1.oferta == tramite )%}
+                    {% set itemOferta = itemOferta1 %}
+              {% endfor %}
+            {% endfor %}
+            {% if loop.first %}
+              {% set organismo = itemPedido.tramite.organismoOrigen %}
+                <dl class="text-center">
+                    <dt>Pedido</dt>
+                    <dd><a  href="{{ path('tramite_show', { 'id': itemPedido.tramite.id }) }}" target="_blank">PEDIDO {{ itemPedido.tramite.numeroTramite }} - {{ itemPedido.tramite.ccoo | default('NO-n/d')}}</a></dd>
+                    <dt>SAF</dt>
+                    <dd> <a href="{{ path('organismo_show', { 'id': organismo.id | default(0) }) }}" target="_blank"> {{organismo}}</a></dd>
+                    <dt>CUIT</dt>
+                    <dd>{{organismo.saf.cuil }}</dd>
+                    <dt>Domicilio</dt>
+                    <dd>{{organismo.saf.domicilio | default("n/d")  }}</dd>
+                    <dt>Email | Telefono</dt>
+                    <dd>{{organismo.saf.email | default("-") }} | {{organismo.saf.telefonoMovil | default("-") }} </dd>
+
+                </dl>
+                  <table id="" class="table table-hover text-left tablaItem">
+                  <thead>
+                    {{ include('AusentismoBundle:ItemOferta:_thead_adjudicado.html.twig') }}
+                  </thead>
+                  <tbody>
+                     {{ include('AusentismoBundle:ItemOferta:_tbody_adjudicado.html.twig') }}
+            {% elseif organismo == itemPedido.tramite.organismoOrigen  %}
+                      {{ include('AusentismoBundle:ItemOferta:_tbody_adjudicado.html.twig') }}
+
+            {% elseif organismo != itemPedido.tramite.organismoOrigen  %}
+                   </tbody>
+                  </table>
+                  <hr>
+                {% set organismo = itemPedido.tramite.organismoOrigen %}
+               <dl class="text-center">
+                    <dt>Pedido</dt>
+                    <dd><a  href="{{ path('tramite_show', { 'id': itemPedido.tramite.id }) }}" target="_blank">PEDIDO {{ itemPedido.tramite.numeroTramite }} - {{ itemPedido.tramite.ccoo | default('NO-n/d')}}</a></dd>
+                    <dt>SAF</dt>
+                    <dd> <a href="{{ path('organismo_show', { 'id': organismo.id | default(0) }) }}" target="_blank"> {{organismo}}</a></dd>
+                    <dt>CUIT</dt>
+                    <dd>{{organismo.saf.cuil }}</dd>
+                    <dt>Domicilio</dt>
+                    <dd>{{organismo.saf.domicilio | default("n/d")  }}</dd>
+                    <dt>Email | Telefono</dt>
+                    <dd>{{organismo.saf.email | default("-") }} | {{organismo.saf.telefonoMovil | default("-") }} </dd>
+                </dl>
+                <table id="" class="table table-hover text-left tablaItem">
+                  <thead>
+                    {{ include('AusentismoBundle:ItemOferta:_thead_adjudicado.html.twig') }}
+                  </thead>
+                  <tbody>
+                     {{ include('AusentismoBundle:ItemOferta:_tbody_adjudicado.html.twig') }}
+            {% endif %}
+          {% endfor %}
+              </tbody>
+          </table>
+      </div>
+    </div>
+  </div>
+
+
+
+  {# PARA REVISAR EL CODIGO PUEDE SERVIR if itemsPedidosTotal | length > 0 %}
+ <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseItemPedido">
+          <span class="glyphicon glyphicon-plus  text-info"></span> <span class="fa fa-bars" aria-hidden="true"></span> ITEMS NOTA DE PEDIDOS SAF  ( Adjudicados {{ itemsPedidosTotal | length }})
+        </a>
+          </h4>
+    </div>
+    <div id="collapseItemPedido" class="panel-collapse collapse">
+      <div class="panel-body">
+        {% set  itemsPedidosTotal = itemsPedidosTotal | sort((a, b) => a.tramite.organismoOrigen <=> b.tramite.organismoOrigen)  %}
+          {% for itemPedido in itemsPedidosTotal  %}
+            {% if loop.first %}
+              {% set organismo = itemPedido.tramite.organismoOrigen %}
+               <h3> {{organismo}}  - {{organismo.saf.cuil }}</h3> 
+                  <table id="" class="table table-hover text-left tablaItem">
+                  <thead>
+                    {{ include('AusentismoBundle:ItemPedido:_thead_completo.html.twig') }}
+                  </thead>
+                  <tbody>
+                     {{ include('AusentismoBundle:ItemPedido:_tbody_completo.html.twig') }}
+            {% elseif organismo == itemPedido.tramite.organismoOrigen  %}
+                      {{ include('AusentismoBundle:ItemPedido:_tbody_completo.html.twig') }}
+
+            {% elseif organismo != itemPedido.tramite.organismoOrigen  %}
+                   </tbody>
+                  </table>
+                {% set organismo = itemPedido.tramite.organismoOrigen %}
+               <h3>{{organismo}} - {{organismo.saf.cuil }} </h3> 
+                           <table id="" class="table table-hover text-left tablaItem">
+                  <thead>
+                    {{ include('AusentismoBundle:ItemPedido:_thead_completo.html.twig') }}
+                  </thead>
+                  <tbody>
+                     {{ include('AusentismoBundle:ItemPedido:_tbody_completo.html.twig') }}
+            {% endif %}
+          {% endfor %}
+              </tbody>
+          </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+{#
+  <div class="panel panel-default hidden-print">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+          <span class="glyphicon glyphicon-plus text-info"></span> <span class="glyphicon glyphicon-wrench"></span>TAREAS ({{tramite.tarea | length}})
+        </a>
+      </h4>
+    </div>
+    <div id="collapseThree" class="panel-collapse collapse">
+      <div class="panel-body">
+        <div class="list-group-item-text">
+            {% set tareas = tramite.tarea %}
+            <table class="table table-hover text-left">
+                    <tbody> 
+                      {% for tarea in tareas %}
+                            {% set tramite = tarea.tramite %}
+                            {{ include('ExpedienteBundle:Tarea:_tbody_completo.html.twig') }}      
+                     {% endfor %}
+                    </tbody>
+            </table>
+        </div>
+        <div class="list-group-item-text">
+            {{ render(controller('DocumentoBundle:Compartir:index', { 'tipoid': tramite.id, 'tipo': constant('TIPO_ENTIDAD', tramite) } )) }} 
+        </div>
+      </div>
+    </div>
+  </div>
+  #}
+</div>
+
+

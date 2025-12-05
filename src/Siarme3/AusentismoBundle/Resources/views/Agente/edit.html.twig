@@ -1,0 +1,74 @@
+{# Siarme/AusentismoBundle/Resources/views/Agente/edit.html.twig#}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+
+{% block main %}
+     <ul class="nav nav-pills hidden-print"> 
+         <li>
+            <a role="button" <span data-href="{{ path('organismo_new') }}" class="btn-nuevo"> <span  class="glyphicon glyphicon-tent"></span> Nuevo Organismo</a>
+        </li>
+    </ul>   
+<!-- Large modal -->
+<div id="modal-organismo"class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+<div class="modal-dialog modal-lg" role="document">
+  <div class="modal-content">
+     <div class="modal-header text-center">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+     </div><!-- /.header -->
+         <div id="modal-body" class="modal-body">
+        </div><!-- /.body -->
+    <!--    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button> 
+     </div> /.footer -->
+  </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="panel panel-default">
+    <div class="panel-heading text-center">  
+       <h4>MODIFICAR AGENTE</h4>
+    </div>
+    <div class="panel-body">    
+
+    {{ form_start(edit_form) }}
+        {{ form_widget(edit_form) }}
+    <div class="text-right">
+        <a  class="btn btn-default" href="{{ path('agente_show', { 'id': agente.id }) }}"> <span> CANCELAR </span></a>
+        <input class="btn btn-danger text-right" type="submit" onclick= "return confirm('¿Desea GUARDAR?');" value="GUARDAR" />
+    </div>
+    {{ form_end(edit_form) }}
+    </div>
+</div>
+{% endblock %}
+ {% block footer %}
+<dir class="footer"></dir>
+{% endblock %}
+{% block javascripts %} 
+{{ parent() }}
+<script type="text/javascript">$.fn.modal.Constructor.prototype.enforceFocus = function() {};</script>
+        <script src="{{ asset('bundles/expediente/plugins/select2/js/select2.min.js') }}"></script>
+         <script> /*-- $('select').select2({  allowClear:true, placeholder:""});*/
+          $('select').select2();
+           </script>
+      <script type="text/javascript">
+$(".btn-nuevo").unbind('click').click( function(){
+        var $href= $(this).attr("data-href");
+        //alert(URL+$href);
+        $.ajax({
+
+             url: URL+$href,
+             type: 'GET',
+             success: function(response){
+
+             var msj= document.getElementById("modal-body");
+
+             msj.innerHTML =response;
+             $('#modal-organismo').modal('show');
+            /*-- $('select').select2({  allowClear:true, placeholder:""});*/
+          $('#siarme_ausentismobundle_organismo_localidad').select2({ width: '100%', allowClear:true, placeholder:"Buscar"});
+
+             } 
+        }); 
+      
+    });
+      </script>
+{% endblock %}

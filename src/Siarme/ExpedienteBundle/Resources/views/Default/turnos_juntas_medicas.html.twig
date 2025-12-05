@@ -1,0 +1,64 @@
+{# Siarme/ExpedienteBundle/Resources/views/Default/informe_licencia.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout_informe_show.html.twig' %}
+{% block cuerpo %}
+
+{# 
+array:1 [▼
+  0 => array:4 [▼
+    "turnos" => DatoAT {#740 ▶}
+    "tipo" => "Traumatología"
+    "fecha" => DateTime @1539036000 {#745 ▶}
+    "cantidad" => "3"
+  ]
+]
+#}
+            <h5 class="text-center"> Expedientes por Organismo y Estado </h5>
+            <h5 class="text-center">Desde la Fecha: <strong>{{ fechaDesde| date("m/d/Y") }}</strong> Hasta la Fecha: <strong>{{fechaHasta | date("m/d/Y")}}</strong> </h5>
+        	<div class="conteiner-fluid">
+          {% for fila in informe | sort  %}
+                  {% set turnos = fila['turnos'] %}
+                  {% set tipo = fila['tipo'] %}
+                  {% set fecha = fila['fecha'] %}
+                  {% set cantidad = fila['cantidad'] %}
+                  
+                    <div class="col-sm-5">
+                          <dl>
+                            <dt> 
+                                  Fecha: {{ fecha |
+                                  date('l, j  F  Y') |replace({
+                                      'January'  : 'de Enero de de ',
+                                      'February' : 'de Febrero de',
+                                      'March' : 'de Marzo de',
+                                      'April' : 'de Abril de',
+                                      'May' : 'de Mayo de',
+                                      'June' : 'de Junio de',
+                                      'July' : 'de Julio de',
+                                      'August' : 'de Agosto de',
+                                      'September' : 'de Septiembre de',
+                                      'October' : 'de Octubre de',
+                                      'November' : 'de Nombiembre de',
+                                      'December' : 'de Diciembre de',
+                                      'Monday'   : ' Lunes',
+                                      'Tuesday'   : ' Martes',
+                                      'Wednesday'   : ' Miércoles',
+                                      'Thursday'   : ' Jueves',
+                                      'Friday'   : ' Viernes',
+                                      'Saturday'  : ' Sabado',
+                                      'Sunday'   : ' Domingo'
+                                  }) 
+                                }}
+                            </dt>
+                               <dd>
+                               Junta Médica:  
+                               <span class="badge">  
+                                 {{tipo}}
+                                </span>
+                             </dd>
+                             <dd>
+                              Cantidad: <span class="badge"> {{ cantidad }} </span>
+                            </dd>
+                          </dl>
+                    </div>
+            {% endfor %}
+      </div>
+{% endblock %}

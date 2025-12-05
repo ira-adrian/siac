@@ -1,0 +1,84 @@
+{# Siarme/AusentismoBundle/Resources/views/Agente/index.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} AGENTES{% endblock %}
+{% block header %}
+  {{ include('ExpedienteBundle:Default:_header.html.twig') }}
+  {{ include('ExpedienteBundle:Default:_breadcrumb_principal.html.twig') }}
+{% endblock %}
+{% block contenido %}
+
+        {% if app.user.departamentoRm.slug != "dppr" %} {% set modulo ="EXPEDIENTES" %}{% else %}{% set modulo ="CCOO-DPPR" %}{% endif %}
+        {{ app.session.set('modulo', "AGENTES") }}
+        {{ app.session.set('route', 'agente_index') }}
+        {{ app.session.set('glyphicon', 'glyphicon glyphicon-tent') }}
+      <div class="nav nav-tabs nav-justified" style="padding-top:5px;">      
+        <li role="presentation"><a class="glyphicon glyphicon-folder-open" href="{{ path('expediente_reparticion_index') }}"> {{modulo}}</a></li>
+        <li role="presentation"><a class="glyphicon glyphicon-tasks" href="{{ path('tramite_reparticion_index') }}"> {% if app.user.departamentoRm.slug != "dppr" %}PROCESOS{% else %}PEDIDOS{% endif %}</a></li>
+        <li role="presentation"><a class="glyphicon glyphicon-stats" href="{{ path('reporte_index', {'id': app.user.departamentoRm.id }) }}"> REPORTE</a></li>
+        <li role="presentation"><a class="glyphicon glyphicon-tent" href="{{ path('organismo_index', {'id': app.user.departamentoRm.id }) }}"> SAFS</a></li>
+        <li role="presentation" class="active"><a class="glyphicon glyphicon-user" href="{{ path('organismo_index', {'id': app.user.departamentoRm.id }) }}"> USUARIOS</a></li>
+      </div>
+
+{% block mensaje %}
+ {{ include('ExpedienteBundle:Default:_mensaje.html.twig') }}
+{% endblock %}
+ 
+<div class="modal"> </div>
+  <table class="table table-responsive tablaItem" >
+            <thead>
+                <tr  class="text-muted">
+                    <th>Estado</th>
+                    <th>Apellido y Nombre</th>
+                    <th>DNI</th>
+                    <th>Organismo</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody  style="margin:0px;">
+          {% for agente in pagination %}
+             {{ include('AusentismoBundle:Agente:_tbody_completo.html.twig') }} 
+          {% endfor %}
+            </tbody>
+          
+        </table>
+
+ {# display navigation #}
+<div class="navigation pagination">
+    {{ knp_pagination_render(pagination) }}
+</div>
+
+
+
+{% endblock %}
+ {% block footer %}
+<dir class="footer"></dir>
+{% endblock %}
+{% block javascripts %}  
+{{ parent() }}
+
+  <script> 
+  $(".nuevalicencia").unbind('click').click( function(){
+     var $href= URL + $(this).attr("data-href");
+      $("#modal").load($href);
+      $('#myModalNewLicencia').show();
+    });
+
+ /** $(function () {
+    $("#tablaAgente").DataTable({"searching": false,"lengthChange": false,"pageLength": 20,
+            "language": {
+                "url": "{{asset('bundles/expediente/plugins/datatables/extensions/language/Spanish.json')}}"
+            },
+        });
+  });*/
+
+
+  $(function () {
+    $(".tablaExpediente").DataTable({"searching": false,"lengthChange": false, "order": [[ 0, "desc" ]],"pageLength": 5,
+            "language": {
+                "url": "{{asset('bundles/expediente/plugins/datatables/extensions/language/Spanish.json')}}"
+            },
+        });
+  });
+
+</script> <!-- DataTables  -->
+{% endblock %}

@@ -1,0 +1,12 @@
+<a class="dropdown-toggle previous hidden-print" data-toggle="dropdown" role="button" aria-expanded="false" ><span  class="glyphicon glyphicon-home" aria-hidden="false"data-toggle="tooltip" data-placement="top" title='Direccion y Lugar de Trabajo'>1</span></a>
+<div  class="dropdown-menu"  >  <!-- dropdown-menu -->                 
+ <ul class="list-group">   <!-- list-group --> 
+   <li class="list-group-item">  
+   <small>                         
+ {% if agente.localidad is empty or agente.cargo is empty  %}<span class= "glyphicon glyphicon-map-marker"></span> {{ agente.domicilio | default ("N/D") | title }} | {{ agente.localidad | default ("N/D") | title }} <hr style="margin:1px" >{% else %}<strong>Departamento:</strong> N/D<hr style="margin:5px" >{% endif %}<strong>Lugar de Trabajo:</strong><br>{% for cargo in agente.cargo %} {{ cargo | default ("N/D") | title }} {% endfor %}</small>  
+     </li>           
+   </ul> <!-- list-group -->                 
+</div> <!-- dropdown-menu --> 
+
+
+

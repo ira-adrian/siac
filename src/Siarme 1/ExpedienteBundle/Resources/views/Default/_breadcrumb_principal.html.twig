@@ -1,0 +1,44 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\_breadcrumb.html.twig#}
+<ul class="nav nav-pills hidden-print"  style="margin-bottom:1px;">
+    <!-- NUEVO TRAMITE-->
+      {% for tipoTramite in app.user.departamentoRm.tipoTramite %}
+           {% if loop.first %}
+             <li>
+               <a href="{{ path('tramite_new', { 'tipo_tramite_id': tipoTramite.id }) }}"  role="button" target="_blank"><span data-toggle="tooltip" data-placement="bottom"  title="Nuevo {{tipoTramite}}" class='{{tipoTramite.glyphicon}}'></span> Nuevo {{tipoTramite}}</a>   
+            </li> 
+          {% endif %}          
+      {% endfor %} 
+        <!-- NUEVO EXPEDIENTE-->
+      {% set tipos = tipo_expediente(app.user.departamentoRm) %}
+      {% for tipo in tipos %}
+          <li> 
+             <a href="{{ path('expediente_new', {'slug': tipo.slug }) }}"  role="button" target="_blank"><span style="font-size:18px; {% if not loop.first  %}color:#306066;{% endif %}" class='glyphicon glyphicon-folder-open'></span> &nbsp; Nuevo {{tipo.tipo }}</a>  
+          </li>
+      {% endfor %}  
+
+  {% if app.user.departamentoRm.slug == "info"  %}
+
+      <li>
+             <a href="{{ path('agente_new') }}"  role="button" target="_blank"> <span style="font-size:18px;" class='glyphicon glyphicon-plus-sign'></span> Nuevo Usuario</a>   
+
+      </li>
+  {% endif %}
+  <!-- Menu DERECHO *** IMPRIMIR - COPIAR -->
+    <div class="pull-right">
+            <li  role="presentation">
+              {% if app.user.departamentoRm.slug == "dppr" %}
+                   <a href="{{ path('itemoferta_index_adjudicado') }}"  target="_blank"> <span class="glyphicon glyphicon-tasks" ></span> Ítems Adjudicados</a>
+                   <a href="https://docs.google.com/spreadsheets/d/1W9hltNCatee8EtOGUmuZ4-A_b5SD0zC7hI-eUeigfJs/edit?usp=sharing" target="_blank"> <span class="fa fa-file-excel-o text-success" ></span> Planilla DPPR </a> &nbsp;&nbsp;
+                   <a href="https://docs.google.com/spreadsheets/d/1evDkuVFNirUdLmjbtP_0FPM9w8Ty6XPccaxQ7ZiLn-8/edit?usp=sharing" target="_blank"> <span class="fa fa-file-excel-o text-success" ></span> Montos BAPIN </a> &nbsp;&nbsp;
+              {% endif %}
+              <a href="{{ path('externo_index')  }}" target="_blank" role="button"> <span class="glyphicon glyphicon-list-alt"></span> Solicitudes de Créditos</a>&nbsp;&nbsp;
+                    
+                <a href="javascript:if(window.print)window.print()" value="Imprimir" role="button"><!-- Printer-imprime el texto de clase="print" -->
+                <span class="glyphicon glyphicon-print" ></span> Imprimir</a>
+
+                <a class="btn" data-clipboard-target="#copy"><!-- clipboard-copiar texto de id="copy" -->
+                  <span class="glyphicon glyphicon-copy"></span>Copiar</a>
+            </li>
+    </div> 
+</ul>
+

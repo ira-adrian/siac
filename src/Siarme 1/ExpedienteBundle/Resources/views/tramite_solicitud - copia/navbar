@@ -1,0 +1,34 @@
+
+         <div class="navbar navbar-inverse navbar-fixed-bottom">
+           <div class="container-fluid">
+              <div class="navbar-header">
+                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                 <span class="sr-only">Toggle navigation</span>
+                 <span class="icon-bar"></span>
+                 <span class="icon-bar"></span>
+                 <span class="icon-bar"></span>
+                 </button>
+                 <a class="navbar-brand" href="/">AppName</a>
+                 <ul class="nav nav-tabs">
+                   <li><a href="/">Home</a></li>
+                   <li class="active"><a href="#">Link A</a></li>
+                   <li class=""><a href="#">Link B</a></li>
+                   <li class=""><a href="#">Link C</a></li>
+                   <li class=""><a href="#">Link D</a></li>
+                   <li class=""><a href="/Admin">Admin</a></li>
+                </ul>
+              </div>
+              <div class="navbar-collapse collapse">
+                 <form method="post" id="logoutForm" class="navbar-right" action="/Account/LogOff">
+                    <ul class="nav navbar-nav navbar-right" style="margin-right: 20px">
+                       <li>
+                          <a title="Manage" href="/Account/Claims">User</a>
+                       </li>
+                       <li>
+                          <button type="submit" class="btn btn-link navbar-btn navbar-link">Log off</button>
+                       </li>
+                    </ul>
+                 </form>
+              </div>
+           </div>
+        </div>

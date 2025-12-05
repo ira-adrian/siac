@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Saf</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ saf.id }}</td>
+            </tr>
+            <tr>
+                <th>Cuil</th>
+                <td>{{ saf.cuil }}</td>
+            </tr>
+            <tr>
+                <th>Numerosaf</th>
+                <td>{{ saf.numeroSaf }}</td>
+            </tr>
+            <tr>
+                <th>Saf</th>
+                <td>{{ saf.saf }}</td>
+            </tr>
+            <tr>
+                <th>Domicilio</th>
+                <td>{{ saf.domicilio }}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ saf.email }}</td>
+            </tr>
+            <tr>
+                <th>Telefonomovil</th>
+                <td>{{ saf.telefonoMovil }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('saf_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('saf_edit', { 'id': saf.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

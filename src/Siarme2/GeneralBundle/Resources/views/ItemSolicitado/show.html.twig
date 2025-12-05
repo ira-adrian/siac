@@ -1,0 +1,295 @@
+{% extends 'GeneralBundle:Default:layout.html.twig' %}
+{% block title %} ITEM {{ itemSolicitado.numero }} {% endblock %}
+{% block contenido %}
+ <div class="container"> 
+<div class="nav nav-pills hidden-print"> 
+
+      <li role="presentation" class="disabled"><a href="#">Menu</a></li>
+{# if ( app.user.departamentoRm == itemSolicitado.tramite.departamentoRm ) and ( itemSolicitado.tramite.expediente | default(null) | movimiento_estado(app.user)) #}
+{% if edit %}
+      <li role="presentation"  class="dropdown overflow" >
+            <a class="dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-pencil"></span> Modificar <span class="caret"></span></a>
+            <div class="dropdown-menu" style="width: 400px;" aria-labelledby="dropdownMenuLink">
+              <div class="list-group-item">
+                  {{ render(controller('GeneralBundle:ItemSolicitado:edit', {'id': itemSolicitado.id  }))}}
+              </div>
+            </div>
+      </li>
+
+    <li role="presentation" data-toggle="tooltip" data-placement="top" title='Eliminar el Item' >
+                  {{ form_start(delete_form) }}
+                  <input class="btn btn-danger" onclick= "return confirm('¿Desea ELIMINAR elItem?');" type="submit" value="Eliminar"> 
+                  {{ form_end(delete_form) }}   
+    </li> 
+
+{% endif %} 
+    <!-- Menu DERECHO *** IMPRIMIR - COPIAR -->
+    <div class="pull-right">
+            <li  role="presentation">
+              <a id="printer"  value="Imprimir" role="button"><!-- Printer-imprime el texto de clase="print" -->
+                <span class="glyphicon glyphicon-print"></span> Imprimir</a>
+
+                <a class="btn" data-clipboard-target="#copy"><!-- clipboard-copiar texto de id="copy" -->
+                  <span class="glyphicon glyphicon-copy"></span>Copiar</a>
+            </li>
+    </div>
+</div>
+
+<div id="copy" class="panel panel-default print">
+        <style type="text/css" media="print">
+        @media print {
+            a[href]:after {
+                content: none !important;
+            }
+        }
+      </style> 
+  <!-- Default panel contents -->
+  <div class="panel-heading"> <span class="fa fa-file-powerpoint-o"></span> ITEM PEDIDO N° : {{ itemSolicitado.numero }} | {{ itemSolicitado.codigo }}
+        {% if itemSolicitado.tramite.expediente.id is defined %}
+                {% if ( itemSolicitado.tramite.expediente |  default(null) | movimiento_estado(app.user))  %}
+                    <span class="pull-right {{itemSolicitado.tramite.estadoTramite.class}}">{{itemSolicitado.tramite.estadoTramite }}</span>{% else %}<span  class="label label-default pull-right" data-toggle="tooltip" data-placement="bottom" title='Para modificar el ÍTEM debe cambiar el estado de la Nota DPPR que lo contiene'>Concluido</span>{% endif %}
+        {% else %}
+            <span class="pull-right {{itemSolicitado.tramite.estadoTramite.class}}">{{itemSolicitado.tramite.estadoTramite }}</span>
+            <span  data-toggle="tooltip" data-placement="top" title='El pedido no esta asignado a Nota DPPR' class="glyphicon glyphicon-warning-sign text-warning  pull-right"></span>
+        {% endif %}
+  </div>
+  <div class="panel-body"> 
+<dl>
+    <dt>Descripción</dt>
+    <dd>{{ itemSolicitado.item }}</dd>
+    <dt>Unidad de Medida</dt>
+    <dd>{{ itemSolicitado.unidadMedida }}</dd>
+    <dt>Precio</dt>
+    <dd>$ {{ itemSolicitado.precio  | default(0) | number_format(2, ',', '.')  }}</dd>
+    <dt></dt>
+    <dd></dd>
+</dl>
+  </div>
+ <h4> DETALLE DE CANTIDADES </h4>
+  <!-- Table -->
+  <table class="table">
+    <thead>
+        {% if  not itemSolicitado.tramite.estado %}
+            <th>Cantidad <span class="label label-warning">Pedida</span></th>        
+            <th>Cantidad Autorizada</th>
+            <th>Cantidad <span class="label label-default">Disponible</span></th>
+        {% else %}
+            <th>Cantidad Pedida</th>  
+            <th>Cantidad Autorizada</th>
+            <th>Cantidad Disponible</th>
+        {% endif %}
+        <th>Acciones</th>
+    </thead>
+    <tbody>
+            <tr>
+                <td>{{ itemSolicitado.cantidad }}</td>
+                <td>
+                   
+                    {% if  itemSolicitado.itemAcuerdoMarco.cantidadRestante | default(0) - itemSolicitado.cantidadAutorizada  < 0 and  not itemSolicitado.tramite.estado %}  
+                          <span class="text-danger"> <strong> {{ itemSolicitado.cantidadAutorizada }} </strong></span>     
+                     {% else %}
+                             {{ itemSolicitado.cantidadAutorizada }} 
+                     {% endif %}
+                     {% if  not itemSolicitado.tramite.estado %} 
+                          <span class="pull-right"><a role="button" data-href="{{ path('itemsolicitado_cantidad_autorizada', {'id':itemSolicitado.id})}}" class="btn-cantidad-autorizada"> <span  class="glyphicon glyphicon-pencil"></span></a></span>
+                      {% endif %}
+                </td>
+                <td>
+                     {% if  not itemSolicitado.tramite.estado %}  
+                        <strong>{{ itemSolicitado.itemAcuerdoMarco.cantidadRestante | default(0) }} </strong>   
+
+                       {% if  itemSolicitado.itemAcuerdoMarco.cantidadRestante | default(0)  >  0 %}
+                       {% set porcentajeSolicitado = ( itemSolicitado.cantidadAutorizada * 100 ) / itemSolicitado.itemAcuerdoMarco.cantidadRestante | default(0) %}
+
+                                {% if porcentajeSolicitado <= 100 %}
+                                            <div class="progress progress-striped">
+                                              <div class="progress-bar progress-bar-warning active" style="width: {{porcentajeSolicitado |round | default(1)}}%">
+                                                {{porcentajeSolicitado |round | default(1)}}%
+                                              </div> 
+                                            </div>
+                                         {% else %}
+                                                <div class="progress progress-striped">
+                                                  <div class="progress-bar progress-bar-danger active" style="width: {{porcentajeSolicitado |round }}%">
+                                                   {{porcentajeSolicitado |round }}%
+                                                  </div>  
+                                                </div>
+                                        {% endif %}
+                                {% else %}
+                                                <div class="progress">
+                                                  <div class="progress-bar progress-bar-danger" style="width: 100%">
+                                                   -
+                                                  </div>  
+                                                </div>
+                                {% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+
+                 </td>
+                <td>
+                 {# if ( app.user.departamentoRm == itemSolicitado.tramite.departamentoRm ) and (( itemSolicitado.tramite.expediente | default(null) | movimiento_estado(app.user)) or itemSolicitado.tramite.expediente.id is not defined) #}
+                 {% if edit %}
+                    <a data-href="{{ path('itemsolicitado_estado', { 'id': itemSolicitado.id }) }}" class="btn-estado-item" role="button">
+                    {% if itemSolicitado.estado %}<span class="glyphicon glyphicon-check" data-toggle="tooltip" data-placement="top" title='Cambiar Estado'></span>{% else %}<span class="glyphicon glyphicon-unchecked text-warning" data-toggle="tooltip" data-placement="top" title='Cambiar Estado'></span>{% endif %} </a>
+                {% endif %}
+                </td>
+            </tr>
+    </tbody>
+  </table>
+<hr>
+        {% set itemAcuerdo = itemSolicitado.itemAcuerdoMarco  %}
+  
+                <h4><span class="fa fa-list-alt"></span> ÍTEM DEL ACUEDO MARCO RELACIONADO </h4>
+                <table id="#" class="table table-hover text-left">
+                    <thead>
+                       {{ include('GeneralBundle:ItemAcuerdoMarco:_thead_completo.html.twig') }}
+                    </thead>
+                     <tbody>
+
+                        {% if itemAcuerdo is not empty %}
+                         {{ include('GeneralBundle:ItemAcuerdoMarco:_tbody_completo.html.twig') }}
+                        {% else %}
+                            <tr> <td colspan="100%"><strong>  No se encontró un ítem relacionado</strong></td> </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+{% if itemAcuerdo is empty %}
+<hr>    
+            <a href="#" class="btn btn-primary detalle1" role="button"><span class=" glyphicon glyphicon-search"> </span> Buscar Ítem y Relacionar</a>
+            {% set itemsAcuerdos = itemSolicitado.tramite.expediente.itemAcuerdoMarco  %}
+         
+            &nbsp;<h4>Es necesario relacionar el item con su correspondiente item del Acuerdo Marco para determinar las CANTIDADES, una vez que lo identifique haga click en (+)Relacionar Ítem</h4> 
+            <table id="tablaItem1" class="table table-hover tablaItem text-left">
+                <thead>
+                        <tr>
+                            <th>N°</th>
+                            <th>Codigo</th>
+                            <th>Item</th>
+                            <th>Unidad</th>
+                            <th>Cantidad Acordada</th>
+                            <th>Cantidad Disponible</th>
+                            <th>Acciones</th>
+                        </tr>
+                </thead>
+                 <tbody>
+                   {% for itemAcuerdo in itemsAcuerdos %}
+                            <tr>       
+                                <td>{{ itemAcuerdo.numero | default("-") }} </td>
+                                {# <td>{% if itemAcuerdo.fecha %}{{ itemAcuerdo.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>#}
+                                <td><a href="{{ path('itemacuerdomarco_show', { 'id': itemAcuerdo.id | default(0)}) }}" target="_blank">{{ itemAcuerdo.codigo | default("-") }}</a></td>
+                                <td style="width: 40%;"><div id="-{{itemAcuerdo.id | default(0)}}">{{ itemAcuerdo.item | default("-")}}</div></td>
+                                <td>{{ itemAcuerdo.unidadMedida | default('N/D')}}</td>
+                                <td>{{ itemAcuerdo.cantidad | default("-") }}</td>
+                                <td> {{ itemAcuerdo.cantidadRestante | default("-") }} </td>
+                                <td width="15%">
+                                     {# if (( itemAcuerdo.tramite.expediente | default(null) | movimiento_estado(app.user)) or itemAcuerdo.tramite.expediente.id is not defined) #}
+                                     {% if edit %}
+                                        {% if   itemSolicitado.itemAcuerdoMarco == itemAcuerdo %}
+                                                <a href="{{ path('itemsolicitado_quitar_item', { 'id': itemSolicitado.id }) }}" role="button" > <span class="glyphicon glyphicon-remove-sign text-danger">  </span>Quitar Relacion</a>
+                                        {% else %}
+                                            <a href="{{ path('itemsolicitado_agregar_item', { 'id': itemSolicitado.id, 'item_acuerdo_id':itemAcuerdo.id | default(0)}) }}"  role="button"> <span class="glyphicon glyphicon-plus-sign">  </span>Relacionar Ítem</a>
+                                        {% endif %}
+                                             
+                                    {% endif %}
+                                </td>
+                            </tr>
+                   {% endfor %}
+                </tbody>
+            </table>
+
+
+{% else %}
+    <br>
+     <a data-toggle="tooltip" data-placement="top" title='Se habilitará esta opcion cuando (x) Quite el item del Acuerdo Marco relacionado' class="btn btn-default" role="button"><span class=" glyphicon glyphicon-search"> </span> Buscar Ítem y Relacionar</a>
+{% endif %}
+
+</div>
+<!-- Large modal -->
+<div id="modal-cantidad-autorizada"class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" >
+<div class="modal-dialog modal-sm" role="document">
+  <div class="modal-content">
+     <div class="modal-header text-center">
+            
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        
+     </div><!-- /.header -->
+         <div id="modal-body-cantidad-autorizada" class="modal-body">
+
+        </div><!-- /.body -->
+    <!--    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button> 
+     </div> /.footer -->
+  </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+ {{ render(controller('ExpedienteBundle:Comentario:index',
+            { 'tipoid': itemSolicitado.id, 'tipo': constant('TIPO_ENTIDAD', itemSolicitado)  })) }}
+
+{{ render(controller('ExpedienteBundle:Comentario:new', { 'tipoid': itemSolicitado.id, 'tipo': constant('TIPO_ENTIDAD', itemSolicitado) })) }}
+</div>
+{% endblock %}
+
+{% block javascripts %} 
+    {{parent()}}
+     <script> 
+            $('#buscarItem').fadeOut("fast");
+          $('.detalle1').on('click',function () {
+             //  var table = $('#tablaItem1').DataTable();
+             //   table.search('{{itemSolicitado.codigo}}').draw();
+              if($('#buscarItem').is(':visible')){
+                $('#buscarItem').fadeOut("fast");
+              }else{
+                $('#buscarItem').fadeIn("fast");
+              }
+
+          });
+
+
+$(".btn-cantidad-autorizada").unbind('click').click( function(){
+        var $href= $(this).attr("data-href");
+        $.ajax({
+             url: URL+$href,
+             type: 'POST',
+             success: function(response){
+             var msj= document.getElementById("modal-body-cantidad-autorizada");
+             msj.innerHTML =response; 
+             $('#modal-cantidad-autorizada').modal('show');
+
+             } 
+        }); 
+    });
+
+        CKEDITOR.replace('siarme_ausentismobundle_item_detalle_detalle', {  height: 400, 
+         // Configure SCAYT to load on editor startup.
+         scayt_autoStartup: true,
+          autoGrow_onStartup: true,
+        } );
+
+$("#siarme_ausentismobundle_itemSolicitado_item").change(function() {
+  let str = $(this).val();
+  str = str.trim();
+  $("#siarme_ausentismobundle_itemSolicitado_item").val(str);
+            });
+$("#siarme_ausentismobundle_itemSolicitado_codigo").change(function() {
+  let str = $(this).val();
+  str = str.trim();
+  $("#siarme_ausentismobundle_itemSolicitado_codigo").val(str);
+            });
+$("#siarme_ausentismobundle_itemSolicitado_precio").change(function() {
+  let str = $(this).val();
+  str = str.replace("$", "");
+  str = str.replace(".", "");
+  str = str.trim();
+  $("#siarme_ausentismobundle_itemSolicitado_precio").val(str);
+            });
+
+     </script>
+{% endblock %}
+
+{% block footer %}
+<dir class="footer"></dir>
+{% endblock %}
+
+
+

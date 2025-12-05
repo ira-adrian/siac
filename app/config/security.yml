@@ -1,0 +1,65 @@
+# To get started with security, check out the documentation:
+# http://symfony.com/doc/current/book/security.html
+security:
+    providers:
+        # Usuarios del frontend
+        usuarios:
+            entity:
+                class: UsuarioBundle:Usuario
+                property: usuario
+ 
+    # EL ORDEN DE LOS FIRWALLS INFLUYE EN CUANTO A LA RESTRICCION UNOS SON MAS GENERALES POR LO 
+    #QUE TENDRAN QUE DEFINISRSE DESPUES
+    firewalls:
+      # disables authentication for assets and the profiler, adapt it according to your needs
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        intranet:
+            pattern: ^/*
+            provider: usuarios
+            anonymous: ~
+            form_login: 
+                login_path: usuario_login
+                check_path: usuario_login_check
+                default_target_path: tramite_reparticion_index
+                always_use_default_target_path: true
+
+            logout:
+                path: usuario_logout
+                target: portada_estatica
+
+            # Mantiene al usuario iniciada la seccion por 3600 seg
+           # remember_me:
+            #    key: cupon1234
+             #   lifetime: 3600  
+
+
+    access_control:
+        - { path: ^/informacion/*, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/security/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        # Control de acceso para mas de un usuario
+        - { path: ^/admin/*, roles: ROLE_ADMIN }
+        #- { path: ^/docmedico/*, roles:  [ ROLE_MEDICO] }
+        #- { path: ^/intranet/docadministrativo/*, roles:  [ ROLE_ADMINISTRATIVO, ROLE_MEDICO] }
+        - { path: ^/usuario/edit-perfil/*, roles:  [ROLE_EXTERNO, ROLE_USUARIO] }
+        - { path: ^/usuario/show/*, roles:  [ROLE_EXTERNO, ROLE_USUARIO] }
+        - { path: ^/tramite/index, roles:  [ROLE_EXTERNO, ROLE_USUARIO] }
+        - { path: ^/externo/*, roles:  [ROLE_EXTERNO, ROLE_USUARIO] }
+        - { path: ^/*, roles:  [ROLE_USUARIO, ROLE_SUPERVISOR] }
+
+    encoders:
+        # '6' hará que la codificación sea muy rápida ... pero insegura se recomienda po defecto: bcrypt que tendria cost:10
+        # AppBundle\Entity\Usuario: { algorithm: 'bcrypt', cost: 6 }
+
+        Siarme\UsuarioBundle\Entity\Usuario:       bcrypt  #plaintext
+        Symfony\Component\Security\Core\User\User: bcrypt  #bcrypt
+
+
+
+    role_hierarchy:
+        ROLE_SAF: [ROLE_EXTERNO]
+        ROLE_EVALUADOR: [ROLE_USUARIO]
+        ROLE_SUPERVISOR: [ROLE_USUARIO]
+        ROLE_ADMIN: [ROLE_SUPERVISOR, ROLE_ALLOWED_TO_SWITCH]

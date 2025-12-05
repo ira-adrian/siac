@@ -1,0 +1,61 @@
+{# Siarme\GeneralBundle\Resources\views\itemAcuerdo\_tbody_completo.html.twig #}
+
+<tr>
+    <td> 
+     {% if itemAcuerdo is not empty %}   
+        <div class="dropdown text-left hidden-print" style="margin:0px;"> 
+            
+                    {% include 'GeneralBundle:ItemAcuerdoMarco:_menu_info_item.html.twig' with {'entidad': itemAcuerdo, 'tipo': constant('TIPO_ENTIDAD', itemAcuerdo) } %}
+        </div>
+    {% endif %}
+    </td>
+    <td>{{ itemAcuerdo.numero | default("-") }} </td>
+    {# <td>{% if itemAcuerdo.fecha %}{{ itemAcuerdo.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>#}
+    <td><a href="{{ path('itemacuerdomarco_show', { 'id': itemAcuerdo.id | default(0)}) }}" target="_blank">{{ itemAcuerdo.codigo | default("-") }}</a></td>
+    <td style="width: 40%;"><div id="-{{itemAcuerdo.id | default(0)}}">{{ itemAcuerdo.item | default("-")}}</div></td>
+    <td> $ {{ itemAcuerdo.precio | default(0) | number_format(2, ',', '.')  }}</td>
+    <td>{{ itemAcuerdo.cantidad | default("-") }}
+        {% if itemAcuerdo.cantidad == 0 %} {% set cantidad = 1 %} {% else %} {% set cantidad = itemAcuerdo.cantidad  %}   {% endif %}
+        {% set porcentajeAutorizado = ( itemAcuerdo.cantidadAutorizada * 100 ) / cantidad  %}
+        {% set porcentajeSolicitado = ( itemAcuerdo.cantidadSolicitada * 100 ) / cantidad  %}
+        {% set porcentaje = porcentajeAutorizado + porcentajeSolicitado %}
+        {% if porcentaje <= 100 %}
+            <div class="progress">
+              <div class="progress-bar progress-bar-success" style="width: {{porcentajeAutorizado}}%">
+                {{porcentajeAutorizado |round }}%
+              </div>
+              <div class="progress-bar progress-bar-warning active" style="width: {{porcentajeSolicitado}}%">
+               {{porcentajeSolicitado |round }}%
+              </div>  
+            </div>
+         {% elseif porcentajeAutorizado |round > 100 %}
+                <div class="progress">
+                  <div class="progress-bar progress-bar-danger" style="width: {{porcentajeAutorizado}}%">
+                    {{porcentajeAutorizado |round }}%
+                  </div>
+                  <div class="progress-bar progress-bar-warning active" style="width: {{porcentajeSolicitado}}%">
+                   {{porcentajeSolicitado |round }}%
+                  </div>  
+                </div>
+         {% else %}
+                <div class="progress">
+                  <div class="progress-bar progress-bar-success" style="width: {{porcentajeAutorizado}}%">
+                    {{porcentajeAutorizado |round }}%
+                  </div>
+                  <div class="progress-bar progress-bar-danger active" style="width: {{100 - (porcentajeAutorizado |round(0, 'ceil'))}}%">
+                   {{porcentajeSolicitado |round }}%
+                  </div>  
+                </div>
+        {% endif %}
+    </td>
+    <td> {{ itemAcuerdo.cantidadAutorizada | default(0)}} </td>
+    <td> {{ itemAcuerdo.cantidadSolicitada | default(0)}} </td>
+    <td> {{ itemAcuerdo.cantidadRestante | default("-") }} </td>
+     
+    <td>
+         {% if (( itemAcuerdo.tramite.expediente | default(null) | movimiento_estado(app.user)) or itemAcuerdo.tramite.expediente.id is not defined) %}
+          {{ include('GeneralBundle:ItemAcuerdoMarco:_menu_acciones_item.html.twig') }}
+        {% endif %}
+    </td> 
+
+</tr>

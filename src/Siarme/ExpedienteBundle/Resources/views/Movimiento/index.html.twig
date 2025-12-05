@@ -1,0 +1,40 @@
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead> 
+            <tr>
+                <th>Usuario</th>
+                <th>Reparticion Destino</th>
+                <th>Motivo</th>
+                <th>Hace</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for movimiento in movimientos if movimiento.departamentoRm.id is defined %}
+            <tr class="text-left">
+                <td>    {% if ( app.user.id == movimiento.usuario.id  | default(null) ) %}
+                                                     <small><span data-toggle="tooltip" data-placement="top" title='{{ movimiento.usuario.agente.apellidoNombre | default("n/d")}}' class='glyphicon glyphicon-user text-info' aria-hidden="true">
+                                                     </span></small>  {{movimiento.usuario.usuario }} 
+                                          {% else %}       
+                                                   <small> <span data-toggle="tooltip" data-placement="top" title='{{ movimiento.usuario.agente.apellidoNombre | default("n/d")}}' class='glyphicon glyphicon-user text-muted' aria-hidden="true"></span></small> {{movimiento.usuario.usuario }}
+                                          {% endif %}  
+                </td>
+                <td> {{movimiento.departamentoRm.organismo }}</td>
+                <td> {{movimiento.texto }}</td>
+                <td>{% if movimiento.fecha %}{{ movimiento.fecha | long_time }}{% endif %}</td>
+                <td>
+                    {{movimiento.estado | raw}}
+                </td>
+                <td>
+                {% if  not loop.first %} 
+                    {% if ( is_granted('ROLE_SUPERVISOR')) %}
+                        <a  role="button" data-toggle="tooltip" data-placement="top" title='Eliminar el Movimiento' onclick= "return confirm('¿Desea eliminar el Movimiento  del Expediente?');" href="{{ path('movimiento_eliminar', { 'id': movimiento.id }) }}"> <span class="glyphicon glyphicon-trash  text-danger" ></span> Eliminar</a>
+                     {% endif %}
+                {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table> 
+</div>

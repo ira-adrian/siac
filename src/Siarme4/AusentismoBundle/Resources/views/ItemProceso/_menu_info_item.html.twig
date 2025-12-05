@@ -1,0 +1,162 @@
+{% if expediente is defined %}
+<span>
+        <a class='hidden-print' href="{{ path('tramite_show', { 'id': itemProceso.proceso.id }) }}"><span>{{ itemPedido.proceso.tipoTramite }} - {{ itemPedido.proceso.numeroTramite }} </span>
+        </a>
+</span>
+{% endif %}
+{% set itemsPedidos = itemProceso | item_pedido %}
+{% set itemsPedidos2 = itemProceso | item_pedido(true) %}
+     <span data-toggle="tooltip" data-placement="top" title='Item Pedido'> 
+        <a aria-hidden="true" class="dropdown-toggle overflow glyphicon glyphicon-tasks {% if (itemsPedidos | length <= 0 ) or (itemsPedidos2 | length > 0) %} text-danger {% endif %}" data-toggle="dropdown" role="button" aria-expanded="false">{{itemsPedidos | length }}</a>
+        <div  class="dropdown-menu" style="width: 600px;">  
+             <ul class="list-group">
+                    <table  class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Pedido</th>
+                                <th>N° | Código</th>
+                                <th>Cantidad</th>
+                                <th>P.U. Presupuestado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in itemsPedidos  %}
+                                <tr>
+                                    <td class="text-center">
+                                        <small><span class="{{item.tramite.estadoTramite.class}}"  data-toggle="tooltip" data-placement="bottom" title='{{item.tramite.estadoTramite}}' >-</span></small>
+                                        <a  href="{{ path('tramite_show', { 'id': item.tramite.id }) }}" target="_blank">  {{item.tramite.tipoTramite}} {{ item.tramite.numeroTramite }}</a>
+                                        <br/>
+                                        {{item.tramite.organismoOrigen.codigoGde}}
+                                    </td>
+                                    <td> <strong> {{ item.numero }} </strong> <br/> <a href="{{ path('itempedido_show', { 'id': item.id }) }}" target="_blank"><strong> {{ item.codigo }} </strong></a></td>
+                                    <td>{{item.cantidad}}</td>
+                                    <td>$ {{item.precio  | default(0) | number_format(2, ',', '.')}}</td>
+                                    <td>
+                                        {% if item.itemProceso.id | default(0) == itemProceso.id %}
+                                          {% if edit %}
+                                              <a  data-href="{{ path('item_relacionar_item', { 'id': item.id, 'item_proceso_id':itemProceso.id | default(0)}) }}"  class="btn-relacionar-item" role="button" ><span class="glyphicon glyphicon-remove-sign text-danger" aria-hidden="true"></span><span class="estadoAdjudicado">Quitar Relación</span></a>
+                                          {% endif %}
+                                        {% elseif item.itemProceso.id is defined %}
+                                            <span class="text-warning">
+                                            Relacionado con: <br/> 
+                                            Ítem {{item.itemProceso.numero }}</span>
+                                            <a  data-toggle="tooltip" data-placement="top" title='Ver Proceso'   href="{{ path('tramite_show', { 'id': item.itemProceso.proceso.id }) }}">{{ item.itemProceso.proceso.numeroComprar  | default(item.itemProceso.proceso)}}</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                                 {% if (itemsPedidos2 | length > 0) and edit %}
+                                  <tr><td colspan="4">  
+                                   &nbsp;&nbsp; <p>No se pudo establecer la relación con el ítem PEDIDO por el SAF <br/>
+                                   Identifique el Ítem Correspondiente y haga Click en <span class="glyphicon glyphicon-plus-sign text-info">Relacionar</span></p>
+                                 </td></tr>
+                                {% endif %}
+                                {% for item in itemsPedidos2  %}
+                                <tr>
+                                    <td class="text-center">
+                                        <small><span class="{{item.tramite.estadoTramite.class}}"  data-toggle="tooltip" data-placement="bottom" title='{{item.tramite.estadoTramite}}' >-</span></small>
+                                        <a  href="{{ path('tramite_show', { 'id': item.tramite.id }) }}" target="_blank">  {{item.tramite.tipoTramite}} {{ item.tramite.numeroTramite }}</a>
+                                        <br/>
+                                        {{item.tramite.organismoOrigen.codigoGde}}
+                                    </td>
+                                    <td> <strong> {{ item.numero }} </strong><br/> <a href="{{ path('itempedido_show', { 'id': item.id }) }}" target="_blank"><strong> {{ item.codigo }} </strong></a></td>
+                                    <td>{{item.cantidad}}</td>
+                                    <td>$ {{item.precio  | default(0) | number_format(2, ',', '.')}}</td>
+                                    <td> 
+                                    {% if edit  %}
+                                        {% if item.itemProceso.id is defined  %}
+                                            <span class="text-warning">
+                                            Relacionado con: <br/> 
+                                            Ítem {{item.itemProceso.numero }} </span>
+                                            <a  data-toggle="tooltip" data-placement="top" title='Ver Proceso'   href="{{ path('tramite_show', { 'id': item.itemProceso.proceso.id }) }}"> {{ item.itemProceso.proceso.numeroComprar  | default(item.itemProceso.proceso)}}</a>
+                                        {% else %}
+                                                  <a  data-href="{{ path('item_relacionar_item', { 'id': item.id, 'item_proceso_id':itemProceso.id | default(0)}) }}" class="btn-relacionar-item" role="button" ><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span><span class="estadoAdjudicado">Relacionar</span></a>
+                                        {% endif %}
+                                    {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>                
+             </ul>
+        </div>
+       </span>
+
+{% if itemProceso.itemOferta | length > 0 %}
+     &nbsp;&nbsp;<span data-toggle="tooltip" data-placement="top" title='Item Ofertado'> 
+        <a aria-hidden="true" class="dropdown-toggle overflow  glyphicon glyphicon-barcode text-info" data-toggle="dropdown" role="button" aria-expanded="false">{{ itemProceso.itemOferta | length }}</a>
+        <div  class="dropdown-menu" style="width: 600px;">  
+             <ul class="list-group">
+                   
+                    <table id="tablaItemDuplicado" class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Oferta</th>
+                                <th>N°</th>
+                                <th>Cantidad</th>
+                                <th>P. U.</th>
+                                <th>Puntaje</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in itemProceso.itemOferta %}
+                                <tr>
+                                    <td>
+                                        <a data-toggle="tooltip" data-placement="top" title='{{ item.oferta.oferente }}' href="{{ path('tramite_show', { 'id': item.oferta.id }) }}" target="_blank"> {{ item.oferta.tipoTramite }} {{ item.oferta.numeroTramite }}</a> <br />
+                                        <span>{% if item.tipo == 1 %}<span class="label label-primary">Principal</span>{% else %}<span class="label label-default">Alternativa</span>{% endif %}</span>
+                                    </td>
+                                    <td><a href="{{ path('itemoferta_show', { 'id': item.id }) }}" target="_blank"><strong> {{ item.numero }} </strong></a></td>
+                                    <td>
+                                        Oferta: <strong>{{item.cantidad}}</strong><br />
+                                        Adjudica: <strong>{{item.cantidadAdjudicada }}</strong>
+                                    </td>
+                                    <td>$ {{item.precio  | default(0) | number_format(2, ',', '.')}}</td>
+                                    <td>{{item.pFTotal}}%</td>
+                                    <td class="estado">
+                                        {% if item.estado %}
+                                            {% if item.adjudicado %}
+                                                <span class="text-success">Adjudicado</span>
+                                            {% else %}
+                                                - 
+                                            {% endif %}
+                                        {% else %}
+                                            No válido
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>                
+             </ul>
+        </div>
+       </span>
+{% endif %}
+
+{% set comentarios = entidad.id | default(null)| Comentario(tipo)  %}
+{% if (comentarios | length > 0 ) %}
+     &nbsp;&nbsp;<span data-toggle="tooltip" data-placement="top" title='Comentario' class='hidden-print'> 
+        <a class="dropdown-toggle glyphicon glyphicon-comment text-info" data-toggle="dropdown" role="button" aria-expanded="false">{{ comentarios | length }}</a>
+        <div  class="dropdown-menu" style="width:400px;">  
+            
+            <ul class="list-group">
+               {% for comentario in comentarios | sort | reverse %}
+                   <li class="list-group-item">
+                              <small>{% if ( app.user.id == comentario.usuario.id) %}
+                              <a data-toggle="tooltip" data-placement="top" title='{{ comentario.usuario}}' class='glyphicon glyphicon-cog glyphicon text-success small'>
+                               </a>  
+                              {% else %}       
+                               <a data-toggle="tooltip" data-placement="top" title='{{ comentario.usuario}}' class='glyphicon glyphicon-cog text-muted'></a> 
+                             {% endif %} <span class="text-muted">  {{ comentario.usuario.usuario}} ha comentado  {% if comentario.fecha %}{{ comentario.fecha|long_time }} ({{ comentario.fecha|date('d-m-Y') }}){% endif %}</span></small> <br> {{ comentario.texto }}
+
+                              {% if ( is_granted('ROLE_ADMIN')) or ( app.user.id == comentario.usuario.id) %}
+                           &emsp;
+                              <a data-href="{{ path('comentario_eliminar', { 'id': comentario.id }) }}" class="btn-eliminar-comentario"><span data-toggle="tooltip" data-placement="top" title='Quitar comentario' class="glyphicon glyphicon-trash" ></span></a>
+                              {% endif %}
+                      </li>
+              {% endfor %}
+          </ul>
+        </div>
+       </span>
+{% endif %}

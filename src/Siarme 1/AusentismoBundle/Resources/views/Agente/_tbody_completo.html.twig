@@ -1,0 +1,50 @@
+
+                <tr  style="margin:0px;">
+                    <td> 
+                      <div class="dropdown text-left"> 
+                        {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': agente, 'tipo': 'AG'} %}
+                      </div>
+                    </td>
+                    <td>
+                      <a data-toggle="tooltip" data-placement="top" title="Muestra los DATOS del Agente" href="{{ path('agente_show', { 'id': agente.id }) }}">{{ agente.apellidoNombre }}</a> 
+                        </td>
+                    <td>{{ agente.dni  }}</td>
+                    <td>
+                      {% for cargo in agente.cargo %}{{loop.index}}- {{ cargo.organismo.codigoGde | default('N/D') }}
+                      {% endfor %}
+                    </td>
+                    <td>
+                     <span class="pull-right">
+                       {% if agente.telefonoMovil | length > 9 %} 
+                        <a href="#" data-tel='{{ agente.telefonoMovil}}' data-msj='Mensaje de {{ app.user}} de la SCA: ' style="font-size:16px;" class="btn-enviar-mensaje bg-success img-circle"><span data-toggle="tooltip" data-placement="top" title='Enviar Mensaje Whatsapp' class="glyphicon glyphicon-earphone text-success" ></span>Msj</a>
+                     {% endif %}
+                   </span>
+                    <span class="pull-right">
+                    {% if agente.email | length > 5 %} 
+                        <div role="presentation" class="dropdown" >
+                                  <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"> <span class="glyphicon  glyphicon-envelope"></span> Email<span class="caret"></span>
+                                  </a> &nbsp;
+                                  <ul class="dropdown-menu dropdown-menu-right">
+                                    <li>
+                                        <form class="navbar-form"  method="post" action="{{ path('email_enviar') }}">
+                                            <div class="input-group">
+                                              <label for="to">Para: <a href='mailto: {{ agente.email | trim }}'>{{agente.email}}</a> </label><br>
+                                             <input type="email" class="form-control" name="to" value='{{ agente.email }}' style="width:320px" readonly>
+                                             </div> <br>
+                                            <div class="input-group">
+                                            <label for="subjet">Asunto:</label><br>
+                                             <input type="text" class="form-control" name="subjet" value='Mensaje de {{ app.user}} de la SCA' style="width:400px">
+                                             </div><br>
+                                             <div class="form-group">
+                                              <label for="texto">Texto:</label>
+                                             <textarea class="form-control" name="texto" rows="7" cols="50"> Hola  {{ agente }},  </textarea>
+                                             </div><br>
+                                             <button type="submit" class="button btn-sm btn-primary pull-right">Enviar</button>
+                                        </form> 
+                                    </li>
+                                  </ul>
+                        </div>
+                    {% endif %} 
+                   </span> 
+                    </td>
+                </tr>

@@ -1,0 +1,22 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\_registro_completo.html.twig#}
+ {% set year = 'now' | date('Y')%}
+ {% set pedidos = tramite.expediente | tramite_por_expediente_slug("tramite_pedido")  %}
+<tr>
+                <td>{{ tramite.numeroTramite}}</td>
+                <td width="10%"> 
+                    {% set proceso = tramite.tipoTramite~" "~tramite.numeroTramite %}
+                    <a  data-toggle="tooltip" data-placement="top" title='Ver'  href="{{ path('credito_tramite_show', { 'id': tramite.id }) }}">{{ tramite.numeroComprar  | default(proceso )}}</a>
+                </td>
+                <td> {{ tramite.expediente.numeroGde | default('NO-'~ year ~ '-n/d') }} | {{tramite.expediente.ccoo | default("") }}</td>  
+                <td>{{ tramite.expediente.extracto[0:60] | default("-") | raw}}...  </td>
+                <td>{{pedidos[0].trimestre | default("-")}}° Trimestre</td>
+                <td>
+                    {% for tramite1 in pedidos %}
+                        <span data-toggle="tooltip" data-placement="top" title='{{ tramite1.organismoOrigen}}' > <strong> SAF-{{ tramite1.organismoOrigen.saf.numeroSaf | default("N/D")}} - {{ tramite1.organismoOrigen.codigoGde | default("N/D") }}:</strong></span>
+                        {% for credito in tramite1.credito %}
+                             {{credito.texto | upper}} - ${{credito.monto | default(0) | number_format(2, ',', '.') }} <br>
+                        {% endfor %}
+                    {% endfor %}
+                </td>
+                <td><span class="{{tramite.estadoTramite.class}}">{{tramite.estadoTramite }}</span></td>
+</tr>

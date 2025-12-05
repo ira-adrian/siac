@@ -1,0 +1,20 @@
+  <div style="margin-left:2em;">    
+    <p  style="text-align:center;"> 
+        <br><span style="font-size:14pt"><span style="font-family:&quot;Times New Roman&quot;,serif">
+        <strong> 
+        INFORME
+        </strong></span></span>
+    </p> 
+<p style="margin-left:0cm;"class="text-uppercase text-left"> 
+        <strong> <u>Referencia: </u></strong><small>{{documento.tramite.expediente}} - {{documento.tramite.expediente.extracto}}</small><br>
+        <strong><u>Iniciador:</u> </strong>{{documento.tramite.expediente.agente.apellidoNombre}} - <u><strong>DNI N°: </strong></u> {{documento.tramite.expediente.agente.dni}}</small><br>   
+        <strong><u>Localidad:</u></strong> <small> {{ documento.tramite.expediente.agente.localidad | default("N/D") }}  </small> <br>
+        <strong><u>Lugar de Trabajo:</u></strong> 
+       <small>{% for cargo in documento.tramite.expediente.agente.cargo %} {{ cargo }} - {{ cargo.funcion }} <br> {% endfor %} </small> 
+        
+         
+</p> 
+<p style="margin-left:0cm; margin-right:0cm; text-align:justify"><span style="font-size:14pt"><span style="font-family:&quot;Times New Roman&quot;,serif"><span style="font-family:&quot;Arial&quot;,sans-serif"> &emsp;&emsp;La Junta M&eacute;dica del Autoseguro Provincial de la  {{appInstitucion}}, procede a evaluar la solicitud de <strong> Reagudización </strong> presentada mediante nota de fecha {{ 'now'| date('d-m-Y') }} por el agente {{documento.tramite.expediente.agente.apellidoNombre}} en relación con el siniestro de referencia y efectuado el examen correspondiente, en base los elementos de juicios presentados, informa: <strong> Se autoriza dicha reagudización para la rehabilitación y posterior evaluación en Junta Médica</strong>.
+  </span></span></span></p>
+<br><br>
+</div>

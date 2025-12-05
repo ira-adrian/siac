@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+  <html lang="es">
+  <head>
+     <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}  {% endblock %} | SIAC </title>
+        
+      {% block stylesheets %}
+      {% endblock %}
+        {% block rss %} {% endblock %}         
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
+  </head>
+<body>          
+<div class="container-fluid">
+ 
+    {% block body %} 
+
+          {% block header %}
+          {% endblock %} 
+          {% block mensaje %}
+            
+          {% endblock %}
+ 
+        {% block contenido %}
+   
+               <div class="col-xs-12 col-sm-12 col-md-2 col-lg-3">
+                   {% block izquierdo %} {% endblock %}  
+                          
+              </div>
+
+             <div class="col-xs-12 col-sm-12 col-md-8 col-lg-6"> 
+                 <div class="row">
+                        {% block main %} {% endblock %}
+                 </div>
+             </div> 
+         {# hay que agregar col-xs-12 col-sm-12 en base.html.twig en educacion #}
+               <div class="col-xs-12 col-sm-12 col-md-2 col-lg-3">
+                  {% block derecho %}{% endblock %}
+               </div>
+      {% endblock %}
+
+  {% endblock %}
+
+</div>
+
+<div class="clearfix"> </div>
+
+  <div class="container hidden-print">
+    {% block footer %}
+      <footer class="footer">
+              <hr style="margin:5px">
+              <p class="text-center"> {{appInstitucion | raw}} | &copy; {{ 'now'|date('Y') }} - IRA </p>
+      </footer>
+    {% endblock %}
+  </div>
+  <div class="row">
+   {% block javascripts %}   
+
+    {% endblock %}
+    </div>
+  </body>
+  </html> 

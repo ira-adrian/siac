@@ -1,0 +1,107 @@
+{# obtengo los reportes para TRAMITE #}
+{% set reportePorTrimestre, reportePorFinalidad,reportePorSaf = tramites_por_trimestre(app.user.departamentoRm,anio), tramites_por_grupo_rubro(app.user.departamentoRm, anio), tramites_por_saf(app.user.departamentoRm,anio) %}
+
+{# obtengo los reportes para ITEMPEDIDO #}
+{% set itemsPorTrimestre, itemsPorRubro,itemsPorSaf = items_por_trimestre(app.user.departamentoRm,anio), items_por_rubro(app.user.departamentoRm,anio), items_por_saf(app.user.departamentoRm,anio) %}
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
+<script>
+   ///
+$("#link-4").addClass('active'); //activa el tab del menu principal
+ 
+$(function () {
+  CanvasJS.addCultureInfo("es", 
+    {      
+      decimalSeparator: ",",// Observe ToolTip Number Format
+      digitGroupSeparator: ".", // Observe axisY labels                   
+      days: ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"]
+      
+    });
+///GRAFICO PEDIDOS POR TRIMESTRE Y AÑO
+var chart = new CanvasJS.Chart("chartTrimestre", {
+  theme: "light1", // "light2", "dark1", "dark2"
+  culture: "es",
+  animationEnabled: false, // change to true    
+  title:{
+    text: ""
+  },
+  data: [
+  {
+    // Change type to "bar", "area", "spline", "pie",etc.
+    type: "column",
+    toolTipContent: "<b>{label}</b><br>Pedidos: {cantidad}<br>Presupuesto: $ {presupuesto}",
+    dataPoints: [
+      {% for reporte in reportePorTrimestre %}
+        { label: "{{reporte.trimestre}} ° Trimestre",  y: {{reporte.presupuesto}}, cantidad:'{{reporte.cantidad}}', presupuesto:'{{reporte.presupuesto | number_format(2, ',', '.')}}' },
+      {% endfor %}
+    ]
+  }
+  ]
+});
+chart.render();
+
+
+///GRAFICO PEDIDOS POR RUBRO Y AÑO
+var chart = new CanvasJS.Chart("chartFinalidad", {
+  theme: "light1", // "light2", "dark1", "dark2"
+  culture: "es",
+  animationEnabled: true,
+  
+  title:{
+    text:""
+  },
+  axisX:{
+    interval: 1
+  },
+  axisY2:{
+    interlacedColor: "rgba(1,77,101,.2)",
+    gridColor: "rgba(1,77,101,.1)",
+    title: ""
+  },
+  data: [{
+    type: "bar",
+    name: "Finalidades",
+    axisYType: "secondary",
+    toolTipContent: "<b>{finalidad}</b><br>Pedidos: {cantidad}<br>Presupuesto: $ {presupuesto}",
+    dataPoints: [
+          {% for reporte in reportePorFinalidad %}
+                { y: {{reporte.presupuesto}}, label: '{{reporte.grupoRubro.codigo}}', finalidad:'{{reporte.grupoRubro.grupo}}', cantidad:'{{reporte.cantidad}}', presupuesto:'{{reporte.presupuesto | number_format(2, ',', '.')}}' },
+          {% endfor %}     
+    ]
+  }]
+});
+chart.render();
+
+///GRAFICO PEDIDOS POR SAF Y AÑO
+var chart = new CanvasJS.Chart("chartSaf", {
+  theme: "light1", // "light2", "dark1", "dark2"
+  culture: "es",
+  animationEnabled: true,
+  
+  title:{
+    text:""
+  },
+  axisX:{
+    interval: 1
+  },
+  axisY2:{
+    interlacedColor: "rgba(1,77,101,.2)",
+    gridColor: "rgba(1,77,101,.1)",
+    title: ""
+  },
+  data: [{
+    type: "bar",
+    name: "SAF",
+    axisYType: "secondary",
+    toolTipContent: "<b>{saf}</b><br>Pedidos: {cantidad}<br>Presupuesto: $ {presupuesto}",
+    dataPoints: [
+          {% for reporte in reportePorSaf %}
+                { y: {{reporte.presupuesto }}, label: 'SAF {{reporte.tramite.organismoOrigen.saf.numeroSaf}}', saf:'{{reporte.tramite.organismoOrigen}}', cantidad:'{{reporte.cantidad}}', presupuesto:'{{reporte.presupuesto | number_format(2, ',', '.')}}' },
+          {% endfor %}    
+    ]
+  }]
+});
+chart.render();
+
+});
+</script>

@@ -1,0 +1,20 @@
+{% if expediente.datoAt.estado == "Con Turno" or expediente.datoAt.turno == true %}
+{% set day = 'now' | date('w') %}
+{% set weekStart = 'now' | date_modify("-#{day} days") | date('d-m-Y') %}
+{% set weekEnd = 'now' | date_modify("+#{6-day} days") | date('d-m-Y') %}
+{% set day = 'now' | date('w') %}
+{% set monthStart = 'now' | date_modify("-#{day} days") | date('d-m-Y') %}
+{% set monthEnd = 'now' | date_modify("+#{30-day} days") | date('d-m-Y') %}    
+
+{% if   expediente.datoAt.fechaTurno  | date('d-m-Y')  ==  'now' | date('d-m-Y')%}  <div class="label label-success" style="font-size:18px; margin:0px; padding:0px;"> <span data-toggle="tooltip" data-placement="top" title='Hoy' class="glyphicon glyphicon-pushpin" ></span><kbd  style="margin:0px; padding-left:3px;">{{expediente.datoAt.hora | date('H:i')}}</kbd></div>
+  {% elseif  date(expediente.datoAt.fechaTurno )  >  date('now')%}
+      {% if  ( date(weekEnd)) >= ( date(expediente.datoAt.fechaTurno)) %} 
+           <div class="label label-info" data-toggle="tooltip" data-placement="top" title='Esta Semana'><span class="glyphicon glyphicon-pushpin"></span>{{expediente.datoAt.fechaTurno | localizeddate('short', 'none', 'es')    }}</div>      
+    {% else %}
+            {% if  date(monthEnd) >= date(expediente.datoAt.fechaTurno) %} <div class="label label-warning" data-toggle="tooltip" data-placement="top" title='Este Mes'><span class="glyphicon glyphicon-pushpin"></span>{{expediente.datoAt.fechaTurno | localizeddate('short', 'none', 'es')    }}</div>
+           {% else %}                
+                 <div class="label label-default" data-toggle="tooltip" data-placement="top" title='Mas de un Mes'><span class="glyphicon glyphicon-pushpin"></span>{{expediente.datoAt.fechaTurno | localizeddate('short', 'none', 'es')    }}</div>
+            {% endif  %} 
+       {% endif  %} 
+{% endif  %} 
+{% endif  %}

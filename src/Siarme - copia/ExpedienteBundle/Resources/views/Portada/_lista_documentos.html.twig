@@ -1,0 +1,53 @@
+
+<div class="panel panel-default">
+  <div class="panel-heading">Consulta de Expediente</div>
+  <div class="panel-body">
+  <table id="consulta" class="table table-striped">
+		<thead>
+                <tr>
+                    <th>Expediente</th>
+                    <th>Iniciador</th>
+                    <th>Extracto</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+        </thead>
+        <tbody>
+                <tr class="success">
+                    <td scope="row">{{expediente}}</td>
+                    <td>{{ expediente.agente.apellidoNombre }}</td>
+                    <td>{{ expediente.extracto |nl2br}}</td>
+                    <td>{% if expediente.estado is same as(false) %}
+                                                CONCLUIDO
+                                            {% endif %}
+                                            {% if expediente.estado is same as(true) %}
+                                                 INGRESADO
+                                            {% endif %}</td>
+                    <td> <button class="btn btn-primary btn-sm"  data-toggle="collapse" data-target=".{{expediente.id}}" aria-expanded="false" id="{{expediente.id}}">Mas Información</button></td>
+                </tr>
+                {% for tramite in expediente.tramite %}
+                <tr class="collapse out budgets {{expediente.id}}">
+
+                    <td colspan="5">
+                        <p  class="bg-primary">  DEPARTAMENTO {{tramite.departamentoRm.departamentoRm | upper}}</p>
+                        <p> <strong>Estado: </strong> {% if tramite.estado is same as(false) %}
+                                                Tramite CONCLUIDO
+                                            {% endif %}
+                                            {% if tramite.estado is same as(true) %}
+                                                Tramite INICIADO
+                                            {% endif %}
+                        </p>
+                    
+                        <p><strong>
+                            Fecha de Ingreso: </strong>{{tramite.fechaOrigen | date("d/m/Y")}}<strong> - Lugar de Origen: </strong>{{tramite.organismoOrigen}}</p>
+                       <p><strong> Fecha de Salida: </strong>{{tramite.fechaOrigen | date("d/m/Y")}}  <strong> -  Lugar  de Destino:</strong>{{tramite.organismoDestino}}</p> 
+
+                    </td>
+                </tr>
+                {% endfor %}
+                
+		</tbody>
+  </table>
+</div></div>
+
+

@@ -1,0 +1,241 @@
+{# Siarme\AusentismoBundle\Resources\views\Itempedido\_tbody_completo.html.twig #}
+<tr>
+    <td style="width: 10%;">     
+        <div class="dropdown text-left" style="margin:0px;"> 
+                    {% include 'AusentismoBundle:ItemOferta:_menu_info_item.html.twig' with {'entidad': itemOferta, 'tipo':constant('TIPO_ENTIDAD', itemOferta ) } %}
+        </div>
+    </td>
+    <td>{{ itemOferta.numero }} </td>
+    {# <td>{% if itemOferta.fecha %}{{ itemOferta.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>#}
+    <td><a data-toggle="tooltip" data-placement="top" title='Ver ítem' href="{{ path('itemoferta_show', { 'id': itemOferta.id }) }}" target="_blank">{{ itemOferta.codigo }}</a><br>{% if buscar is defined %} {{itemOferta.fecha | date('d-m-Y')}}{% endif %}</td>
+    <td style="width: 43%;"><small>{{ itemOferta.item }}</small></td>
+    <td style="width: 22%;">
+      Precio: <strong>{{ itemOferta.pFPrecio | default('N/D') | number_format(2, ',', '.')}}</strong><br />
+      Calidad: {% if itemOferta.calidad == 0 %}<span class="glyphicon glyphicon-remove text-warning" data-toggle="tooltip" data-placement="top" title='Ninguna'></span>{% elseif itemOferta.calidad == 1 %}<span class='text-danger' data-toggle="tooltip" data-placement="top" title='No se Ajusta'>N/A</span>{% else %}<strong>{{ itemOferta.pFCalidad | default('n/d')}}</strong> {% endif %}<br />
+      Plazo Ent.: <strong>{{ itemOferta.pFPlazoEntrega | default('N/D') | number_format(2, ',', '.')}}</strong><br />
+      Antecedente: <strong>{{ itemOferta.pFAntecedente | default('N/D')}}</strong>
+    </td>
+    <td>
+       {% set igualPt = itemOferta | item_igual_puntaje %}
+        {% if igualPt %}
+            <strong><span class="text-danger">{{ itemOferta.pFTotal | default('N/D')}} % </span></strong>
+            <small><span class="text-muted">puntaje igual</span></small>
+        {% else %}
+            {% if itemOferta.pFTotal > 100 %}
+               <span class="text-danger" data-toggle="tooltip" data-placement="top" title='Es mayor a 100'><strong>{{ itemOferta.pFTotal | default('N/D')}}</strong> </span>
+            {% else %} 
+                {{ itemOferta.pFTotal | default('N/D')}}
+            {% endif %} 
+        {% endif %}
+    </td>
+    <td> ${{ itemOferta.precio | default(0) | number_format(2, ',', '.')  }}
+        {% if itemOferta.adjudicado %}
+
+                {% set cantidadPedida = itemOferta.itemProceso.cantidadPedida %}
+                {% set itemPedido = itemOferta.itemProceso.unItemPedido %}
+                {% set porcentaje = (( itemOferta.precio / itemPedido.precio ) * 100) | round  %}
+
+                {% if (itemPedido is not empty) and ((itemOferta.precio / itemPedido.precio) >= 1.3 ) %}
+                    <div class="dropdown text-left hidden-print" style="margin:0px;">
+                        <a aria-hidden="true" class="dropdown-toggle overflow text-danger" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-tasks" data-toggle="tooltip" data-placement="top" title="Precio  {{porcentaje - 100}}%  MAYOR de lo Presupuestado"></span></a>
+                        <div  class="dropdown-menu dropdown-menu-right" style="width: 400px;">  
+                            <table id="tablaItemDuplicado" class="table table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th>Pedido</th>
+                                        <th>Codigo</th>
+                                        <th>Presupuestado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in itemOferta.itemProceso.itemPedido %}
+                                        <tr>
+                                            <td>
+                                                <a data-toggle="tooltip" data-placement="top" title='{{ item.tramite.organismoOrigen }}' href="{{ path('tramite_show', { 'id': item.tramite.id }) }}" target="_blank"> {{ item.tramite.tipoTramite }} {{ item.tramite.numeroTramite }}</a>
+                                            </td>
+                                            <td><a href="{{ path('itempedido_show', { 'id': item.id }) }}" target="_blank"><strong> {{ item.codigo }} </strong></a></td>
+                                            
+                                            <th>$ {{item.precio  | default(0) | number_format(2, ',', '.')}}</th>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>  
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if (itemPedido is not empty) and ((itemOferta.precio / itemPedido.precio)  <= 0.7 ) %}
+                    <div class="dropdown text-left hidden-print" style="margin:0px;">
+                        <a aria-hidden="true" class="dropdown-toggle overflow text-muted" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-tasks" data-toggle="tooltip" data-placement="top" title="Precio {{ 100 - porcentaje}}% MENOR de lo Presupuestado"></span></a>
+                        <div  class="dropdown-menu dropdown-menu-right" style="width: 400px;">  
+                            <table id="tablaItemDuplicado" class="table table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th>Pedido</th>
+                                        <th>Codigo</th>
+                                        <th>Presupuestado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in itemOferta.itemProceso.itemPedido %}
+                                        <tr>
+                                            <td>
+                                                <a data-toggle="tooltip" data-placement="top" title='{{ item.tramite.organismoOrigen }}' href="{{ path('tramite_show', { 'id': item.tramite.id }) }}" target="_blank"> {{ item.tramite.tipoTramite }} {{ item.tramite.numeroTramite }}</a>
+                                            </td>
+                                            <td><a href="{{ path('itempedido_show', { 'id': item.id }) }}" target="_blank"><strong> {{ item.codigo }} </strong></a></td>
+                                            
+                                            <th>$ {{item.precio  | default(0) | number_format(2, ',', '.')}}</th>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>  
+                        </div>
+                    </div>
+                {% endif %}
+            
+        {% endif %}
+    </td>
+    {% if itemOferta.adjudicado %}
+        <td> 
+            <strong>{{ itemOferta.cantidadAdjudicada | default('-')}}</strong>
+            {% if itemOferta.itemProceso.estado  %}
+                {% set cantidadPedida = 0 %}
+                {% for item in itemOferta.itemProceso.itemPedido %}
+                    {% set cantidadPedida = cantidadPedida + item.cantidad %}  
+                {% endfor %}
+                {# if cantidadPedida > itemOferta.cantidad  %}
+                    <br><span class="glyphicon glyphicon-info-sign text-warning hidden-print"  data-toggle="tooltip" data-placement="top" title='Es MENOR a la cantidad PEDIDA {{cantidadPedida}}'><strong></strong></span>
+                {% elseif cantidadPedida < itemOferta.cantidad %}
+                     <br><span class="glyphicon glyphicon-info-sign text-danger hidden-print" data-toggle="tooltip" data-placement="top" title='Es MAYOR a la cantidad PEDIDA {{cantidadPedida}} '><strong></strong></span>
+                {% endif #}
+                {% if  itemOferta.esParcial  %}
+                    <span class="glyphicon glyphicon-info-sign text-warning hidden-print" data-toggle="tooltip" data-placement="top" title='Adjudicacion Parcial'><strong></strong></span>
+                {% endif %}
+                <div class="dropdown text-left hidden-print" style="margin:0px;">
+                    <a aria-hidden="true" class="dropdown-toggle overflow" data-toggle="dropdown" role="button" aria-expanded="false">
+                        <span class="glyphicon glyphicon-random" data-toggle="tooltip" data-placement="top" title='Distribución de Cantidades'></span> {{itemOferta.itemProceso.itemPedido | length}}
+                    </a>
+                    <div  class="dropdown-menu dropdown-menu-right" style="width: auto;"> 
+                        
+                            <table class="table table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th>Organismo</th>
+                                        <th class="text-muted">Cantidad Pedida</th>
+                                        <th>Cantidad Adjudicada</th>
+                                        <th>Importe Adjudicado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% set cantidad_total, monto_total, diferencia = 0, 0, 'ok' %}
+                                    {% for item in itemOferta.itemProcesoAdjudicado %}
+                                                {% set cantidad = item.cantidad %}
+                                                {% set monto = cantidad * item.precio  %}
+                                                {% set cantidad_total = cantidad_total + cantidad %}
+
+                                                {% if loop.last %}
+                                                    {% if cantidad_total > itemOferta.cantidadAdjudicada %}
+                                                        {% set  diferencia = '+1'  %} 
+                                                    {% endif %}
+                                                    {% if cantidad_total < itemOferta.cantidadAdjudicada %}
+                                                         {% set  diferencia = '-1'  %}
+                                                    {% endif %}
+                                                {% endif %}
+                                                {% set monto_total = monto_total + monto %}  
+                                                <tr>
+                                                    <td>{{ item.itemPedido.tramite.organismoOrigen.codigoGde }}</td>
+                                                    <td class="text-muted">{{item.itemPedido.cantidad}}</td>
+                                                    <td> 
+                                                        {% if edit  and item.itemPedido.itemProcesoAdjudicado %}
+                                                            <form class="formulario-cantidad" method="POST" data-url="{{ path('item_adjudicado_cantidad_ajax', {'id': item.id}) }}">
+                                                                <div class="form-group">
+                                                                    <div class="input-group">
+                                                                        <input type="number" class="form-control cantidad-input" placeholder="0" value="{{ cantidad }}" min="0" style="width: 130px;" autocomplete="off" >
+                                                                        <div class="input-group-addon">
+                                                                            <span class="btn btn-xs glyphicon glyphicon-ok text-info escribiendo pull-right hidden-print" style="display:none; padding:0x; margin:0px;"></span>
+                                                                            <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate pull-right enviando" style="display:none"></span>
+                                                                            <span class="glyphicon glyphicon-ok text-success enviado pull-right hidden-print" style="display:none"></span>
+                                                                            <span class="glyphicon glyphicon-remove text-danger error pull-right hidden-print" style="display:none"></span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                        {% else %}
+                                                             <strong>{{cantidad}}</strong> 
+                                                        {% endif %}
+                                                       
+                                                    </td>
+                                                    <td><strong>${{ monto | number_format(2, ',', '.')}} </strong></td>
+                                                </tr>
+                                    {% else %} 
+                                        {% for item in itemOferta.itemProceso.itemPedido %}
+                                                {% set cantidad = (item.cantidad/cantidadPedida)*itemOferta.cantidadAdjudicada %}
+                                                {% set cantidad = cantidad  | round %} 
+                                                {% set monto = cantidad * itemOferta.precio  %}
+                                                {% set cantidad_total = cantidad_total + cantidad %}
+
+                                                {% if loop.last %}
+                                                    {% if cantidad_total > itemOferta.cantidadAdjudicada %}
+                                                        {% set  diferencia = '+1'  %} 
+                                                    {% endif %}
+                                                    {% if cantidad_total < itemOferta.cantidadAdjudicada %}
+                                                         {% set  diferencia = '-1'  %}
+                                                    {% endif %}
+                                                {% endif %}
+                                                {% set monto_total = monto_total + monto %}  
+                                                <tr>
+                                                    <td>{{ item.tramite.organismoOrigen.codigoGde }}</td>
+                                                    <td class="text-muted">{{item.cantidad}}</td>
+                                                    <td> <strong>{{cantidad }}</strong> </td>
+                                                    <td><strong>${{ monto | number_format(2, ',', '.')}} </strong></td>
+                                                </tr>
+                                        {% endfor %} 
+                                    {% endfor %} 
+
+                                   {% if diferencia in ['+1', '-1'] %}
+                                         <tr class="text-danger"><td colspan="2">Total</td><th >{{cantidad_total}}</th><th>${{ monto_total | number_format(2, ',', '.')}}</th></tr>
+                                          <tr class="text-danger"><td colspan="4">Error en la Cantidad, {% if diferencia == '-1' %} Total - Ofertado = {{cantidad_total - itemOferta.cantidad }}{% elseif diferencia == '+1' %}Total - Ofertado = + {{cantidad_total - itemOferta.cantidad }} {% endif %} </td></tr>
+                                    {% endif %}
+                                    
+                                </tbody>
+                            </table>  
+                    </div>
+                </div>
+                
+                {% if  diferencia in ['+1', '-1']  %}
+                    <span class="glyphicon glyphicon-info-sign text-danger hidden-print"  data-toggle="tooltip" data-placement="top" title='Error en la redistribucion de cantidades'><strong></strong></span>
+                {% endif %}
+                
+            {% endif %}
+        </td>
+        <td class="montoAdjudicado"><strong>${{ itemOferta.montoAdjudicado | default(0) | number_format(2, ',', '.')  }}</strong></td>
+    {% else %} 
+       
+        <td>-</td>
+        <td>-</td>
+    {% endif %}
+    <td style="width: 12%;" class="estado">
+    {# if (itemOferta.oferta.expediente | default(null) | movimiento_estado(app.user)) and  itemOferta.proceso.departamentoRm == app.user.departamentoRm  #}
+    {% if edit  %}
+                {% if itemOferta.estado %}
+                            {% if itemOferta.adjudicado %}
+                                    <a data-href="{{ path('item_oferta_adjudicar', { 'id': itemOferta.id }) }}" class="btn-adjudicar-item text-success" role="button" ><span class="glyphicon glyphicon-check" aria-hidden="true"></span><span class="estadoAdjudicado">Preadjudicado</span></a>
+                            {% else %}
+                                    <a  data-href="{{ path('item_oferta_adjudicar', { 'id': itemOferta.id }) }}" class="btn-adjudicar-item text-muted" role="button" ><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span><span class="estadoAdjudicado">Sin Ajudicar</span></a>
+                            {% endif %}
+               {% else %}
+                    <span class="label label-warning">No Válida</span>       
+               {% endif %}
+    {% else %}
+         {% if itemOferta.estado %}
+            {% if itemOferta.adjudicado %}
+                    <div class="text-success"><span class="glyphicon glyphicon-check" aria-hidden="true"></span><span class="estadoAdjudicado">Preadjudicado</span></div>                   
+            {% else %}
+                    <div class="text-muted"><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span><span class="estadoAdjudicado">Sin Ajudicar</span></div>
+             {% endif %}
+        {% else %}
+                    <span class="label label-warning">No Válido</span>       
+        {% endif %}
+    {% endif %}
+    </td>
+</tr>

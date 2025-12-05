@@ -1,0 +1,92 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\_registro_completo.html.twig#}
+ {% set year = 'now' | date('Y')%}
+          <tr{#if tramite.departamentoRm != app.user.departamentoRm  %} style="background-color:rgba(192,192,192,0.3);" data-toggle="tooltip" data-placement="top" title="Reparticion {{ tramite.departamentoRm  }}"  {% elseif  tramite.tareaActiva %} data-toggle="tooltip" data-placement="top" title='Tarea en curso...'  style="background-color:hsla(120,60%,70%,0.3);" {% endif #}>
+{% if tramites is defined or  tareas is defined or realizadas is defined %}
+           <td>
+                    <div class="dropdown text-left hidden-print" style="margin:0px;"> 
+                    {# El tipo puede ser ['EX','DOC','AG'] corresponde con las entidades Expediente, Documento, Agente #}
+                    {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': tramite, 'tipo': constant('TIPO_ENTIDAD', tramite) } %}
+                    {% include 'ExpedienteBundle:Tramite:_menu_info_tramite.html.twig' with {'entidad': tramite, 'tipo':constant('TIPO_ENTIDAD', tramite) } %}
+
+                    </div>
+                </td>
+                <td class="hidden">{{tramite.id}}</td>
+{% endif %}
+{% if organismo is defined %}
+    <td><input type='checkbox' id='checkall' name='id[]' value={{tramite.id}}></td>
+{% else %}
+    <td> {{ tramite.numeroTramite }}</td>
+{% endif %}
+                
+
+{% if tramites is defined or  tareas is defined or realizadas is defined %}
+                 <td style="width: 20%"><a  href="{{ path('tramite_show', { 'id': tramite.id }) }}" target="_blank">{{ tramite.ccoo | default('NO-'~ year ~ '-n/d')}}</a></td>
+{% else %}
+                 <td style="width: 15%"><a  href="{{ path('tramite_show', { 'id': tramite.id }) }}" target="_blank">{{ tramite.ccoo[0:16] | default('NO-'~ year ~ '-n/d')}}</a></td>
+{% endif %}
+{% if  tramites is defined and tramite.estadoTramite.slug  in ["rectificacion", "devuelto"] and notaRectifica %}
+                {% if tramite.estadoTramite.slug == "rectificacion" %}
+                        <td>{{tramite.numeroComprar}}</td>
+                {% else %}
+                        <td>{{tramite.numeroNota}}</td>
+                {% endif %}
+{% endif %}
+                <td>{% if tramite.fechaDestino %}{{ tramite.fechaDestino|date('d-m-Y') }}{% endif %} <br>{{ tramite.trimestre }}° Trim.</td>
+                <td>          
+                    <a data-toggle="tooltip" data-placement="top" title='{{ tramite.organismoOrigen}}' href="{{ path('organismo_show', { 'id': tramite.organismoOrigen.id | default(0) }) }}" target="_blank"><strong>{{ tramite.organismoOrigen.saf.numeroSaf | default("N/D")}}</strong></a>
+                </td>
+                <td style="width: 35%"><small>{{ tramite.texto | upper }}</small></td>
+                    {# En tramite.estadoTramite devuelve el estado con etiquetas label #}
+                {#<td>{{ tramite.PresupuestoOficial | format_currency('EUR', locale='de')  }}</td>#}
+                <td>
+                        {{ tramite_credito(tramite) | raw }}
+                 </td>
+                <td>${{ tramite.PresupuestoOficial | default(0) | number_format(2, ',', '.')  }}</td>
+               
+                <td>
+                    {% if ( tramite.expediente.id is defined and tramite.expediente | movimiento_estado(app.user))  %}
+                           {#<span  class="label label-primary">Activo</span>#}
+                           <span class="pull-left">{{ include('ExpedienteBundle:Tramite:_estado_etiqueta.html.twig') }}</span>
+                    {% elseif  tramite.expediente.id is defined %} 
+                           <span  class="label label-default">Enviado</span> 
+                    {% else %}
+                            {% if ( app.user.departamentoRm == tramite.departamentoRm | default(null) ) %}
+                                <span>{{ include('ExpedienteBundle:Tramite:_estado_etiqueta.html.twig') }}</span>
+                            {% else %} 
+                                <span class="{{tramite.estadoTramite.class}}">{{tramite.estadoTramite }}</span>
+                            {% endif %} 
+                            {{ tramite.fechaEstado |long_time}}
+                    {% endif %}
+                </td> 
+{% if tramites is defined or mis_tramites is defined or realizadas is defined %}
+                <td style="width:10%">
+            {% if  tramite.expediente.id is defined %}
+                     <a data-toggle="tooltip" data-placement="top" title='Ver {{tramite.expediente}}' href="{{ path('expediente_show', { 'id': tramite.expediente.id }) }}" target="_blank">{{tramite.expediente.ccoo[0:16] | default('NO-'~ year ~ '-n/d')}}</a> <br />
+                    {% set procesos = tramite.expediente | tramite_por_expediente_slug("tramite_proceso")  %}
+                     {% for tramite1 in procesos %}
+                       <small><span class="{{tramite1.estadoTramite.class}}"  data-toggle="tooltip" data-placement="bottom" title='{{tramite1.estadoTramite}}' >-</span>
+                       <a  href="{{ path('tramite_show', { 'id': tramite1.id }) }}" target="_blank">{{ tramite1.numeroComprar | default('100-00000-n/d')}}</a></small> <br />
+                    {% endfor %}
+            {% else %}
+                    <span  data-toggle="tooltip" data-placement="top" title='El pedido no esta asignado a Nota DPPR' class="glyphicon glyphicon-warning-sign text-warning"></span> 
+            {% endif %}
+                </td>
+                <td>
+                    {% for tarea in tramite.tarea | reverse  %}  
+                            {% if loop.first  %} 
+                                {% if  tarea.esResponsable | default(false) %} 
+                                     {% set title = "Responsable: " ~ tarea.usuario.agente.apellidoNombre | default( tarea.usuario.departamentoRm ) %} 
+                                {% else %}
+                                    {% set title = "Colaborador: " ~ tarea.usuario.agente.apellidoNombre | default( tarea.usuario.departamentoRm ) %}
+                                {% endif %}    
+                                <a data-toggle="tooltip" data-placement="top" title="Ver {{ title | default(null)}}"  href="{{ path('agente_show', { 'id': tarea.usuario.agente.id | default(0) }) }}" target="_blank">{{ tarea.usuario.usuario | default("-") }}</a>
+                           {% endif %}   
+                   {% endfor %}
+               </td>
+{% endif %}
+{% if organismo is not defined %}
+                <td>
+                    {% include 'ExpedienteBundle:Tramite:_menu_acciones_tramite.html.twig' %}
+                </td>
+{% endif %}
+            </tr>

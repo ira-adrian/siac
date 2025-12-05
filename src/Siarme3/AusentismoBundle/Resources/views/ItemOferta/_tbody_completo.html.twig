@@ -1,0 +1,103 @@
+{# Siarme\AusentismoBundle\Resources\views\Itempedido\_tbody_completo.html.twig #}
+<tr>
+    <td style="width: 10%;">     
+        <div class="dropdown text-left" style="margin:0px;"> 
+                    {% include 'AusentismoBundle:ItemOferta:_menu_info_item.html.twig' with {'entidad': itemOferta, 'tipo':constant('TIPO_ENTIDAD', itemOferta ) } %}
+        </div>
+    </td>
+    <td>{{ itemOferta.numero }} </td>
+    {# <td>{% if itemOferta.fecha %}{{ itemOferta.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>#}
+    <td>
+        <a href="{{ path('itemoferta_show', { 'id': itemOferta.id }) }}" target="_blank">{{ itemOferta.codigo }}</a>
+        <br>
+        {# if ( app.user.departamentoRm == itemOferta.proceso.departamentoRm  and not itemOferta.proceso.estado)  #}
+        {% if edit  %}
+           <a data-href="{{ path('item_oferta_estado', { 'id': itemOferta.id }) }}" class="btn-estado-item" role="button">{% if itemOferta.estado %}<span class="glyphicon glyphicon-check" data-toggle="tooltip" data-placement="top" title='Cambiar a estado No Válido'></span>{% else %}<span class="glyphicon glyphicon-unchecked text-warning" data-toggle="tooltip" data-placement="top" title='Cambiar a estado Admisible'></span>{% endif %} </a> 
+        {% else %}   
+            {% if itemOferta.estado %}<span class="glyphicon glyphicon-check text-info" data-toggle="tooltip" data-placement="top" title='Estado Admisible'></span>{% else %}<span class="glyphicon glyphicon-unchecked text-warning" data-toggle="tooltip" data-placement="top" title='Estado No Válido'></span>{% endif %}
+        {% endif %}    
+    </td>
+    <td style="width: 40%;">
+        <div data-toggle="tooltip" data-placement="top" title='Descripción y Rubro COMPRAR' style="font-size:10px; padding:0px; margin:0px; background-color: #eef1ea; border:1px dashed black;">
+            <strong>{{ itemOferta.itemProceso.item }}</strong>
+            <span class="pull-right">-<i>{% set itemCatalogo = itemOferta | item_catalogo %}{{itemCatalogo.rubro  |default("-")| title}}</i></span>
+        </div>
+        <div id="-{{itemOferta.id}}">{{ itemOferta.item }}</div>
+        {% set cantidadPedida = itemOferta.itemProceso.cantidadPedida %}
+        {% set itemPedido = itemOferta.itemProceso.unItemPedido %}     
+        {% if itemPedido is not empty  %}
+           {% if itemPedido.detalle is not empty %}
+             <p data-toggle="tooltip" data-placement="top" title='Especificación Técnica' style="font-size:10px; padding:0px; margin:0px; border:1px dashed black;" class="text-muted"><strong>{{ itemPedido.detalle | default("-")| striptags }}</strong></p>
+           {% endif %} 
+        {% endif %}
+    </td>
+    <td>
+        ${{ itemOferta.precio  | default(0) | number_format(2, ',', '.')  }}
+        {% if itemPedido is not empty %}
+            {% set porcentaje = (( itemOferta.precio / itemPedido.precio ) * 100) | round  %}
+            {% set titulo = "Precio Acorde" %}
+            <div class="dropdown text-left hidden-print" style="margin:0px;">
+                        <a aria-hidden="true" class="dropdown-toggle overflow
+                            {% if (itemPedido.precio > itemOferta.precio) %} 
+                                {% if ((itemPedido.precio / itemOferta.precio) > 1.25 ) %}
+                                    text-muted 
+                                    {% set titulo = "Precio " ~ (100 - porcentaje) ~ "% MENOR de lo Presupuestado" %}
+                                {% else %}
+                                     text-success 
+                                {% endif %}
+                            {% elseif ((itemPedido.precio / itemOferta.precio) <= 0.5 ) %}
+                                    text-danger 
+                                    {% set titulo = "Precio " ~  (porcentaje - 100) ~ "% MAYOR de lo Presupuestado" %}
+                            {% elseif ((itemPedido.precio / itemOferta.precio) < 0.75 ) %}
+                                    text-warning 
+                                    {% set titulo = "Precio " ~ (porcentaje - 100 ) ~ "% MAYOR de lo Presupuestado" %}
+                            {% else %}
+                                 text-success
+                            {% endif %}" data-toggle="dropdown" role="button" aria-expanded="false">
+                            <span class="glyphicon glyphicon-tasks" data-toggle="tooltip" data-placement="top" title='{{ titulo }}'></span>
+                        </a>
+                <div  class="dropdown-menu dropdown-menu-right" style="width: 400px;">  
+                            <table id="tablaItemDuplicado" class="table table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th>Pedido</th>
+                                        <th>Codigo</th>
+                                        <th>Presupuestado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in itemOferta.itemProceso.itemPedido %}
+                                        <tr>
+                                            <td>
+                                                <a data-toggle="tooltip" data-placement="top" title='{{ item.tramite.organismoOrigen }}' href="{{ path('tramite_show', { 'id': item.tramite.id }) }}" target="_blank"> {{ item.tramite.tipoTramite }} {{ item.tramite.numeroTramite }}</a>
+                                            </td>
+                                            <td><a href="{{ path('itempedido_show', { 'id': item.id }) }}" target="_blank"><strong> {{ item.codigo }} </strong></a></td>
+                                            
+                                            <th>$ {{item.precio  | default(0) | number_format(2, ',', '.')}}</th>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>  
+                </div>
+             </div>
+        {% endif %}
+    </td>
+    <td>
+        {{ itemOferta.cantidad }}
+        {% if cantidadPedida > itemOferta.cantidad  %}
+            <br><span class="glyphicon glyphicon-info-sign text-warning hidden-print"  data-toggle="tooltip" data-placement="top" title='Es MENOR a la cantidad PEDIDA {{cantidadPedida}}'><strong></strong></span>
+        {% elseif cantidadPedida < itemOferta.cantidad %}
+             <br><span class="glyphicon glyphicon-info-sign text-danger hidden-print" data-toggle="tooltip" data-placement="top" title='Es MAYOR a la cantidad PEDIDA {{cantidadPedida}} '><strong></strong></span>
+        {% endif %}
+    </td>
+    <td>{% include 'AusentismoBundle:ItemOferta:_calidad_etiqueta.html.twig' %}</td>
+    <td style="width: 35%;" >
+        {# if itemOferta.proceso.departamentoRm == app.user.departamentoRm  and not itemOferta.proceso.adjudicado #}
+        {% if edit  %}
+            <span class="glyphicon glyphicon-ok pull-right hidden-print" style="display:none"></span>
+            <textarea class="form-control" data-href="{{ path('item_oferta_observacion', { 'id': itemOferta.id }) }}"   placeholder="Ninguna" >{{ itemOferta.texto }}</textarea>
+        {% else %}
+            {{ itemOferta.texto }}
+        {% endif %}
+    </td>
+</tr>

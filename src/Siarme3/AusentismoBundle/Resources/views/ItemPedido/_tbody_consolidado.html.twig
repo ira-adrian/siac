@@ -1,0 +1,116 @@
+{# Siarme\AusentismoBundle\Resources\views\Itempedido\_tbody_completo.html.twig #}
+{% if items | length > 1 %}
+<tr >
+    <td>
+<div class="dropdown text-left hidden-print" style="margin:0px;"> 
+   {% set items = itemConsolida | item_consolida %}
+{% if (items | length > 1 ) %}
+     <span data-toggle="tooltip" data-placement="top" title='Items Consolidado'> 
+        <a aria-hidden="true" class="dropdown-toggle overflow  glyphicon glyphicon-compressed {% if itemConsolida.consolida %} text-info {% else %} text-warning {% endif %} " data-toggle="dropdown" role="button" aria-expanded="false">{{items | length}}</a>
+        <div  class="dropdown-menu" style="width: 500px;">  
+             <ul class="list-group">                   
+                    <table id="#" class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Pedido</th>
+                                <th>Fecha</th>
+                                <th>Cantidad</th>
+                                <th>P. U.</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items  %}
+                                <tr {% if  not item.consolida %} style="background-color:rgba(192,192,192,0.3);"  class="text-muted" {% endif %}>
+                                    <td><a  href="{{ path('tramite_show', { 'id': item.tramite.id }) }}" target="_blank">{{ item.tramite.tipoTramite}} {{ item.tramite.numeroTramite }}</a>
+                                    </td>
+                                    <td><a href="{{ path('itempedido_show', { 'id': item.id }) }}" target="_blank"><strong> {{ item.numero }} - {{item.tramite.organismoOrigen.codigoGde}} </strong></a></td>
+                                    <td>{{item.cantidad}}</td>
+                                    <td>$ {{item.precio  | default(0) | number_format(2, ',', '.')}}</td>
+                                    <td> 
+                                        <a href="{{ path('item_pedido_consolida', { 'id': item.id }) }}" class="btn-estado-item" role="button">
+                                          {% if item.consolida %}<span class="glyphicon glyphicon-check" data-toggle="tooltip" data-placement="top" title='No Consolidar'></span>Consolidado{% else %}<span class="glyphicon glyphicon-unchecked text-warning" data-toggle="tooltip" data-placement="top" title='Consolidar'></span>No Consolidado{% endif %}
+                                        </a> 
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>                
+             </ul>
+        </div>
+       </span>
+{% endif %}
+
+{% set itemsProceso = itemConsolida | item_proceso %}
+{% if (itemsProceso | length > 0 ) %}
+     <span data-toggle="tooltip" data-placement="top" title='Item Proceso'> 
+        <a aria-hidden="true" class="dropdown-toggle overflow  glyphicon glyphicon-shopping-cart text-info" data-toggle="dropdown" role="button" aria-expanded="false">{{itemsProceso | length }}</a>
+        <div  class="dropdown-menu" style="width: 500px;">  
+             <ul class="list-group">
+                   
+                    <table id="tablaItemDuplicado" class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Proceso</th>
+                                <th>N°</th>
+                                <th>Cantidad Adjudica</th>
+                                <th>Monto Adjudicado</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for itemProceso in itemsProceso %}
+                                <tr>
+                                    <td>
+                                        <a data-toggle="tooltip" data-placement="top" title='{{ itemProceso.proceso.oferente }}' href="{{ path('tramite_show', { 'id': itemProceso.proceso.id }) }}" target="_blank"> {{ itemProceso.proceso.tipoTramite }} {{ itemProceso.proceso.numeroTramite }}</a> <br />
+                                    </td>
+                                    <td><a href="{{ path('itemproceso_show', { 'id': itemProceso.id }) }}" target="_blank"><strong> {{ itemProceso.numero }} </strong></a></td>
+                                    <td>
+                                        {% if itemProceso.cantidadAdjudicada > 0  and itemProceso.proceso.adjudicado %}
+                                            {{ itemProceso.cantidadAdjudicada }}
+                                        {% else %} 
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if itemProceso.montoAdjudicado > 0  and itemProceso.proceso.adjudicado %}
+                                             $ {{ itemProceso.montoAdjudicado  | default(0) | number_format(2, ',', '.')  }}
+                                        {% else %} 
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                       {{ include('AusentismoBundle:ItemProceso:_etiqueta_estado.html.twig') }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>                
+             </ul>
+        </div>
+       </span>
+{% endif %}
+
+</div>
+
+       {% set itemsProceso = itemConsolida | item_proceso %}
+        {% if (itemsProceso | length > 0 ) %} 
+            {% for itemProceso in itemsProceso | reverse %}
+              {% if  loop.first %}
+                {{ include('AusentismoBundle:ItemProceso:_etiqueta_estado.html.twig') }}
+              {% endif %}
+           {% endfor %}
+        {% endif %}
+
+    </td>
+    <td>{{indice}}</td>
+    <td style="width: 8%;">{{itemSaf | raw }}</td>
+    {# <td>{% if itemPedido.fecha %}{{ itemPedido.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>#}
+    <td> {{codigo}}</td>
+    <td style="width: 45%;">{{item1}}</td>
+    <td>{{unidad}}</td>
+    <td style="width: 10%;">$ {{ precio  | default(0) | number_format(2, ',', '.')  }}</td>
+    <td>{{ cantidad }}</td>
+    <td style="width: 10%;">$ {{ (cantidad * precio) | default(0) | number_format(2, ',', '.')  }}</td>
+</tr>
+{% endif %}

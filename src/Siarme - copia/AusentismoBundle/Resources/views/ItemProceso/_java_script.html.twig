@@ -1,0 +1,28 @@
+<script>
+   //boton para relacionar el itemPedido con el ItemProceso
+    $(".btn-relacionar-item").unbind('click').click( function(){
+
+        var $href= $(this).attr("data-href");
+
+        if ( $(this).find('.glyphicon').hasClass("glyphicon-plus-sign")){
+
+         $(this).find('.glyphicon').removeClass("glyphicon-plus-sign").addClass("glyphicon-remove-sign text-danger");
+         $(this).find('.estadoAdjudicado').html('Quitar Relación');
+
+        } else {
+            $(this).find('.glyphicon').removeClass("glyphicon-remove-sign text-danger").addClass("glyphicon-plus-sign");
+                    $(this).find('.estadoAdjudicado').html('Relacionar');
+        }
+        $(this).parent().parent().parent().parent().parent().parent().parent().parent().find('.glyphicon-tasks').toggleClass('text-danger','text-primary');
+     
+        $.ajax({
+             url: URL+$href,
+             type: 'POST',
+             success: function(response){
+                console.log(true);
+             } 
+        });
+      } 
+    );
+    
+</script>

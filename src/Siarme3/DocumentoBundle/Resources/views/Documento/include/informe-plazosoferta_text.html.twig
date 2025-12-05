@@ -1,0 +1,49 @@
+{% set observaciones, edit = [], false %}
+{% for documento in documento.tramite.documento | reverse %}  
+    {% if documento.tipoDocumento.slug == "observacion-proceso" %} {% set observaciones =  observaciones | merge([documento])%}{% endif %} 
+{% endfor %}
+<p style="text-align:center"><strong>INFORME DE EVALUACIÓN TÉCNICO</strong></p> 
+<br>
+<p style="text-align:justify">EXPEDIENTE ELECTR&Oacute;NICO: {{documento.tramite.expediente | upper}}</p>
+<p style="text-align:justify">{{documento.tramite.tipoProceso | title }} Nº: {{documento.tramite.numeroComprar | upper}}</p>
+<p style="text-align:justify">OBJETO DEL LLAMADO: {{documento.tramite.expediente.extracto | upper}}</p>
+<br>
+<div>
+<iframe class="jsCalculatorWidget" src="https://calcuonline.com/calculadoras/calculadora-dias-entre-fechas/?widget=yes" style="width: 100%;max-width:734px;border:none;overflow: hidden;"></iframe><script src="https://calcuonline.com/build/widget-client.js"></script><div style="font-size: 13px; color: #333; font-style: italic;text-align: center;"><span>Fuente: </span><a target="_blank" href="https://calcuonline.com/calculadoras/calculadora-dias-entre-fechas/" style="color: #333;">Calcuonline</a></div>
+<br>
+
+<table border="1" id="tablaItemPedido" lass="table table-hover text-left" >
+  <thead>
+    <tr>
+        <th>Oferente</th>
+        <th>Monto Adjudicado</th>
+        <th>Ítems Adjudicados</th>
+        <th>Plazo en Días</th>
+        <th>Fecha de Notificación OC</th>
+        <th>Fecha Límite de Entrega</th>
+        <th>Observaciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for tramite in documento.tramite.oferta | reverse if tramite.montoAdjudicado > 0 %}
+        {% set oferente = tramite.oferente %}
+        {% if tramite.montoAdjudicado > 0 %}
+            <tr>
+                <td>{{ tramite.proveedor  | default(oferente)}} <br>{{ tramite.cuit  | default("") | mostrar_como_cuil }}</td>
+                <td>${{ tramite.montoAdjudicado | number_format(2, ',', '.') }}</td>
+                <td>
+                    {% for itemOferta in tramite.itemOferta if itemOferta.adjudicado %}
+                            {{itemOferta.numero}},
+                    {% endfor %}
+                </td>
+                <td>{{ tramite.plazo }} días</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        {% endif %}
+    {% endfor %}
+  </tbody>
+</table>
+
+

@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Historials list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Fecha</th>
+                <th>Texto</th>
+                <th>Tipo</th>
+                <th>Tipoid</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for historial in historials %}
+            <tr>
+                <td><a href="{{ path('historial_show', { 'id': historial.id }) }}">{{ historial.id }}</a></td>
+                <td>{% if historial.fecha %}{{ historial.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{{ historial.texto }}</td>
+                <td>{{ historial.tipo }}</td>
+                <td>{{ historial.tipoId }}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('historial_show', { 'id': historial.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('historial_edit', { 'id': historial.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('historial_new') }}">Create a new historial</a>
+        </li>
+    </ul>
+{% endblock %}

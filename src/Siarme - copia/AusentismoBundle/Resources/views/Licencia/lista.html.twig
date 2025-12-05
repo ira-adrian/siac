@@ -1,0 +1,27 @@
+{% if pagination | length > 0 %}
+    <table  class="table table-responsive table-hover {% if pagination | length > 6 %} tablaLicencia {% endif %}">
+        <thead>
+            <tr class="text-muted">
+                <th>N° </th>
+                <th>Info</th>
+                {% if licVigentes is defined %}
+                    <th>Empleado</th>
+                    <th>Sector</th>
+                    <th>Mes</th>
+                {% endif %}
+                <th>Marco Legal</th>
+                <th>Fecha Desde</th>
+                <th>Fecha Hasta </th>        
+                <th>Días</th>
+                <th>Código</th>
+                <th>Año</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+               {{ include('AusentismoBundle::Licencia/registro_lista.html.twig') }}
+        </tbody>
+    </table>
+{% else %}  
+{% endif %}  

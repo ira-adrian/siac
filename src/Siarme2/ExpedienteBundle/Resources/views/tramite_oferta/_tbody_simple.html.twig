@@ -1,0 +1,54 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\_registro_completo.html.twig#}
+<tr>
+        {#<td>
+            <div class="dropdown text-left hidden-print" style="margin:0px;"> 
+            {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': tramite, 'tipo': constant('TIPO_ENTIDAD', tramite) } %}
+            {% include 'ExpedienteBundle:tramite_oferta:_menu_info_tramite.html.twig' with {'entidad': tramite, 'tipo':constant('TIPO_ENTIDAD', tramite) } %}
+            </div>
+        </td>#}
+        <td><a  href="{{ path('tramite_show', { 'id': tramite.id }) }}">OFERTA {{ tramite.numeroTramite}}</a></td>
+        <td> 
+             {{  tramite.oferente | default("-")}} <br> {{ tramite.cuit  | default("") | mostrar_como_cuil }}
+            {% if edit %}
+                <br>
+                <a href="{{ path('oferta_estado', { 'id': tramite.id }) }}" role="button" onclick= "return confirm('¿Desea cambiar al estado ({{ tramite.estado? "No Válido" : "Admisible" }}) la  {{ tramite.tipoTramite }} y los ítems relacionados?');">
+                     {% if tramite.estado %}<span class="glyphicon glyphicon-check" data-toggle="tooltip" data-placement="top" title='Cambiar al estado (No Válido)'></span><small class="text-muted"> Admisible</small>{% else %}<span class="glyphicon glyphicon-unchecked text-warning" data-toggle="tooltip" data-placement="top" title='Cambiar al estado (Admisible)'></span><small class="text-muted"> No Válido</small>{% endif %} 
+                </a>
+            {% else %} 
+                <br>
+                 {% if tramite.estado %}<span class="glyphicon glyphicon-check text-info" data-toggle="tooltip" data-placement="top" title='Estado Admisible'></span><small class="text-muted"> Admisible</small>{% else %}<span class="glyphicon glyphicon-unchecked text-warning" data-toggle="tooltip" data-placement="top" title='Estado No Válido'></span><small class="text-muted"> No Válido</small>{% endif %}
+            {% endif %}  
+        </td>
+        <td>${{ tramite.montoOfertado | number_format(2, ',', '.')  }} <br><small>({{ numero_a_letras(tramite.montoOfertado,2, '') | title }})</small></td>
+        <td>
+            {% if tramite.proceso.adjudicado %}
+                ${{ tramite.montoAdjudicado | number_format(2, ',', '.')  }} {% if tramite.montoAdjudicado > 0 %}<br><small>({{ numero_a_letras(tramite.montoAdjudicado,2, '') | title }})</small>{% endif %} 
+            {% else %}
+                -
+            {% endif %} 
+        </td>
+        {% if tramite.estado %}
+            <td>
+                {% if tramite.proceso.adjudicado %}
+                    {% for itemOferta in tramite.itemOferta if itemOferta.adjudicado %}
+                        {{itemOferta.numero}},&nbsp;
+                    {% else %}  
+                      -     
+                    {% endfor %}    
+                {% else %} 
+                    -
+                {% endif %} 
+            </td>
+            <td>
+                 {% if edit %} <a role="button" data-href="{{ path('oferta_ponderacion_edit', {'id':tramite.id})}}" class="btn-editarPonderacionOferta hidden-print"> <span  class="glyphicon glyphicon-pencil"></span> Modificar</a>{% endif %} 
+                <div class="{% if not tramite.proceso.estado  %} hidden-print {% endif %}">
+                   Plazo Entrega: <strong>{{ tramite.pFPlazoEntrega | number_format(2, ',', '.') }} </strong> <br /> 
+                   Antecedente: <strong>{{ tramite.pFAntecedente }}  </strong><br />
+                   Plazo: <strong>{{ tramite.plazo }} días</strong><br />
+                </div>
+            </td>
+        {% else %}
+            <td><p class="text-center">INADMISIBLE</p></td>
+            <td></td>
+        {% endif %}
+</tr>

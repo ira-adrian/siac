@@ -1,0 +1,59 @@
+{# Siarme/AusentismoBundle/Resources/views/Agente/index.html.twig #}
+
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} MIS TAREAS{% endblock %}
+  {% block header %}
+  {{ include('ExpedienteBundle:Default:_header.html.twig') }}
+  {{ include('ExpedienteBundle:Default:_breadcrumb_principal.html.twig') }}
+{% endblock %}
+{% block contenido %}
+        {{ app.session.set('modulo', 'MIS TAREAS') }}
+        {{ app.session.set('route', 'mis_tramites_index') }}
+        {{ app.session.set('glyphicon', 'glyphicon glyphicon-wrench') }}
+{#
+      <div class="nav nav-tabs nav-justified" style="padding-top:5px;">
+        <li role="presentation" class="active"><a class="glyphicon glyphicon-tasks" href="{{ path('mis_tramites_index') }}"> TAREAS {% if movimientoPendiente is defined and movimientoPendiente is not empty  %}<span class=" glyphicon-folder-open text-warning"><small>+</small></span>{% endif %}</a></li>
+        <li role="presentation" ><a class="glyphicon glyphicon-folder-open" href="{{ path('mis_expedientes_index') }}"> EXPEDIENTES</a></li>
+      </div> 
+#}
+
+{% set mis_tramites = true %}
+ {# ---------ESTE CODIGO PERMITE SEPARA EN SOLAPAS LOS DISTINTOS TIPOS DE TRAMITES
+ {% set tipoTramites = app.user | tipo_tramite_por_usuario  %}
+{% if tipoTramites | length > 1 %}
+    <ul class="nav nav-tabs nav-justified">
+           {% for tipo in tipoTramites %}
+                 <li  {% if loop.first %}class="active"{% endif %} ><a data-toggle="tab" href="#menu1"> {{tipo}} ({{tipo.tramite | length }})</a></li> 
+            {% endfor %} 
+    </ul>
+
+{{dump(tipoTramites)}}
+{% else %}
+{% endif %} 
+
+<div class="pull-right"> <a data-toggle="tooltip" data-placement="top" title='Marcar TODAS las TAREAS como realizada' role="button"  href="{{ path('tarea_realizar_all') }}"><span class="glyphicon glyphicon-unchecked text-warning"></span> Realizar Todo</a> </div>
+#}
+<div  class="row" style="padding-top:5px;">
+       <ol class="breadcrumb"  style="margin-bottom:1px;"> 
+        {% for year in ( ('now' | date("Y") - 2) .. ('now' | date("Y"))) %} 
+            {% if year != anio %}
+              <li><a href="{{ path('mis_tramites_index', { 'anio': year }) }}"> <span class="glyphicon glyphicon-calendar"></span>{{year}}</a></li>
+            {% else %}
+                <li class="active"> 
+                  <span class="glyphicon glyphicon-calendar text-success"></span> <strong>{{year}}</strong>
+                </li>
+            {% endif %}
+        {% endfor %}
+      </ol>
+      {% if tramites | length %}
+        {{ include('ExpedienteBundle:Tramite:_lista.html.twig') }}  
+      {% endif %}
+</div>
+{% endblock %}
+
+{% block javascripts %}  
+{{ parent() }}
+<script> 
+ $("#link-1").addClass('active');
+</script>
+{% endblock %}

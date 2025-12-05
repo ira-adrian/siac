@@ -1,0 +1,58 @@
+{# Siarme\ExpedienteBundle\Resources\views\tramite_proceso\_tbody_completo.html.twig #}
+{% set year = 'now' | date('Y')%}
+          <tr{# if tramite.departamentoRm != app.user.departamentoRm  %} style="background-color:rgba(192,192,192,0.3);"  data-toggle="tooltip" data-placement="top" title="Reparticion {{ tramite.departamentoRm  }}"  {% elseif  tramite.tareaActiva %}  style="background-color:hsla(120,60%,70%,0.3);" {% endif #}>
+           {% if tramites is defined or  tareas is defined or realizadas is defined %}
+                <td>
+                    <div class="dropdown text-left hidden-print" style="margin:0px;"> 
+                    {# El tipo puede ser ['EX','DOC','AG'] corresponde con las entidades Expediente, Documento, Agente #}
+                    {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': tramite, 'tipo': constant('TIPO_ENTIDAD', tramite) } %}
+                    {% include 'ExpedienteBundle:Tramite:_menu_info_tramite.html.twig' with {'entidad': tramite, 'tipo':constant('TIPO_ENTIDAD', tramite) } %}
+
+                    </div>
+                </td>
+            {% endif %}
+                <td>{{ tramite.numeroTramite}}</td>
+                <td> 
+                    {% set proceso = tramite.tipoTramite~" "~tramite.numeroTramite %}
+                    <a  data-toggle="tooltip" data-placement="top" title='Ver Proceso'   href="{{ path('tramite_show', { 'id': tramite.id }) }}">{{ tramite.numeroComprar  | default(proceso )}}</a>                    
+                </td>
+           {% if tramites is defined or  tareas is defined or realizadas is defined %}
+                <td> <a href="{{ path('expediente_show', { 'id': tramite.expediente.id | default("-") }) }}">{{ tramite.expediente.numeroGde | default('NO-'~ year ~ '-n/d') }}</a></td>
+            {% endif %}    
+                <td>{{ tramite.expediente.extracto | default("-") | raw}}  </td>
+                <td>{{ tramite.tipoProceso }}</td>
+                <td>${{ tramite.expediente.presupuestoOficial | default(0) | number_format(2, ',', '.')  }}</td>
+                <td>
+                        ${{ tramite.montoAdjudica | default(0) | number_format(2, ',', '.')  }}
+                </td>
+                <td>
+                    {% set comentar = false %}
+                    {% for tarea in tramite.tarea | reverse  %}  
+                        {% if tarea.usuario.id == app.user.id %}{% set comentar = true %}{% endif %}
+                            {% if loop.first  %} 
+                                {% if  tarea.esResponsable | default(false) %} 
+                                     {% set title = "Responsable: " ~ tarea.usuario.agente.apellidoNombre | default( tarea.usuario.departamentoRm ) %} 
+                                {% else %}
+                                    {% set title = "Colaborador: " ~ tarea.usuario.agente.apellidoNombre | default( tarea.usuario.departamentoRm ) %}
+                                {% endif %}    
+                                <a data-toggle="tooltip" data-placement="top" title="Ver {{ title | default(null)}}"  href="{{ path('agente_show', { 'id': tarea.usuario.agente.id | default(0) }) }}" target="_blank">{{ tarea.usuario.usuario | default("-") }}</a>
+                           {% endif %}   
+                   {% endfor %}
+                </td>
+                <td >      
+                    <span class="pull-left">{{ include('ExpedienteBundle:Tramite:_estado_etiqueta.html.twig') }}</span>
+                    <br><small>{{ tramite.fechaEstado | date('d/m/Y')}}  {{ tramite.fechaEstado |long_time}}</small>               
+                </td>
+          {% if tramites is defined or  tareas is defined or realizadas is defined %}
+                <td width="15%" >
+                    {% set comentarios = tramite.id | Comentario(constant('TIPO_ENTIDAD', tramite))  %}
+                    {% if (comentarios | length > 0 ) %}
+                        {% set comentarios = comentarios | reverse %}
+                            <small><span>{{ comentarios[0].texto }}</span></small>  {% if   ( app.user.id == comentarios[0].usuario.id) %}&emsp;<a data-href="{{ path('comentario_eliminar', { 'id': comentarios[0].id }) }}" class="btn-eliminar-comentario text-danger"><span data-toggle="tooltip" data-placement="top" title='Quitar comentario' class="glyphicon glyphicon-trash" ></span></a>{% endif %}
+                    {% endif %}
+                    {% if is_granted('ROLE_SUPERVISOR') or comentar %} 
+                         {{ render(controller('ExpedienteBundle:Comentario:new',{ 'tipoid': tramite.id, 'tipo': constant('TIPO_ENTIDAD', tramite) } )) }}
+                    {% endif %}
+                </td>
+        {% endif %}
+</tr>

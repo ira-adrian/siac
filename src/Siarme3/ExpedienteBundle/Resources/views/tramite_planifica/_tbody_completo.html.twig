@@ -1,0 +1,24 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\_registro_completo.html.twig#}
+ {% set year = 'now' | date('Y')%}
+ <tr>
+    <td class="hidden">{{tramite.id}}</td>
+    <td>{{ tramite.numeroTramite }}</td>
+     <td style="width: 20%"><a  href="{{ path('tramite_show', { 'id': tramite.id }) }}" target="_blank">{{ tramite.ccoo | default('NO-'~ year ~ '-n/d')}}</a></td>
+    <td>{{ tramite.trimestre }}° Trimestre</td>
+    <td>          
+        <a href="{{ path('organismo_show', { 'id': tramite.organismoOrigen.id | default(0) }) }}" target="_blank"><strong>{{ tramite.organismoOrigen.saf.numeroSaf | default("N/D")}} - {{ tramite.organismoOrigen}} </strong></a>
+    </td>
+    <td>${{ tramite.PresupuestoOficial | default(0) | number_format(2, ',', '.')  }}</td>
+    <td style="width:10%">
+                           {% for tarea in tramite.tarea | reverse  %}  
+                            {% if loop.first  %} 
+                                {% if  tarea.esResponsable | default(false) %} 
+                                     {% set title = "Responsable: " ~ tarea.usuario.agente.apellidoNombre | default( tarea.usuario.departamentoRm ) %} 
+                                {% else %}
+                                    {% set title = "Colaborador: " ~ tarea.usuario.agente.apellidoNombre | default( tarea.usuario.departamentoRm ) %}
+                                {% endif %}    
+                                <a data-toggle="tooltip" data-placement="top" title="Ver {{ title | default(null)}}"  href="{{ path('agente_show', { 'id': tarea.usuario.agente.id | default(0) }) }}" target="_blank">{{ tarea.usuario.usuario | default("-") }}</a>
+                           {% endif %}   
+                   {% endfor %}
+    </td>
+</tr>

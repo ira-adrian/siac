@@ -1,0 +1,40 @@
+{# Siarme/AusentismoBundle/Resources/views/Cargo/edit.html.twig#}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} AGENTE{% endblock %}
+{% block stylesheets %}   
+     <link href="{{ asset('bundles/expediente/plugins/boostrap3/css/bootstrap_yeti.min.css') }}" type="text/css" rel="stylesheet">  
+     <link href="{{ asset('bundles/expediente/plugins/select2/css/select2.min.css') }}" rel="stylesheet">  
+{% endblock %}
+{% block menu_li %}    
+        <li>
+            <a  href="{{ path('agente_index') }}" role="button"> <span class="glyphicon glyphicon-list-alt"> Lista de Agentes </span></a>
+        </li>               
+ {% endblock %}   
+{% block main %}
+    <div class="panel panel-default">
+    <div class="panel-heading text-center">  
+       <h4>MODIFICAR LUGAR DE TRABAJO</h4>
+    </div>
+    <div class="panel-body">  
+    {{ form_start(edit_form) }}
+    {{ form_widget(edit_form) }}
+<ul class="list-inline text-right"> 
+    <li>    <a  class="btn btn-primary" href="{{ path('agente_show', { 'id': cargo.agente.id }) }}"> CANCELAR </span></a> </li>
+    <li>  <input class="btn btn-primary" type="submit" onclick= "return confirm('¿Desea GUARDAR?');" value="GUARDAR" /></li>
+
+    {{ form_end(edit_form) }}
+
+    <li>  {{ form_start(delete_form) }}
+                <input class="btn btn-danger"  onclick= "return confirm('¿Desea ELMINAR?');"  type="submit" value="ELIMINAR" />
+        {{ form_end(delete_form) }}</li>   
+ </ul>
+</div>
+</div>
+{% endblock %}
+{% block javascripts %} 
+{{ parent() }}
+    <script src="{{ asset('bundles/expediente/plugins/select2/js/select2.min.js') }}"></script>
+    <script> /*-- $('select').select2({  allowClear:true, placeholder:""});*/
+          $('select').select2();
+    </script>
+{% endblock %}

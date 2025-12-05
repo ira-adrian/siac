@@ -1,0 +1,36 @@
+expediente_evento:
+    resource: "@ExpedienteBundle/Controller/EventoController.php"
+    type:     annotation
+
+
+# app/config/routing.yml
+easy_admin_bundle:
+    resource: "@EasyAdminBundle/Controller/"
+    type:     annotation
+    prefix:   /admin
+
+usuario:
+    resource: "@UsuarioBundle/Controller/"
+    type:     annotation
+    prefix:   /
+    
+ausentismo:
+    resource: "@AusentismoBundle/Controller/"
+    type:     annotation
+    prefix:   /
+
+expediente_expediente:
+    resource: "@ExpedienteBundle/Controller/"
+    type:     annotation
+    prefix:   /
+    
+general:
+    resource: "@GeneralBundle/Controller/"
+    type:     annotation
+    prefix:   /
+
+documento:
+    resource: "@DocumentoBundle/Controller/"
+    type:     annotation
+    prefix:   /
+    

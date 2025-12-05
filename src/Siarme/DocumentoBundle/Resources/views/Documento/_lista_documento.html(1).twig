@@ -1,0 +1,125 @@
+{# Siarme/ExpedienteBundle/Resources/views/Extranet/_lista_documento.html.twig #}
+<li  style="padding-top:5px;">  
+        {% if documento.papelera %}
+           {%  set detalle = "Documento en Papelera" %}
+           
+      {% elseif documento.tipoDocumento.esArchivo %}
+             {% set   detalle = documento.nombreArchivo %}
+      {% else %}
+          {%  set detalle = "Ver el Documento" %}   
+      {% endif %}
+
+        <div class="dropdown hidden-print" style="background-color:#F5F5F5;"> 
+           {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': documento, 'tipo': 'DOC'} %}
+           {% if not documento.tipoDocumento.esArchivo and (app.user.id == documento.usuario.id or is_granted('ROLE_SUPERVISOR')) %}
+                 &nbsp; <a  role="button" href="{{ path('extranet_documento_edit' , { 'id': documento.id }) }}"> <span class="glyphicon glyphicon-pencil"></span></a>
+            {% endif %}
+            {% if edit or  app.user.id == documento.usuario.id or is_granted('ROLE_SUPERVISOR') %}
+               &nbsp; <a class="pull-right" href="{{ path('documento_eliminar', { 'id': documento.id }) }}" onclick= "return confirm('¿Desea  eliminar el documento?');"><span class="glyphicon glyphicon-trash text-danger"></span></a>
+            {% endif %}
+           <span> 
+      {% if documento.tipoDocumento.esArchivo %}     
+            {% set type = documento.archivo |split('.') %}
+          <a href="{{ asset('uploads/archivos/' ~ documento.archivo) }}" target="_blank" download><span class="glyphicon glyphicon-download-alt"></span></a>
+
+      {% endif %}
+       </span>
+           {# include 'DocumentoBundle:Documento:_menu_acciones_documento.html.twig' with {'entidad': documento, 'tipo': 'DOC'} #}
+     </div>
+       <hr style="margin:0px">
+
+    	{% if documento.papelera == true  %}
+        <h3 style="margin:3px">
+            <a data-toggle="tooltip" data-placement="top" title='{{ detalle }}'
+            href="{{ path('documento_show', { 'id': documento.id }) }}"           
+            class='{{documento.tipodocumento.glyphicon ~ ' text-muted'}}'>
+            </a>
+        </h3>
+        {%  set color = " text-muted" %} 
+    {#  {% elseif  ( app.user.id == documento.usuario.id) %} 
+           <h3><a data-toggle="tooltip" data-placement="top" title='{{ detalle }}'
+            href="{{ path('documento_show', { 'id': documento.id }) }}"
+           
+            class='{{documento.tipodocumento.glyphicon ~ ' text-success'}}'>
+            </a></h3>
+            {%  set color = " text-default" %}  #}
+
+    	{% else %}
+           <h3 style="margin:3px">
+
+           {% if ( is_granted('ROLE_USUARIO') or ( app.user.rol == documento.usuario.rol )) %}
+            {% if documento.tipoDocumento.esArchivo %}  
+                   {% set type = documento.archivo |default('nn.pdf') |split('.') %}
+
+                    <a class="file-icon" data-type='{{type[1]}}' data-toggle="tooltip" data-placement="top" title='{{ detalle }}'  href="{{ path('documento_show', { 'id': documento.id }) }}"></a>
+                    {#
+                            {% if type[1]== "pdf" %}
+                                    class="fa fa-file-pdf-o text-danger hidden-print"
+                            {% endif %}
+                            {% if type[1] in ["xlsx","xls"] %}
+                                     class="fa fa-file-excel-o text-success hidden-print"
+                            {% endif %}
+                             {% if type[1] in ["docx","dox","txt"] %}
+                                     class="fa fa-file-word-o text-primary hidden-print"
+                            {% endif %}
+                             {% if type[1] in ["pptx","ppt"] %}
+                                     class="fa fa-file-powerpoint-o text-danger hidden-print"
+                            {% endif %}
+                            {% if type[1] in ["zip","rar"] %}
+                                     class="fa fa-file-archive-o text-muted hidden-print"
+                            {% endif %}
+                            {% if type[1] in ["jpg","gif","png"] %}
+                                     class="fa fa-file-image-o text-primary hidden-print"
+                            {% endif %}                            
+                     >
+                     #}
+             {% else %}
+                     <a data-toggle="tooltip" data-placement="top" title='{{ detalle }}'  href="{{ path('documento_show', { 'id': documento.id }) }}" class='{{documento.tipodocumento.glyphicon}} hidden-print'></a>
+            {% endif %}
+
+         {% else %}
+            <span class='{{documento.tipodocumento.glyphicon}}  hidden-print'> </span>
+         {% endif %}   
+          </h3>
+            {%  set color = "" %} 
+      {% endif %}
+
+     <small class='{{ color }}'>
+
+        {% if ( app.user.id == documento.usuario.id) %}
+
+                  <small><span data-toggle="tooltip" data-placement="top" title='{{ documento.usuario }}' class='glyphicon glyphicon-user text-success hidden-print' aria-hidden="true">
+                     </span></small>  
+        {% else %}       
+                     <small><span data-toggle="tooltip" data-placement="top" title='{{ documento.usuario }}' class='glyphicon glyphicon-user text-muted hidden-print' aria-hidden="true"></span></small>
+        {% endif %} 
+  
+     </small>
+       {% if documento.slug != "licencia"  %}
+       <strong>{{ documento.nombreArchivo[:25] | default("-")}}</strong> 
+            <br>
+                {% if documento.fechaDocumento %}
+                     {{ documento.fechaDocumento|date('d-m-Y') }}                     
+                {% endif %}                
+             <br>  
+        {# {% if documento.estado %}           
+             <span class="label label-success"> Enviado a GDE</span>
+          {% else %}        
+             <span class="label label-default"> No Enviado a GDE</span>
+         {% endif %}  #}  
+        {% else %}
+            <br> 
+                 <span class="h6"> 
+                      {{ documento.licencia.fechaDesde | date("d/m/Y") | default("N/D")}} - 
+                      {% if documento.licencia.dias == 1 %}
+                              1 día
+                       {% else %}
+                               {{ documento.licencia.dias }} días
+                       {% endif %} - 
+                       {{documento.licencia.enfermedad.codigoEnfermedad }}
+                 </span>
+                 <br> 
+         {% endif %}       
+      {{documento}}
+</li>   
+

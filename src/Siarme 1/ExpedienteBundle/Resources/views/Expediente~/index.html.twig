@@ -1,0 +1,303 @@
+{# Siarme/ExpedienteBundle/Resources/views/Extranet/index.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} Escritorio {% endblock %}
+{% block menu_li %}
+
+{% endblock %}
+
+{% block contenido %}
+
+
+{% block mensaje %}
+ {{ include('ExpedienteBundle:Default:_mensaje.html.twig') }}
+{% endblock %}
+{% set turnoshoy=  app.user.id | Turnos() %}
+{% if find is empty %}
+     {% set agentes = app.user.id | Historial_Entidad('AG') %}
+     {% set agentes_total = agentes | length %}
+     {% set expedientes = app.user.id | Historial_Entidad('EXP')  %}
+     {% set expedientes_total = expedientes | length%}
+     {% set documentos = app.user.id | Historial_Entidad('DOC') %}
+     {% set documentos_total = documentos | length %}
+{% else %}
+         {% set agentes = pagination_agentes %}
+         {% set agentes_total = agentes | length %}
+         {% set expedientes = pagination_expedientes %}
+         {% set expedientes_total = expedientes | length %}
+        {% set documentos_total = 0%}
+{% endif %}
+
+
+ {% set msjs_compartido = app.user.id | Comparte('MSJ') %}
+ {% set msjs_compartido_total = msjs_compartido | length %}
+
+ {% set ags_compartido = app.user.id | Comparte('AG') %} 
+ {% set ags_compartido_total = ags_compartido | length %} 
+ {% set expts_compartido = app.user.id | Comparte('EXP') %} 
+ {% set expts_compartido_total = expts_compartido | length  %} 
+ {% set docs_compartido = app.user.id | Comparte('DOC') %} 
+ {% set docs_compartido_total = docs_compartido | length  %}
+ 
+   {% set classac="" %}
+   {% set classdc="" %}
+   {% set classec="" %}
+
+{% if docs_compartido_total > 0 %}
+    {% set classdc="active" %}
+     {% set classec="" %}
+      {% set classac="" %}  
+{% endif%}
+{% if expts_compartido_total > 0 %}
+   {% set classec="active" %}
+     {% set classdc="" %}
+       {% set classac="" %}
+{% endif%}
+{% if ags_compartido_total > 0 %}
+   {% set classac="active" %}
+    {% set classdc="" %}
+       {% set classec="" %}
+{% endif %}
+
+  <ul class="nav nav-tabs" id="myTab">
+        {% set classd="" %}
+         {% set classe="" %}
+          {% set classa="" %} 
+
+   {% if documentos_total > 0 %}
+        {% set classd="active" %}
+         {% set classe="" %}
+          {% set classa="" %}  
+    {% endif %}
+    {% if expedientes_total > 0 %}
+       {% set classe="active" %}
+         {% set classd="" %}
+           {% set classa="" %}
+    {% endif %}
+    {% if agentes_total > 0 %}
+       {% set classa="active" %}
+        {% set classd="" %}
+           {% set classe="" %}
+    {% endif %}
+
+   {% if find is empty %}
+
+    <li class="active"><a data-toggle="tab" href="#principal"><span class="glyphicon glyphicon-time"></span>Historial 
+
+     <small class="text-muted">
+     {% if agentes_total > 0 %}
+       <span class="glyphicon glyphicon-user" aria-hidden="true"></span>{{agentes_total}}
+    {% endif %}
+     {% if expedientes_total > 0 %}
+       <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> {{expedientes_total}}
+     {% endif %}
+     {% if documentos_total > 0 %} 
+       <span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span> {{documentos_total}}
+    {% endif %}
+      </small></a>
+    </li>
+     
+  {% else %}
+    
+      <li class="active"><a data-toggle="tab" href="#principal">Resultados
+        <small>
+     {% if agentes_total > 0 %}
+       <span class="glyphicon glyphicon-user" aria-hidden="true"></span>{{agentes_total}}
+      {% endif %} 
+     {% if expedientes_total > 0 %}
+       <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> {{expedientes_total}}
+     {% endif %}
+        {#
+       <span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span> {{documentos_total}}#}
+
+       </small>
+      </a></li>
+    
+  {% endif %}
+    <li>
+          <a data-toggle="tab" href="#menu3"> <span class="glyphicon glyphicon-pushpin" aria-hidden="true"></span>Turnos
+          {% if turnoshoy.hoy >= 1 %}
+                <span class="label label-success"> Hoy: {{turnoshoy.hoy}} </span>
+         {% endif %}
+           </a>
+     </li>
+   {% if ags_compartido_total + expts_compartido_total + docs_compartido_total > 0 %}
+     <li>
+          <a data-toggle="tab" href="#menu4"><span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span>Compartido
+ 
+          <small class="text-muted">
+              {% if ags_compartido_total > 0 %}
+                  <span class="glyphicon glyphicon-user" aria-hidden="true"></span>{{ags_compartido_total}}
+              {% endif %}      
+
+              {% if expts_compartido_total > 0 %}
+                  <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> {{expts_compartido_total}} 
+              {% endif %}
+
+              {% if docs_compartido_total > 0 %}  
+                 <span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span> {{docs_compartido_total}} 
+              {% endif %}
+
+           </small>
+
+          </a>
+     </li>
+ {% endif %}
+   {% if msjs_compartido_total > 0 %}
+    <li>
+          <a data-toggle="tab" href="#mensajes"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span> Mensajes<span class="badge">{{msjs_compartido_total}}</span> 
+
+          </a>
+     </li>
+   {% endif %}  
+  </ul>
+
+  <div class="tab-content">
+{# -- ------------------------------------------------------------------ --#}
+
+    <div id="principal" class="tab-pane fade in active">
+   {% if find is empty and (agentes_total + expedientes_total + documentos_total) > 0 %}
+
+      <p style="margin-bottom:0px" class="text-center"> &nbsp;&nbsp;&nbsp;<a href="{{ path('historial_limpiar',{'tipo':'todo'} ) }}" class="text-center"><span class="glyphicon glyphicon-remove"></span>Limpiar el HISTORIAL </a></p>
+
+   {% endif %}
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist" style="background-color:#F5F5F5;">
+    {% if find is empty %}
+      {% if  agentes_total > 0 %}
+        <li role="presentation" class={{classa}}><a href="#agentes" aria-controls="agentes" role="tab" data-toggle="tab">Agentes<span class="badge">{{agentes_total}}</span></a></li>
+      {% endif %}  
+      {% if  expedientes_total > 0 %}
+        <li role="presentation" class={{classe}}><a href="#expedientes" aria-controls="expedientes" role="tab" data-toggle="tab">Expedientes<span class="badge">{{expedientes_total}}</span></a></li>
+      {% endif %}  
+      {% if  documentos_total > 0 %}
+        <li role="presentation" class={{classd}}><a href="#Documentos" aria-controls="Documentos" role="tab" data-toggle="tab">Documentos<span class="badge">{{documentos_total}}</span></a></li>
+      {% endif %}
+
+   {% else %}
+        {% if  agentes_total == 0 %}
+            <li class={{classa}}><a data-toggle="tab" href="#agentes">Agentes <span class="label label-default"> <small> Ninguno </small> </span></a></li>
+        {% else %}
+            <li class={{classa}}><a data-toggle="tab" href="#agentes">Agentes <span class="label label-success"> <small>Encontrados </small> {{ agentes_total}} </span></a></li>
+        {% endif %}
+        {% if  expedientes_total == 0 %}
+           <li class={{classe}}><a data-toggle="tab" href="#expedientes"> Expedientes <span class="label label-default"> <small> Ninguno </small> </span> </a></li>
+        {% else %}
+            <li class={{classe}}><a data-toggle="tab" href="#expedientes"> Expedientes <span class="label label-success"> <small>Encontrados</small> {{ expedientes_total }}</span></a></li>  
+         {% endif %}
+   {% endif %}
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content" style="background-color:#F5F5F5;">
+    {% if agentes_total > 0 or find is not empty %} 
+    <div role="tabpanel" id="agentes" class="tab-pane fade in {{classa}}">
+       
+  
+        {{ include('AusentismoBundle:Agente:_panel_agente.html.twig', {'pagination' : agentes , 'find': find | upper }) }}
+                
+        {# display navigation 
+        <div class="navigation pagination">
+        {{ knp_pagination_render(pagination)  }}
+        </div>#}
+
+    </div>
+    {% endif %}
+    {% if expedientes_total > 0 or find is not empty %} 
+    <div role="tabpanel" class="tab-pane fade in {{classe}}" id="expedientes">   
+       {% if find is empty %}  
+        {% set find = "--..--" %}
+        {% endif %}
+        {{ include('ExpedienteBundle:Expediente:_panel_expediente.html.twig', {'pagination' : expedientes , 'find': find | upper }) }}
+    </div>
+    {% endif %}
+    {% if documentos_total > 0 %} 
+    <div role="tabpanel" class="tab-pane fade in {{classd}}" id="Documentos">       
+       <ul class="list-inline text-center">
+        {% for documento in documentos %} 
+
+        {{ include('DocumentoBundle:Documento:_lista_documento.html.twig') }}
+       
+        {% endfor %}    
+      </ul> 
+        {# display navigation 
+        <div class="navigation pagination">
+        {{ knp_pagination_render(pagination)  }}
+        </div>#}
+      </div>
+     {% endif %}  
+  </div>
+
+
+ </div>
+{# -- ------------------------------------------------------------------ --#} 
+    <div id="menu3" class="tab-pane fade">
+
+     {{ render(controller('ExpedienteBundle:Expediente:indexTurno'))}}
+ 
+    </div>
+{# -- ------------------------------------------------------------------ --#} 
+  <div id="menu4" class="tab-pane fade">
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs bg-info " role="tablist">
+     {% if ags_compartido_total > 0 %}
+        <li role="presentation" class={{classac}}><a href="#ags_compartido" aria-controls="ags_compartido" role="tab" data-toggle="tab">Agentes
+          <span class="badge">{{ags_compartido_total}}</span></a></li>
+     {% endif %}
+
+   {% if expts_compartido_total > 0 %}
+      <li role="presentation" class={{classec}}><a href="#axpts_compartido" aria-controls="axpts_compartido" role="tab" data-toggle="tab">Expedientes<span class="badge">{{expts_compartido_total}}</span></a></li>  
+   {% endif %}
+
+   {% if docs_compartido_total > 0 %}
+       <li role="presentation" class={{classdc}}><a href="#docs_compartido" aria-controls="docs_compartido" role="tab" data-toggle="tab">Documentos<span class="badge">{{docs_compartido_total}}</span></a></li>
+    {% endif %}
+
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+
+    {% if ags_compartido_total > 0  %} 
+          <div role="tabpanel" class="tab-pane fade in {{classac}}" id="ags_compartido">
+              {{ include('AusentismoBundle:Agente:_panel_agente.html.twig', {'pagination' : ags_compartido , 'find': find | upper }) }}
+          </div>
+    {% endif %}
+
+    {% if expts_compartido_total > 0  %} 
+        <div role="tabpanel" class="tab-pane fade in {{classec}}" id="axpts_compartido">
+           {% if find is empty %}  
+            {% set find = "--..--" %}
+            {% endif %}
+            {{ include('ExpedienteBundle:Expediente:_panel_expediente.html.twig', {'pagination' : expts_compartido , 'find': find | upper }) }}
+        </div>
+    {% endif %}
+    {% if docs_compartido > 0  %}
+              <div role="tabpanel" class="tab-pane fade in {{classdc}}" id="docs_compartido">
+                <ul class="list-inline text-center">
+                  {% for documento in docs_compartido %} 
+
+                  {{ include('DocumentoBundle:Documento:_lista_documento.html.twig') }}
+                 
+                  {% endfor %}       
+               </ul>
+              </div>
+    {% endif %}
+  </div>
+ </div>
+  {# -- ------------------------------------------------------------------ --#} 
+  {% if msjs_compartido_total > 0 %}
+   <div id="mensajes" class="tab-pane fade">
+
+  <div class="col-sm-offset-2 col-sm-8 col-md-offset-2 col-md-8  style="font-size:15px"">
+    {{ include('DocumentoBundle:Compartir:index.html.twig', {'compartidos' : msjs_compartido , 'find': find | upper }) }}
+</div>
+
+   </div>
+   {% endif %}
+ {# -- ------------------------------------------------------------------ --#} 
+</div>
+
+
+{% endblock %}

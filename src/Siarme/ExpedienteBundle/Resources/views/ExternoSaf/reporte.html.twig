@@ -1,0 +1,231 @@
+{# Siarme\ExpedienteBundle\Resources\views\Externo\index.html.twig #}
+
+{% extends 'frontend.html.twig' %}
+{% block title %} PEDIDOS{% endblock %}
+{% block stylesheets %}   
+     <link href="{{ asset('bundles/expediente/plugins/boostrap3/css/bootstrap_cerulean.min.css') }}" type="text/css" rel="stylesheet"> 
+    <link rel="stylesheet" href="{{ asset('bundles/expediente/plugins/font-awesome/css/font-awesome.min.css') }}">  
+    <link href="{{ asset('bundles/expediente/plugins/datatables/jquery.dataTables.min.css')}}" type="text/css" rel="stylesheet">
+    <style type="text/css" media="print">
+        @media print {
+            a[href]:after {
+                content: none !important;
+            }
+        }
+    </style>     
+{% endblock %}
+{% block body %}
+<header>
+  <nav class="navbar navbar-inverse hidden-print"  role = "navigation">
+      <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <a class="navbar-brand"><span  class="glyphicon glyphicon-shopping-cart"></span> {{app.user.departamentoRm.organismo}}</a>
+    </div>
+      <ul class="nav navbar-nav">       
+        <li class="active"><a href="{{ path('externo_saf_index') }}" ><span class="glyphicon glyphicon-home" aria-hidden="true"></span> INICIO</a></li>   
+        <li><a href="{{ path('externo_reporte') }}"  target="_blank"> <span class="glyphicon glyphicon-stats" ></span> REPORTE </a></li> 
+      </ul> 
+      <ul class="nav navbar-nav navbar-right">     
+          <li data-toggle="tooltip" data-placement="bottom" title='Ver Perfil' >
+            
+      <a href="{{ path('usuario_show', { 'id': app.user.id }) }}"><span class="glyphicon glyphicon-user text-info"> </span> {{ app.user.usuario }}</a>
+            </li>      
+        <li>
+             <a href="{{ path('usuario_logout') }}" >
+                  <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
+                  Salir
+              </a>           
+        </li>        
+      </ul> 
+    </div><!-- /.container-fluid -->    
+</nav>
+</header>
+<ul class="nav nav-pills hidden-print"  style="margin-bottom:1px;">
+  <!-- Menu DERECHO *** IMPRIMIR - COPIAR -->
+    <div class="pull-right">
+            <li  role="presentation">
+                <a href="javascript:if(window.print)window.print()" value="Imprimir" role="button"><!-- Printer-imprime el texto de clase="print" -->
+                <span class="glyphicon glyphicon-print" ></span> Imprimir</a>
+            </li>
+    </div> 
+</ul>
+ <div class="container" id="copy">
+ <div class="panel panel-warning">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#reporte">
+          <span class="glyphicon glyphicon-plus  text-info"></span> <span class="glyphicon glyphicon-stats"></span> REPORTE
+        </a>
+      </h4>
+    </div>
+    <div id="reporte" class="collapse in">
+      <div  class="panel-body ">
+        <ol class="breadcrumb hidden-print"  style="margin-bottom:1px;"> 
+            {% for year in ( ('now' | date("Y") - 2) .. ('now' | date("Y"))) %} 
+                {% if year != anio %}
+                  <li><a href="{{ path('externo_reporte', {'anio': year }) }}"> <span class="glyphicon glyphicon-calendar"></span>{{year}}</a></li>
+                {% else %}
+                    <li class="active"> 
+                      <span class="glyphicon glyphicon-calendar text-success"></span> <strong>{{year}}</strong>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+          <div class="list-group-item" style="height: 100%;">
+            <table class="table table-striped">
+            <thead class="text-center">
+              <tr> <h3> CANTIDAD DE PEDIDOS POR TRIMESTRE </h3> </tr>
+             <tr>
+                <th>Trimestres</th>
+                <th>Cantidad</th>
+                <th>Presupuesto</th>
+             </tr>
+           </thead>
+            <tbody>
+
+              {% set resportePorTrimestreSaf, sumaCantidad, sumaPresupuesto = tramites_por_trimestre_saf(2, anio, app.user.departamentoRm.organismo.id), 0, 0 %}
+      
+              {% for reporte  in resportePorTrimestreSaf %}
+                <tr> 
+                  <th>{{reporte.trimestre}}° Trimestre</th>
+                  <td> {{reporte.cantidad}} </td>
+                  <td>$ {{reporte.presupuesto | number_format(2, ',', '.')}}</td>
+                </tr> 
+                {% set sumaCantidad, sumaPresupuesto = 
+                              sumaCantidad + reporte.cantidad , 
+                              sumaPresupuesto +  reporte.presupuesto 
+
+                %}
+              {% endfor %}
+              <tr>
+                <th>Totales</th>
+                <th>{{sumaCantidad}}</th>
+                <th>$ {{sumaPresupuesto | number_format(2, ',', '.')}}</th>
+              </tr> 
+            </tbody>
+          </table>
+            <div id="chartTrimestre" style="height: 300px; max-width: 80%"></div>
+          </div>
+          
+          <div class="list-group-item">
+          <table class="table table-striped">
+            <thead class="text-center">
+              <tr> <h3> CANTIDAD DE PEDIDOS POR RUBRO</h3> </tr>
+             <tr>
+                <th>Rubro</th>
+                <th>Cantidad</th>
+                <th>Presupuesto</th>
+             </tr>
+           </thead>
+            <tbody>
+              {% set resportePorRubroSaf, sumaCantidad, sumaPresupuesto = tramites_por_rubro_saf(2, anio, app.user.departamentoRm.organismo.id), 0, 0 %}
+      
+              {% for reporte  in resportePorRubroSaf %}
+                <tr> 
+                  <th>{{reporte.tramite.rubro}}</th>
+                  <td> {{reporte.cantidad}} </td>
+                  <td>$ {{reporte.presupuesto | number_format(2, ',', '.')}}</td>
+                </tr> 
+                {% set sumaCantidad, sumaPresupuesto = 
+                              sumaCantidad + reporte.cantidad , 
+                              sumaPresupuesto +  reporte.presupuesto 
+
+                %}
+              {% endfor %}
+              <tr>
+                <th>Totales</th>
+                <th>{{sumaCantidad}}</th>
+                <th>$ {{sumaPresupuesto | number_format(2, ',', '.')}}</th>
+              </tr> 
+            </tbody>
+          </table>
+              <div id="chartRubro"  style="height: 700px; max-width: 80%;"></div>
+          </div>
+
+      </div>
+    </div>
+  </div>
+  
+</div>
+{% endblock %}
+{% block javascripts %}   
+   <script src="{{ asset('bundles/expediente/plugins/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('bundles/expediente/plugins/boostrap3/js/bootstrap.min.js') }}"></script>         
+    <script src="{{ asset('bundles/expediente/plugins/print/printArea.js') }}"></script> 
+    <script src="{{ asset('bundles/expediente/plugins/dropzone/dist/dropzone.js') }}"></script>
+    <script src="{{ asset('bundles/expediente/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('bundles/expediente/plugins/clipboard/dist/clipboard.min.js') }}"></script>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+<script>    
+{# obtengo los reportes para ITEMPEDIDO #}
+{% set itemsPorTrimestreSaf, itemsPorRubroSaf= tramites_por_trimestre_saf(2,anio, app.user.departamentoRm.organismo.id), tramites_por_rubro_saf(2,anio, app.user.departamentoRm.organismo.id) %}
+
+$('#selectAll').click( function(){ 
+    $('input').prop('checked', false);              
+})
+$(function () {
+
+  CanvasJS.addCultureInfo("es", 
+    {      
+      decimalSeparator: ",",// Observe ToolTip Number Format
+      digitGroupSeparator: ".", // Observe axisY labels                   
+      days: ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"]
+      
+    });
+
+///GRAFICO CANTIDAD DE ITEMS POR TRIMESTRE
+var chart = new CanvasJS.Chart("chartTrimestre", {
+  theme: "light2", // "light2", "dark1", "dark2"
+  culture: "es",
+  animationEnabled: false, // change to true    
+  title:{
+    text: ""
+  },
+  data: [
+  {
+    // Change type to "bar", "area", "spline", "pie",etc.
+    type: "column",
+    toolTipContent: "<b>{label}</b><br>Cantidad de ítems: {cantidad}<br>Presupuesto: $ {presupuesto}",
+    dataPoints: [
+      {% for reporte in itemsPorTrimestreSaf %}
+        { label: "{{reporte.trimestre}} ° Trimestre",  y: {{reporte.presupuesto}}, cantidad:'{{reporte.cantidad}}', presupuesto:'{{reporte.presupuesto | number_format(2, ',', '.')}}' },
+      {% endfor %}
+    ]
+  }
+  ]
+});
+chart.render();
+
+///GRAFICO RUBRO POR TOTAL POR RUBRO Y AÑO
+var chart = new CanvasJS.Chart("chartRubro", {
+  culture: "es",
+  animationEnabled: true,
+  
+  title:{
+    text:""
+  },
+  axisX:{
+    interval: 1
+  },
+  axisY2:{
+    interlacedColor: "rgba(1,77,101,.2)",
+    gridColor: "rgba(1,77,101,.1)",
+    title: ""
+  },
+  data: [{
+    type: "bar",
+    name: "Rubros",
+    axisYType: "secondary",
+    toolTipContent: "<b>{rubro}</b><br>Cantidad de ítems: {cantidad}<br>Presupuesto: $ {presupuesto}",
+    dataPoints: [
+          {% for reporte in itemsPorRubroSaf %}
+                { y: {{reporte.presupuesto}}, label: '{{reporte.tramite.rubro.ipp}}', rubro:'{{reporte.tramite.rubro}}', cantidad:'{{reporte.cantidad}}', presupuesto:'{{reporte.presupuesto | number_format(2, ',', '.')}}'},
+          {% endfor %} 
+    ]
+  }]
+});
+chart.render();
+});
+</script>
+{% endblock %}

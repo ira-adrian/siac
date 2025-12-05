@@ -1,0 +1,44 @@
+<?php
+
+namespace Siarme\ExpedienteBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * Evento
+ *
+ * @ORM\Table(name="evento")
+ * @ORM\Entity(repositoryClass="Siarme\ExpedienteBundle\Repository\EventoRepository")
+ */
+class Evento
+{
+/**
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer")
+     */
+    private $id;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank()
+     */
+    private $titulo;
+
+    /**
+     * @ORM\Column(type="datetime")
+     * @Assert\NotBlank()
+     */
+    private $fechaInicio;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $fechaFin;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $descripcion;
+}

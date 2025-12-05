@@ -1,0 +1,57 @@
+{# Siarme/AusentismoBundle/Resources/views/Licencia/edit.html.twig#}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} LICENCIA{% endblock %}
+{% block stylesheets %}
+          <link href="{{ asset('bundles/expediente/plugins/boostrap3/css/bootstrap_cerulean.min.css') }}" type="text/css" rel="stylesheet">   
+      <link href="{{ asset('bundles/expediente/select2/css/select2.min.css') }}" rel="stylesheet">     
+{% endblock %}
+{% block menu_li %}    
+    <li>
+        <a   href="{{ path('licencia_index') }}" role="button"> <span class="glyphicon glyphicon-list-alt"> Listar Licencias</span></a>
+    </li>     
+    {% set botonDelet %}                     
+         {{ form_start(delete_form, {'attr': {'onclick': 'return confirm("¿Desea ELIMINAR la Licencia?")'}}) }}                       
+           <button class="btn btn-danger btn-sm" type="submit" value="Eliminar"><span class="glyphicon glyphicon-trash"> Eliminar  </span> </button>
+          {{ form_end(delete_form) }}
+    {% endset %}
+    {% if (licencia.documento | length == 0) %} 
+        <li> 
+        {{ botonDelet }}
+        </li>
+    {% endif %}   
+                 
+ {% endblock %}   
+{% block main %}
+<div class="panel panel-default">
+        <div class="panel-heading">  
+            <h4 class="text-center"> MODIFICAR LICENCIA </h4>
+            <strong>Agente: <br> 
+            </strong> {{licencia.agente}}<br> 
+            <strong> Edad:</strong> {{ licencia.agente.fechaNacimiento | age }}  - 
+            <strong>Antiguedad: </strong>{{ licencia.agente.fechaInicioLaboral | age }} - 
+            {% if licencia.agente.localidad.departamento is defined %}
+            <strong>Departamento:</strong> {{ licencia.agente.localidad.departamento }} <hr style="margin:5px" >
+
+            {% else %}
+            <strong>Departamento:</strong> N/D  <hr style="margin:5px" >
+            {% endif %}
+            <strong>Lugar de Trabajo:</strong> <br> 
+            {% for cargo in licencia.agente.cargo %} {{ cargo }} - {{ cargo.funcion }} {% endfor %}  
+        </div>
+         <div class="panel-body">
+            {{ form_start(edit_form) }}
+            {{ form_widget(edit_form) }}
+                <div class="text-right">
+                   <input class="btn btn-danger" type="submit" onclick= "return confirm('¿Desea GUARDAR los cambios?');" value="GUARDAR" />
+                </div>
+            {{ form_end(edit_form) }}
+        </div>
+</div>
+{% endblock %}
+{% block javascripts %} 
+{{ parent() }}
+    <script src="{{ asset('bundles/expediente/select2/js/select2.min.js') }}"></script>
+    <script> /*-- $('select').select2({  allowClear:true, placeholder:""});*/
+          $('select').select2();
+    </script>
+{% endblock %}

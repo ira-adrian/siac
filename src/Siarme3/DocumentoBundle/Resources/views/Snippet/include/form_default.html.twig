@@ -1,0 +1,7 @@
+{{ form_start(form) }}
+{{ form_widget(form) }}
+	<div class="text-right">
+	    <a class="btn btn-primary" href="{{ path('expediente_show', { 'id': documento.tramite.expediente.id }) }}"> CANCELAR </span></a> 
+	    <input class="btn btn-danger"  type="submit" value="Guardar" />
+	</div>
+{{ form_end(form) }}

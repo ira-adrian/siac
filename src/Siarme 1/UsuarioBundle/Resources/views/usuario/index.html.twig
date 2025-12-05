@@ -1,0 +1,418 @@
+{# Siarme/AusentismoBundle/Resources/views/Agente/index.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} USUARIOS{% endblock %}
+{% block header %}
+  {{ include('ExpedienteBundle:Default:_header.html.twig') }}
+  {{ include('ExpedienteBundle:Default:_breadcrumb_principal.html.twig') }}
+{% endblock %}
+{% block contenido %}
+<div id="copy"> 
+        {% if app.user.departamentoRm.slug != "dppr" %} {% set modulo ="EXPEDIENTES" %}{% else %}{% set modulo ="CCOO-DPPR" %}{% endif %}
+        {% set modulo2 = "TAREAS" %}  
+        {% for tipoTramite in app.user.departamentoRm.tipoTramite %}
+            {% if loop.first %}
+            {% set modulo2 = tipoTramite %}
+            {% endif %}
+        {% endfor %}
+        {{ app.session.set('modulo', "USUARIOS") }}
+        {{ app.session.set('route', 'usuario_index') }}
+        {{ app.session.set('glyphicon', 'glyphicon glyphicon-user') }}
+     <div class="nav nav-tabs nav-justified" style="padding-top:5px;">      
+        <li role="presentation" ><a href="{{ path('expediente_reparticion_index') }}"> <span class="glyphicon glyphicon-folder-open"></span> {{modulo}}</a></li>
+        <li role="presentation" ><a href="{{ path('tramite_reparticion_index') }}"> <span class="glyphicon glyphicon-tasks"></span>{{modulo2}}</a></li>
+        <li role="presentation"><a style="color:#306066;" href="{{ path('general_reparticion_index', {'id': app.user.departamentoRm.id }) }}"><span class="glyphicon glyphicon-folder-open"></span> ACUERDO MARCO</a></li>
+        <li role="presentation" ><a  href="{{ path('reporte_index', {'id': app.user.departamentoRm.id }) }}"> <span class="glyphicon glyphicon-stats"></span> REPORTE</a></li>
+        <li role="presentation" ><a href="{{ path('organismo_index', {'id': app.user.departamentoRm.id }) }}"><span class="glyphicon glyphicon-tent" ></span> SAFS</a></li>
+        <li role="presentation" class="active"><a  href="{{ path('usuario_index', {'id': app.user.departamentoRm.id }) }}"> <span class="glyphicon glyphicon-user"></span> USUARIOS</a></li>
+      </div>
+{% block mensaje %}
+ {{ include('ExpedienteBundle:Default:_mensaje.html.twig') }}
+{% endblock %}
+      <ol class="breadcrumb"  style="margin-bottom:1px;"> 
+        {% for year in ( ('now' | date("Y") - 2) .. ('now' | date("Y"))) %} 
+<li></li>
+        {% endfor %}
+      </ol>
+ <!-- Nav tabs -->
+  <ul class="nav nav-tabs nav-justified hidden-print" role="tablist">
+  
+            <li role="presentation"  {% if app.user.departamentoRm.slug == "dppr" %} class="active" {% endif %}><a href="#dppr" aria-controls="dppr" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-user"></span> DPPR </a></li>
+            <li role="presentation" {% if app.user.departamentoRm.slug == "dpcbs" %} class="active" {% endif %}><a href="#dpcbs" aria-controls="dpcbs" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-user"></span> DPCBS </a></li>
+            <li role="presentation" {% if app.user.departamentoRm.slug == "despacho" %} class="active" {% endif %}><a href="#despacho" aria-controls="despacho" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-user"></span> DESPACHO </a></li>
+            <li role="presentation" {% if app.user.departamentoRm.slug == "sca" %} class="active" {% endif %}><a href="#pago" aria-controls="pago" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-user"></span> PAGO </a></li>
+            <li role="presentation" {% if app.user.departamentoRm.slug == "multa" %} class="active" {% endif %}><a href="#multa" aria-controls="multa" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-user"></span> MULTA </a></li>
+            <li role="presentation" {% if app.user.departamentoRm.slug == "dlt" %} class="active" {% endif %}><a href="#dlt" aria-controls="dlt" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-user"></span> LEGAL </a></li>
+            <li role="presentation" {% if app.user.departamentoRm.slug == "info" %} class="active" {% endif %}><a href="#info" aria-controls="info" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-user"></span> INFO </a></li>
+  </ul>
+
+<div class="tab-content">
+ 
+<div role="tabpanel" class="tab-pane fade in   {% if app.user.departamentoRm.slug == "dppr" %} active {% endif %}" id="dppr">
+ <table class="table table-responsive table-hover tablaAgente text-uppercase">
+            <thead>
+                <tr>
+                    <th>Info</th>
+                    <th>Apellido y Nombre</th>
+                    <th>DNI</th>
+                    <th>Usuario</th>
+                    <th>Reparticion</th>
+                    <th>Email</th>
+                    <th>Telefono</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for agente in usuarios if agente.usuario.departamentoRm.slug | default( "-") == "dppr"  %}
+                <tr>
+                    <td>
+                          <div class="dropdown text-left"> 
+                            {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': agente, 'tipo': 'AG'} %}
+                          </div>
+                    </td>
+                    <td><a data-toggle="tooltip" data-placement="top" title="Muestra TODOS los datos del Agente" href="{{ path('agente_show', { 'id': agente.id }) }}" target="_blank">{{ agente.apellidoNombre }} </a></td>
+                    <td>{{ agente.dni }}</td>
+                    <td> 
+                        {% if agente.usuario.id is defined %}
+                                <a data-toggle="tooltip" data-placement="top" title="Ver Perfil"  href="{{ path('usuario_show', { 'id': agente.usuario.id }) }}" target="_blank">{{ agente.usuario.usuario | default( "-") }}</a>
+                        {% else %}
+                            -
+                        {% endif %}
+
+                    </td>
+
+                    <td>{{ agente.usuario.departamentoRm | default( "-") }}</td>
+                    <td>{{ agente.email }}</td>
+                    <td>{{ agente.telefonoMovil }}</td>
+                    <td>                
+                     {% if ( is_granted('ROLE_ADMIN'    )) %} 
+                        {% if agente.usuario.id is not defined %}
+                            <a  class="text-danger" data-toggle="tooltip" data-placement="top" title="CREAR nuevo Usuario" href="{{ path('usuario_new', { 'id': agente.id }) }}"> 
+                            <span class="glyphicon glyphicon-plus-sign"></span> Crear Usuario
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div role="tabpanel" class="tab-pane fade in {% if app.user.departamentoRm.slug == "dpcbs" %} active {% endif %}" id="dpcbs">
+        <table class="table table-responsive table-hover tablaAgente text-uppercase">
+            <thead>
+                <tr>
+                    <th>Info</th>
+                    <th>Apellido y Nombre</th>
+                    <th>DNI</th>
+                    <th>Usuario</th>
+                    <th>Reparticion</th>
+                    <th>Email</th>
+                    <th>Telefono</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for agente in usuarios if agente.usuario.departamentoRm.slug | default( "-") == "dpcbs"  %}
+                <tr>
+                    <td>
+                          <div class="dropdown text-left"> 
+                            {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': agente, 'tipo': 'AG'} %}
+                          </div>
+                    </td>
+                    <td><a data-toggle="tooltip" data-placement="top" title="Muestra TODOS los datos del Agente" href="{{ path('agente_show', { 'id': agente.id }) }}" target="_blank">{{ agente.apellidoNombre }} </a></td>
+                    <td>{{ agente.dni }}</td>
+                    <td> 
+                        {% if agente.usuario.id is defined %}
+                                <a data-toggle="tooltip" data-placement="top" title="Ver Perfil"  href="{{ path('usuario_show', { 'id': agente.usuario.id }) }}" target="_blank">{{ agente.usuario.usuario | default( "-") }}</a>
+                        {% else %}
+                            -
+                        {% endif %}
+
+                    </td>
+
+                    <td>{{ agente.usuario.departamentoRm | default( "-") }}</td>
+                    <td>{{ agente.email }}</td>
+                    <td>{{ agente.telefonoMovil }}</td>
+                    <td>                
+                     {% if ( is_granted('ROLE_ADMIN'    )) %} 
+                        {% if agente.usuario.id is not defined %}
+                            <a  class="text-danger" data-toggle="tooltip" data-placement="top" title="CREAR nuevo Usuario" href="{{ path('usuario_new', { 'id': agente.id }) }}"> 
+                            <span class="glyphicon glyphicon-plus-sign"></span> Crear Usuario
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div role="tabpanel" class="tab-pane fade in {% if app.user.departamentoRm.slug == "despacho" %} active {% endif %}" id="despacho">
+         <table class="table table-responsive table-hover tablaAgente text-uppercase">
+            <thead>
+                <tr>
+                    <th>Info</th>
+                    <th>Apellido y Nombre</th>
+                    <th>DNI</th>
+                    <th>Usuario</th>
+                    <th>Reparticion</th>
+                    <th>Email</th>
+                    <th>Telefono</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for agente in usuarios if agente.usuario.departamentoRm.slug | default( "-") == "despacho"  %}
+                <tr>
+                    <td>
+                          <div class="dropdown text-left"> 
+                            {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': agente, 'tipo': 'AG'} %}
+                          </div>
+                    </td>
+                    <td><a data-toggle="tooltip" data-placement="top" title="Muestra TODOS los datos del Agente" href="{{ path('agente_show', { 'id': agente.id }) }}" target="_blank">{{ agente.apellidoNombre }} </a></td>
+                    <td>{{ agente.dni }}</td>
+                    <td> 
+                        {% if agente.usuario.id is defined %}
+                                <a data-toggle="tooltip" data-placement="top" title="Ver Perfil"  href="{{ path('usuario_show', { 'id': agente.usuario.id }) }}" target="_blank">{{ agente.usuario.usuario | default( "-") }}</a>
+                        {% else %}
+                            -
+                        {% endif %}
+
+                    </td>
+
+                    <td>{{ agente.usuario.departamentoRm | default( "-") }}</td>
+                    <td>{{ agente.email }}</td>
+                    <td>{{ agente.telefonoMovil }}</td>
+                    <td>                
+                     {% if ( is_granted('ROLE_ADMIN'    )) %} 
+                        {% if agente.usuario.id is not defined %}
+                            <a  class="text-danger" data-toggle="tooltip" data-placement="top" title="CREAR nuevo Usuario" href="{{ path('usuario_new', { 'id': agente.id }) }}"> 
+                            <span class="glyphicon glyphicon-plus-sign"></span> Crear Usuario
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div role="tabpanel" class="tab-pane fade in {% if app.user.departamentoRm.slug == "sca" %} active {% endif %}" id="pago">
+         <table class="table table-responsive table-hover tablaAgente text-uppercase">
+            <thead>
+                <tr>
+                    <th>Info</th>
+                    <th>Apellido y Nombre</th>
+                    <th>DNI</th>
+                    <th>Usuario</th>
+                    <th>Reparticion</th>
+                    <th>Email</th>
+                    <th>Telefono</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for agente in usuarios if agente.usuario.departamentoRm.slug | default( "-") == "sca"  %}
+                <tr>
+                    <td>
+                          <div class="dropdown text-left"> 
+                            {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': agente, 'tipo': 'AG'} %}
+                          </div>
+                    </td>
+                    <td><a data-toggle="tooltip" data-placement="top" title="Muestra TODOS los datos del Agente" href="{{ path('agente_show', { 'id': agente.id }) }}" target="_blank">{{ agente.apellidoNombre }} </a></td>
+                    <td>{{ agente.dni }}</td>
+                    <td> 
+                        {% if agente.usuario.id is defined %}
+                                <a data-toggle="tooltip" data-placement="top" title="Ver Perfil"  href="{{ path('usuario_show', { 'id': agente.usuario.id }) }}" target="_blank">{{ agente.usuario.usuario | default( "-") }}</a>
+                        {% else %}
+                            -
+                        {% endif %}
+
+                    </td>
+
+                    <td>{{ agente.usuario.departamentoRm | default( "-") }}</td>
+                    <td>{{ agente.email }}</td>
+                    <td>{{ agente.telefonoMovil }}</td>
+                    <td>                
+                     {% if ( is_granted('ROLE_ADMIN'    )) %} 
+                        {% if agente.usuario.id is not defined %}
+                            <a  class="text-danger" data-toggle="tooltip" data-placement="top" title="CREAR nuevo Usuario" href="{{ path('usuario_new', { 'id': agente.id }) }}"> 
+                            <span class="glyphicon glyphicon-plus-sign"></span> Crear Usuario
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+   <div role="tabpanel" class="tab-pane fade in {% if app.user.departamentoRm.slug == "multa" %} active {% endif %}" id="multa">
+         <table class="table table-responsive table-hover tablaAgente text-uppercase">
+            <thead>
+                <tr>
+                    <th>Info</th>
+                    <th>Apellido y Nombre</th>
+                    <th>DNI</th>
+                    <th>Usuario</th>
+                    <th>Reparticion</th>
+                    <th>Email</th>
+                    <th>Telefono</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for agente in usuarios if agente.usuario.departamentoRm.slug | default( "-") == "multa"  %}
+                <tr>
+                    <td>
+                          <div class="dropdown text-left"> 
+                            {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': agente, 'tipo': 'AG'} %}
+                          </div>
+                    </td>
+                    <td><a data-toggle="tooltip" data-placement="top" title="Muestra TODOS los datos del Agente" href="{{ path('agente_show', { 'id': agente.id }) }}" target="_blank">{{ agente.apellidoNombre }} </a></td>
+                    <td>{{ agente.dni }}</td>
+                    <td> 
+                        {% if agente.usuario.id is defined %}
+                                <a data-toggle="tooltip" data-placement="top" title="Ver Perfil"  href="{{ path('usuario_show', { 'id': agente.usuario.id }) }}" target="_blank">{{ agente.usuario.usuario | default( "-") }}</a>
+                        {% else %}
+                            -
+                        {% endif %}
+
+                    </td>
+
+                    <td>{{ agente.usuario.departamentoRm | default( "-") }}</td>
+                    <td>{{ agente.email }}</td>
+                    <td>{{ agente.telefonoMovil }}</td>
+                    <td>                
+                     {% if ( is_granted('ROLE_ADMIN'    )) %} 
+                        {% if agente.usuario.id is not defined %}
+                            <a  class="text-danger" data-toggle="tooltip" data-placement="top" title="CREAR nuevo Usuario" href="{{ path('usuario_new', { 'id': agente.id }) }}"> 
+                            <span class="glyphicon glyphicon-plus-sign"></span> Crear Usuario
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div role="tabpanel" class="tab-pane fade in {% if app.user.departamentoRm.slug == "dlt" %} active {% endif %}" id="dlt">
+         <table class="table table-responsive table-hover tablaAgente text-uppercase">
+            <thead>
+                <tr>
+                    <th>Info</th>
+                    <th>Apellido y Nombre</th>
+                    <th>DNI</th>
+                    <th>Usuario</th>
+                    <th>Reparticion</th>
+                    <th>Email</th>
+                    <th>Telefono</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for agente in usuarios if agente.usuario.departamentoRm.slug | default( "-") == "dlt"  %}
+                <tr>
+                    <td>
+                          <div class="dropdown text-left"> 
+                            {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': agente, 'tipo': 'AG'} %}
+                          </div>
+                    </td>
+                    <td><a data-toggle="tooltip" data-placement="top" title="Muestra TODOS los datos del Agente" href="{{ path('agente_show', { 'id': agente.id }) }}" target="_blank">{{ agente.apellidoNombre }} </a></td>
+                    <td>{{ agente.dni }}</td>
+                    <td> 
+                        {% if agente.usuario.id is defined %}
+                                <a data-toggle="tooltip" data-placement="top" title="Ver Perfil"  href="{{ path('usuario_show', { 'id': agente.usuario.id }) }}" target="_blank">{{ agente.usuario.usuario | default( "-") }}</a>
+                        {% else %}
+                            -
+                        {% endif %}
+
+                    </td>
+
+                    <td>{{ agente.usuario.departamentoRm | default( "-") }}</td>
+                    <td>{{ agente.email }}</td>
+                    <td>{{ agente.telefonoMovil }}</td>
+                    <td>                
+                     {% if ( is_granted('ROLE_ADMIN'    )) %} 
+                        {% if agente.usuario.id is not defined %}
+                            <a  class="text-danger" data-toggle="tooltip" data-placement="top" title="CREAR nuevo Usuario" href="{{ path('usuario_new', { 'id': agente.id }) }}"> 
+                            <span class="glyphicon glyphicon-plus-sign"></span> Crear Usuario
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+     <div role="tabpanel" class="tab-pane fade in {% if app.user.departamentoRm.slug == "info" %} active {% endif %}" id="info">
+         <table class="table table-responsive table-hover tablaAgente text-uppercase">
+            <thead>
+                <tr>
+                    <th>Info</th>
+                    <th>Apellido y Nombre</th>
+                    <th>DNI</th>
+                    <th>Usuario</th>
+                    <th>Reparticion</th>
+                    <th>Email</th>
+                    <th>Telefono</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for agente in usuarios if agente.usuario.departamentoRm.slug | default( "-") == "info"  %}
+                <tr>
+                    <td>
+                          <div class="dropdown text-left"> 
+                            {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': agente, 'tipo': 'AG'} %}
+                          </div>
+                    </td>
+                    <td><a data-toggle="tooltip" data-placement="top" title="Muestra TODOS los datos del Agente" href="{{ path('agente_show', { 'id': agente.id }) }}" target="_blank">{{ agente.apellidoNombre }} </a></td>
+                    <td>{{ agente.dni }}</td>
+                    <td> 
+                        {% if agente.usuario.id is defined %}
+                                <a data-toggle="tooltip" data-placement="top" title="Ver Perfil"  href="{{ path('usuario_show', { 'id': agente.usuario.id }) }}" target="_blank">{{ agente.usuario.usuario | default( "-") }}</a>
+                        {% else %}
+                            -
+                        {% endif %}
+
+                    </td>
+
+                    <td>{{ agente.usuario.departamentoRm | default( "-") }}</td>
+                    <td>{{ agente.email }}</td>
+                    <td>{{ agente.telefonoMovil }}</td>
+                    <td>                
+                     {% if ( is_granted('ROLE_ADMIN'    )) %} 
+                        {% if agente.usuario.id is not defined %}
+                            <a  class="text-danger" data-toggle="tooltip" data-placement="top" title="CREAR nuevo Usuario" href="{{ path('usuario_new', { 'id': agente.id }) }}"> 
+                            <span class="glyphicon glyphicon-plus-sign"></span> Crear Usuario
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+{% endblock %}
+{% block javascripts %}  
+{{ parent() }}
+<!-- DataTables -->
+<script src="{{ asset('bundles/expediente/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+
+  <script> 
+  $(function () {
+    $(".tablaAgente").DataTable({"searching": true,"lengthChange": false,"pageLength": 30,
+            "language": {
+                "url": "{{asset('bundles/expediente/plugins/datatables/extensions/language/Spanish.json')}}"
+            },
+        });
+  });
+</script> <!-- DataTables  -->
+{% endblock %}

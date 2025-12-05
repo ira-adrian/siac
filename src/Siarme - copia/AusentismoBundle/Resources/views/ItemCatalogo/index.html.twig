@@ -1,0 +1,40 @@
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %}Items{% endblock %}
+{% block contenido %}
+ <div class="row text-center">
+    <h4>BUSCAR POR CÓDIO O PALABRA CLAVE</h4>
+    <form class="navbar-form navbar" method="GET" action="{{ path('item_catalogo_index')}}" role="search">
+       <div class="form-group">
+          <div class="input-group">
+            <input style="width=100%;" id="buscar" name="consulta"  type="text" class="form-control" placeholder="Buscar ítem"  value="{{find}}" required />
+             <span class="input-group-btn"><button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span></button></span>
+         </div>
+       </div>
+    </form> 
+</div>
+    <table class="table table-hover table-responsive tablaItem">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Codigo</th>
+                <th>Rubro</th>
+                <th>Item</th>
+                <th>Ipp</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for itemCatalogo in itemCatalogos %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td style="width: 10%;"><a href="{{ path('item_catalogo_show', { 'id': itemCatalogo.id }) }}">{{ itemCatalogo.codigo  | upper | replace({ (find) :'<mark class="text-info" style="padding-right:0px;">'~find~'</mark>' })  | raw  }}</a></td>
+                <td>{{ itemCatalogo.rubro | replace({ (find | upper) :'<mark>'~find | upper ~'</mark>'  })   | raw }}</td>
+                <td>{{ itemCatalogo.item  | upper | replace({ (find | upper) :'<mark>'~find | upper ~'</mark>'  })   | raw }}</td>
+                <td>{{ itemCatalogo.ipp }}</td>
+                <td>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

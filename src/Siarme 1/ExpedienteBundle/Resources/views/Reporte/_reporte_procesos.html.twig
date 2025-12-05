@@ -1,0 +1,82 @@
+{# Siarme\ExpedienteBundle\Resources\views\Reporte\_reporte_pedidos.html.twig#}
+  <div class="list-group-item" style="height: 100%;">
+  {% set meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto",  "Septiembre",  "Octubre", "Noviembre", "Diciembre"] %}
+              {% set reporteProcesos, tramites2, procesos,  cantidad , montoPresupuestado, sumaTotal, montoAdjudicado, mes= [], procesos_por_mes(app.user.departamentoRm, anio), {}, 0, 0, 0, 0, 0 %}
+
+          {% for tramite in tramites2 | sort((a, b) => a.mes <=> b.mes) %}
+            {% if loop.first %}
+              {% set mes, cantidad , montoPresupuestado, montoAdjudicado, procesos = tramite.mes, 1, tramite.expediente.presupuestoOficial, tramite.montoAdjudica, procesos | merge([tramite])  %}
+            {% elseif tramite.mes == mes %}
+               {% set cantidad , montoPresupuestado, montoAdjudicado, procesos = cantidad  + 1 , montoPresupuestado + tramite.expediente.presupuestoOficial, montoAdjudicado + tramite.montoAdjudica,  procesos | merge([tramite])  %}
+            {% else %}
+             {% set  reporteProcesos = reporteProcesos | merge([{mes, cantidad , procesos, montoPresupuestado, montoAdjudicado}]) %}
+                {% set  procesos = [] %}
+             {% set mes, cantidad , montoPresupuestado, montoAdjudicado,  procesos = tramite.mes, 1, tramite.expediente.presupuestoOficial, tramite.montoAdjudica, procesos | merge([tramite]) %}
+            {% endif %}
+          {% endfor %}
+               {% set  reporteProcesos = reporteProcesos | merge([{mes, cantidad ,  procesos, montoPresupuestado, montoAdjudicado}]) %}
+           
+<h3> PROCESOS ADJUDICADOS POR MES</h3>
+        <table id="tablaGrupoRubro" class="table table-striped table-hover">
+            <thead class="text-center">
+             <tr>
+                <th></th>
+                <th>Mes</th>
+                <th>Cantidad</th>
+                <th>Monto Presupuestado</th>
+                <th>Monto Adjudicado</th>
+             </tr>
+           </thead>
+            <tbody class="panel">
+                {% set sumaCantidad, sumaPresupuesto, sumaAdjudicado = 0, 0, 0 %}
+              {% for reporte  in reporteProcesos %}
+                <tr data-toggle="collapse" data-parent="#tablaGrupoRubro" data-target="#collapse{{loop.index}}">
+                  <th>
+                    {% if loop.first %} <span  data-toggle="popover" data-placement="top"  data-content="Haga Click para ver los PROCESOS"></span>{% endif %}
+                    <span class="chevron glyphicon glyphicon-chevron-down text-info"  ></span></th>
+                  <th>{% if reporte.mes == 0 %}  {{meses[reporte.mes ]}}  {% else %} {{meses[reporte.mes - 1]}}{% endif %}</th>
+                  <td> {{reporte.cantidad}} </td>
+                  <td>$ {{reporte.montoPresupuestado | number_format(2, ',', '.')}}</td>
+                  <td>$ {{reporte.montoAdjudicado | number_format(2, ',', '.')}}</td>
+                </tr> 
+                <tr id="collapse{{loop.index}}" class="collapse">  
+                   <td colspan="5">
+                          {% set   tramites1, cantidad = reporte.procesos, reporte.cantidad %}
+                        {% for tramite in  tramites1 if tramite.fechaDestino | date('Y') ==  anio  %}        
+                        {# cabecera de tabla #}
+                         {% if loop.first %}
+                              <table class='{{(cantidad > 5)? "tablaTramite": " "}}  table table-responsive'>
+                                  <thead>
+                                    {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_thead_completo.html.twig') }}         
+                                  </thead>
+                                  <tbody>
+                          {% endif %}   
+                          
+                                      {# filtro los tramites que no tienen expedientes #}
+                                     {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_tbody_completo.html.twig') }}    
+                         {% endfor %}
+                                  </tbody>
+                              </table>     
+
+         
+                    </td>
+                </tr> 
+                {% set sumaCantidad, sumaPresupuesto, sumaAdjudicado = 
+                              sumaCantidad + reporte.cantidad , 
+                              sumaPresupuesto +  reporte.montoPresupuestado, 
+                              sumaAdjudicado +  reporte.montoAdjudicado 
+
+                %}
+              {% endfor %}
+              <tr>
+                <th></th>
+                <th>Totales</th>
+                <th>{{sumaCantidad}}</th>
+                <th>$ {{sumaPresupuesto | number_format(2, ',', '.')}}</th>
+                <th>$ {{sumaAdjudicado | number_format(2, ',', '.')}}</th>
+              </tr> 
+            </tbody>
+        </table>
+        <div id="chartContainer" style="height: 300px; max-width: 80%"></div>
+</div>
+{{ app.session.set('reporteProcesos', reporteProcesos) }}

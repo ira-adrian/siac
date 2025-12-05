@@ -1,0 +1,61 @@
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} INFORME{% endblock %}
+{% block menu_li %}
+    <li>
+        <a  href="{{ path('expediente_reparticion_index') }}"> <span class="glyphicon glyphicon-list-alt"> Lista </span></a>
+    </li> 
+    <li >
+           <a href="{{ path('informe_new')  }}"  role="button"> <span class="glyphicon glyphicon-stats"> Generar Informe</span></a>
+    </li>
+    <li >  
+        <a id="printer"  value="Imprimir" role="button"> <span class="glyphicon glyphicon-print">  </span> Imprimir </a>
+    </li>
+{% endblock %}
+
+{% block main %}
+
+<div  id="print"  class="panel panel-default print">
+
+    <div class="panel-heading text-center"> 
+         <p> 
+            <img src="{{ asset('escudo.png') }}" alt="Escudo..." class="img-rounded" width="50" height="50"> <br>   
+        <small>Ministerio de Educacion Cs. y Tec.<br />
+    Direcci&oacute;n Provincial de Recursos Humanos <br />
+DIRECCI&Oacute;N  DE CONTROL Y RECONOCIMIENTO M&Eacute;DICOS</small>
+         </p>
+    </div>
+        <div class="panel-body">
+            {% set fecha = date() %}
+            <p class="text-center"> San Fernando Del Valle  de Catamarca,  {{ fecha  | date('l, j  F  Y') |replace({
+                    'January'  : 'de Enero de de ',
+                    'February' : 'de Febrero de',
+                    'March' : 'de Marzo de',
+                    'April' : 'de Abril de',
+                    'May' : 'de Mayo de',
+                    'June' : 'de Junio de',
+                    'July' : 'de Julio de',
+                    'August' : 'de Agosto de',
+                    'September' : 'de Septiembre de',
+                    'October' : 'de Octubre de',
+                    'November' : 'de Nombiembre de',
+                    'December' : 'de Diciembre de',
+                    'Monday'   : ' Lunes',
+                    'Tuesday'   : ' Martes',
+                    'Wednesday'   : ' Miércoles',
+                    'Thursday'   : ' Jueves',
+                    'Friday'   : ' Viernes',
+                    'Saturday'  : ' Sabado',
+                    'Sunday'   : ' Domingo'
+                }) }} 
+            </p>  
+
+            {% block cuerpo %}
+              
+            {% endblock %}
+
+    </div> <!-- Panel-body-->
+</div>   <!-- Panel-->
+
+
+
+{% endblock %}

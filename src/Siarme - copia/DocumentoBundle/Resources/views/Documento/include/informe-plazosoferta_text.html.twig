@@ -1,0 +1,44 @@
+{% set fechaNotificaOc = agenda_ultima(documento.tramite, "notificacion_oc") %}
+
+<p style="text-align:center"><strong>INFORME DE EVALUACIÓN TÉCNICO</strong></p> 
+<br>
+<p style="text-align:justify">EXPEDIENTE ELECTR&Oacute;NICO: {{documento.tramite.expediente | upper}}</p>
+<p style="text-align:justify">{{documento.tramite.tipoProceso | title }} Nº: {{documento.tramite.numeroComprar | upper}}</p>
+<p style="text-align:justify">OBJETO DEL LLAMADO: {{documento.tramite.expediente.extracto | upper}}</p>
+
+<br>
+<table border="1"  id="tablaItemPedido" lass="table table-hover text-left">
+  <thead>
+    <tr>
+        <th>Oferente</th>
+        <th>Monto Adjudicado</th>
+        <th>Ítems Adjudicados</th>
+        <th>Plazo en Días</th>
+        <th>Fecha de Notificación OC</th>
+        <th>Fecha Límite de Entrega</th>
+        <th>Observaciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for tramite in documento.tramite.oferta | reverse if tramite.montoAdjudicado > 0 %}
+        {% set oferente = tramite.oferente %}
+        {% if tramite.montoAdjudicado > 0 %}
+            <tr>
+                <td>{{ tramite.proveedor  | default(oferente)}} <br>{{ tramite.cuit  | default("") | mostrar_como_cuil }}</td>
+                <td>${{ tramite.montoAdjudicado | number_format(2, ',', '.') }}</td>
+                <td>
+                    {% for itemOferta in tramite.itemOferta if itemOferta.adjudicado %}
+                            {{itemOferta.numero}},
+                    {% endfor %}
+                </td>
+                <td>{{ tramite.plazo }} días</td>
+                <td>{% if fechaNotificaOc.fecha | default(false) %}{{ fechaNotificaOc.fecha | date('d/m/Y') }}{% endif %}</td>
+                <td>{% if fechaNotificaOc.fecha | default(false) %}{{ fechaNotificaOc.fecha | date('Y-m-d') | sumar_dias(tramite.plazo, false) | date('d/m/Y')   }}{% endif %}</td>
+                <td></td>
+            </tr>
+        {% endif %}
+    {% endfor %}
+  </tbody>
+</table>
+
+

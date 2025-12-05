@@ -1,0 +1,160 @@
+{# Siarme\ExpedienteBundle\Resources\views\Reporte\reparticion_index.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} REPORTE{% endblock %}
+  {% block header %}
+    {{ include('ExpedienteBundle:Default:_header.html.twig') }}
+  {{ include('ExpedienteBundle:Default:_breadcrumb_principal.html.twig') }}
+{% endblock %}
+{% block contenido %}
+        {% if app.user.departamentoRm.slug != "dppr" %} {% set modulo ="EXPEDIENTES" %}{% else %}{% set modulo ="CCOO-DPPR" %}{% endif %}
+        {% set modulo2 = "TAREAS" %}  
+        {% for tipoTramite in app.user.departamentoRm.tipoTramite %}
+            {% if loop.first %}
+            {% set modulo2 = tipoTramite %}
+            {% endif %}
+        {% endfor %}
+        {{ app.session.set('modulo', "REPORTE") }}
+        {{ app.session.set('glyphicon', 'glyphicon glyphicon-stats') }}
+        {{ app.session.set('route', 'reporte_index') }}    
+     <div class="nav nav-tabs nav-justified hidden-print" style="padding-top:5px;">   
+      {% if app.user.departamentoRm.slug not in ["planificacion", "dlt"] %}
+        <li role="presentation" ><a href="{{ path('expediente_reparticion_index') }}"> <span class="glyphicon glyphicon-folder-open"></span>{{modulo}}</a></li>
+      {% endif %}
+        <li role="presentation" ><a href="{{ path('tramite_reparticion_index') }}"> <span class="glyphicon glyphicon-tasks"></span>{{modulo2}}</a></li>
+      {% if app.user.departamentoRm.slug not in ["planificacion", "dlt"] %} 
+        <li role="presentation"><a style="color:#306066;" href="{{ path('general_reparticion_index', {'id': app.user.departamentoRm.id }) }}"><span class="glyphicon glyphicon-folder-open"></span> ACUERDO MARCO</a></li>
+      {% endif %}
+        <li role="presentation" class="active"><a  href="{{ path('reporte_index') }}"> <span class="glyphicon glyphicon-stats"></span> REPORTE</a></li>
+        <li role="presentation"><a href="{{ path('organismo_index', {'id': app.user.departamentoRm.id }) }}"><span class="glyphicon glyphicon-tent" ></span> SAFS</a></li>
+        <li role="presentation"><a  href="{{ path('usuario_index', {'id': app.user.departamentoRm.id }) }}"> <span class="glyphicon glyphicon-user"></span> USUARIOS</a></li>
+      </div>
+<div id="copy" class="container"> 
+      <ol class="breadcrumb"  style="margin-bottom:1px;"> 
+        {% for year in ( ('now' | date("Y") - 3) .. ('now' | date("Y"))) %} 
+            {% if year != anio %}
+              <li><a href="{{ path('reporte_index', { 'id': app.user.departamentoRm.id, 'anio': year }) }}"> <span class="glyphicon glyphicon-calendar"></span>{{year}}</a></li>
+            {% else %}
+                <li class="active"> 
+                  <span class="glyphicon glyphicon-calendar text-success"></span> <strong>{{year}}</strong>
+                </li>
+            {% endif %}
+        {% endfor %}
+      </ol>
+ <!-- Nav tabs -->
+  <ul class="nav nav-tabs nav-justified hidden-print" role="tablist">
+    {% if app.user.departamentoRm.slug in ["dppr", "planificacion"]  %} 
+            <li role="presentation" {% if app.user.departamentoRm.slug == "dppr" %} class="active" {% endif %} ><a href="#pedidos" aria-controls="pedidos" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-tasks"></span> PEDIDOS </a></li>
+            <li role="presentation"  {% if app.user.departamentoRm.slug == "planificacion" %} class="active" {% endif %} ><a href="#planificacion" aria-controls="planificacion" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-tasks"></span> PLANIFICACION </a></li>
+    {% endif %}
+    {% if app.user.departamentoRm.slug == "dpcbs" %} 
+            <li role="presentation" {% if app.user.departamentoRm.slug == "dpcbs" %} class="active" {% endif %}><a href="#procesos" aria-controls="procesos" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-tasks"></span> PROCESOS </a></li>
+    {% endif %}
+    {% if app.user.departamentoRm.slug == "despacho" %}         
+            <li role="presentation" {% if app.user.departamentoRm.slug == "despacho" %} class="active" {% endif %}><a href="#despachos" aria-controls="despachos" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-random"></span> DESPACHOS </a></li>
+    {% endif %}
+  </ul>
+
+<div class="tab-content">
+   {% if app.user.departamentoRm.slug in ["dppr", "planificacion"]  %} 
+
+    <div role="tabpanel" class="tab-pane fade in  {% if app.user.departamentoRm.slug == "dppr" %} active {% endif %}" id="pedidos">
+       <div class="panel panel-default">
+        <div class="panel-heading"> 
+        <h4 class="panel-title text-center"> REPORTE POR PEDIDOS <span class="pull-right"> Fecha: {{'now' | date('d-m-Y')  }}</span></h4>
+        </div>
+        <div id="pedidos" class="panel-collapse collapse in">
+          <div  class="panel-body ">        
+           
+              {{ include('ExpedienteBundle:Reporte:_reporte_pedidos.html.twig') }} 
+             
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+ {% if app.user.departamentoRm.slug == "dpcbs" %}
+    <div role="tabpanel" class="tab-pane fade in {% if app.user.departamentoRm.slug == "dpcbs" %} active {% endif %}" id="procesos">
+            <div class="panel panel-default">
+        <div class="panel-heading"> 
+        <h4 class="panel-title text-center"> REPORTE POR PROCESOS <span class="pull-right"> Fecha: {{'now' | date('d-m-Y')  }}</span></h4>
+        </div>
+        <div id="pedidos" class="panel-collapse collapse in">
+          <div  class="panel-body ">        
+              {{ include('ExpedienteBundle:Reporte:_reporte_procesos.html.twig') }} 
+             
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}  
+ {% if app.user.departamentoRm.slug == "despacho" %}
+    <div role="tabpanel" class="tab-pane fade in {% if app.user.departamentoRm.slug == "despacho" %} active {% endif %}" id="despachos">
+      <div class="panel panel-default">
+        <div class="panel-heading"> 
+        <h4 class="panel-title text-center"> REPORTE POR DESPACHO <span class="pull-right"> Fecha: {{'now' | date('d-m-Y')  }}</span></h4>
+        </div>
+        <div id="pedidos" class="panel-collapse collapse in">
+          <div  class="panel-body ">        
+              {{ include('ExpedienteBundle:Reporte:_reporte_despacho.html.twig') }} 
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+ {% if app.user.departamentoRm.slug in ["dppr", "planificacion"]  %} 
+    {% set mes = 'now' | date("m") %}
+     {% set uno = [1 , 2 , 3] %}
+     {% set dos = [4 , 5 , 6] %}
+     {% set tres = [7 , 8 , 9] %}
+     {% set cuatro = [10 , 11 , 12] %}
+    <div role="tabpanel" class="tab-pane fade in {% if app.user.departamentoRm.slug == "planificacion" %} active {% endif %}" id="planificacion">
+      <div class="panel panel-default">
+        <div class="panel-heading"> 
+        <h4 class="panel-title text-center"> PLANIFICACION <span class="pull-right"> Fecha: {{'now' | date('d-m-Y')  }}</span></h4>
+        </div>
+        <div  class="panel-body "> 
+      <ul class="nav nav-tabs nav-justified hidden-print" role="tablist">
+          <li role="presentation"  {% if mes in uno %}class="active" {% endif %}><a href="#uno" aria-controls="procesos" role="tab" data-toggle="tab">1° Trimestre</a></li>
+          <li role="presentation"  {% if mes in dos %}class="active" {% endif %}><a href="#dos" aria-controls="procesos" role="tab" data-toggle="tab">2° Trimestre</a></li>
+          <li role="presentation"  {% if mes in tres %}class="active" {% endif %}><a href="#tres" aria-controls="procesos" role="tab" data-toggle="tab">3° Trimestre</a></li>
+          <li role="presentation"  {% if mes in cuatro %}class="active" {% endif %}><a href="#cuatro" aria-controls="procesos" role="tab" data-toggle="tab">4° Trimestre</a></li>
+      </ul>
+      <div class="tab-content">
+        {% set trimestre = 1 %}
+        <div role="tabpanel" class="tab-pane fade in {% if mes in uno %}active{% endif %}" id="uno"> {{ include('ExpedienteBundle:Reporte:_reporte_planificacion.html.twig') }} </div>
+        {% set trimestre = 2 %}
+        <div role="tabpanel" class="tab-pane fade in {% if mes in dos %}active{% endif %}" id="dos"> {{ include('ExpedienteBundle:Reporte:_reporte_planificacion.html.twig') }} </div>
+        {% set trimestre = 3 %}
+        <div role="tabpanel" class="tab-pane fade in {% if mes in tres %}active{% endif %}" id="tres"> {{ include('ExpedienteBundle:Reporte:_reporte_planificacion.html.twig') }} </div>
+        {% set trimestre = 4 %}
+        <div role="tabpanel" class="tab-pane fade in {% if mes in cuatro %}active{% endif %}" id="cuatro"> 
+          {{ include('ExpedienteBundle:Reporte:_reporte_planificacion.html.twig') }}
+        </div>
+      </div>   
+       </div>
+
+      </div>
+    </div>
+ {% endif %}
+</div>
+</div>   
+
+{% endblock %}
+{% block javascripts %}  
+  {{ parent() }}
+  <script>
+    $(function () {
+      $(".tablaPlanificacion").DataTable({"searching": true,"lengthChange": true, "order": [[ 5, "desc" ]],"pageLength": -1,
+              "language": {
+                  "url": "{{asset('bundles/expediente/plugins/datatables/extensions/language/Spanish.json')}}"
+              },"lengthMenu": [[10, 25, 50, 100,-1], [10, 25, 50, 100, "Todo"]],
+          });
+    });
+  </script>
+ {% if app.user.departamentoRm.slug == "dppr" %} 
+    {{ include('ExpedienteBundle:Reporte:_reporteJavaScript.html.twig') }} 
+ {% endif %}  
+  {% if app.user.departamentoRm.slug == "dpcbs" %} 
+    {{ include('ExpedienteBundle:Reporte:_procesosJavaScript.html.twig') }} 
+  {% endif %}  
+{% endblock %}

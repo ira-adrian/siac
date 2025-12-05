@@ -1,0 +1,221 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\_breadcrumb.html.twig#}
+{% set year = 'now' | date('Y')%}
+<ol class="breadcrumb hidden-print"  style="margin-bottom:1px;">
+     {% if app.user.sector | length > 1  %}
+      <li>
+         <div class="dropdown">
+              <a class="dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <span data-toggle="tooltip" data-placement="bottom"  title="SIAC" class="glyphicon glyphicon-shopping-cart"></span> {{app.user.departamentoRm}}
+                <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                {% for sector in app.user.sector  %}
+                   <li><a href="{{ path('usuario_cambiar_sector', { 'id': sector.id  }) }}">{{sector}}  {% if app.user.departamentoRm == sector %}<span class="glyphicon glyphicon-ok"></span>{% endif %}</a></li>
+                   <li role="separator" class="divider"></li>
+                {% endfor %}
+              </ul>
+        </div>
+      </li>
+      {% else %}
+            <li><span data-toggle="tooltip" data-placement="bottom"  title="SIAC" class="glyphicon glyphicon-shopping-cart"></span><strong>{{app.user.departamentoRm}}</strong></li>
+      {% endif %}
+  {# Breadcrumbs para MODULO #}
+  {% set modulo = app.session.get('modulo') | default(false)  %}
+  {% set route = app.session.get('route') %}
+  {% set glyphicon = app.session.get('glyphicon') %}
+          <li><a  href="{{ path('tramite_reparticion_index') }}" role="button"><span  class='glyphicon glyphicon-home'></span> PRINCIPAL</a></li>
+          {% if modulo != false %}
+             <li><a href= {{ path(route) }}  role="button"><span  class='{{ glyphicon }}'></span> {{modulo}}</a></li>
+          {% endif %} 
+
+          
+         {% if usuario is defined %}
+           <li><a href="{{ path('agente_show', { 'id': usuario.agente.id | default(0) }) }}"> <span class="glyphicon glyphicon-user"></span>{{ usuario }}</a></li>
+           <li class="active"> <span class="glyphicon glyphicon-menu-right"></span> <strong>{{ usuario.usuario }}</strong></li>
+         {% endif %}
+
+{# Breadcrumbs para AGENTE #}
+          {% if agente is defined and agente.id is not empty %}
+                  <li class="active"><span  class="glyphicon glyphicon-user"></span><strong>{{agente.apellidoNombre | title }}</strong></li>   
+          {% elseif agente is defined  %}
+                 <li class="active"><span  class="glyphicon glyphicon-user"></span>Nuevo</li> 
+          {% endif %} 
+{# Breadcrumbs para ORGANISMO #}
+          {% if organismo is defined and organismo.id is not empty %}
+                  <li class="active"><span  class="glyphicon glyphicon-home"></span> <strong>{{organismo.codigoGde }}</strong></li>   
+          {% elseif organismo is defined  %}
+                 <li class="active"><span  class="glyphicon glyphicon-home"> </span>Nuevo</li> 
+          {% endif %} 
+{# Breadcrumbs para EXPEDIENTE #}
+           {% if expediente is defined and expediente.id is not empty %}
+
+            <li  class="active"> <span  class="glyphicon glyphicon-folder-open"></span>
+             {{ expediente.numeroGde | default(expediente.ccoo | default("")) }}
+          </li>     
+           {% elseif expediente is defined %}  
+                <li  class="active"><span  class="glyphicon glyphicon-folder-open"></span>Nuevo</li>
+           {% endif %} 
+
+{# Breadcrumbs para TRAMITE #}
+          {% if tramite.expediente is defined and tramite.expediente.id | default("") is not empty %}
+                  <li> <a  href="{{ path('expediente_show', { 'id': tramite.expediente.id }) }}"> <span class="glyphicon glyphicon-folder-open"></span>{{ tramite.expediente.numeroGde | default(tramite.expediente.ccoo | default("")) }}</a></li>     
+          {% endif %} 
+          {% if tramite is defined and tramite.id is not empty %}
+                  {% if tramite.proceso.id is defined and tramite.proceso.id is not empty %}
+                    {% set proceso = tramite.proceso.tipoTramite~" N° "~tramite.proceso.numeroTramite %}
+                    <li><a href="{{ path('tramite_show', { 'id': tramite.proceso.id  }) }}"><span  class='{{ tramite.proceso.tipoTramite.glyphicon}}'></span>{{tramite.proceso.numeroComprar | default(proceso) }}</a></li> 
+                  {% endif %} 
+                  {% if   tramite.tipoTramite.slug == "tramite_proceso" %}
+                      {% set proceso = tramite.tipoTramite~" N° "~tramite.numeroTramite %}
+                      <li class="active"><span  class='{{ tramite.tipoTramite.glyphicon}}'></span>{{tramite.numeroComprar | default(proceso) }}</li>
+                  {% elseif tramite.tipoTramite.slug == "tramite_oferta" %}
+                    <li class="active"><span  class='{{ tramite.tipoTramite.glyphicon}}'></span>{{tramite.oferente[0:15]}} </li>
+                  {% else %}
+                       <li class="active"><span  class='{{ tramite.tipoTramite.glyphicon}}'></span>{{tramite.tipoTramite}} N° {{tramite.numeroTramite }}</strong></li>
+                  {% endif %}
+          {% elseif tramite is defined  %}
+                 <li class="active"><span  class='{{ tramite.tipoTramite.glyphicon}}'></span> Nuevo</li> 
+          {% endif %} 
+
+{# Breadcrumbs para DOCUMENTO #}
+    {% if documento is defined %}
+          {% if documento.tramite.expediente is defined and documento.tramite.expediente.id | default("") is not empty %}
+                  <li><a href="{{ path('expediente_show', { 'id': documento.tramite.expediente.id }) }}"  role="button"> <span  class="glyphicon glyphicon-folder-open"></span>{{ documento.tramite.expediente.numeroGde | default(documento.tramite.expediente.ccoo | default("")) }}</a></li>     
+          {% endif %} 
+          {% if documento.tramite.tipoTramite.slug | default("") != "tramite_doc" %}
+              {% if documento.tramite is defined and documento.tramite.id  | default("") is not empty %}
+                    {% if documento.tramite.proceso.id is defined and documento.tramite.proceso.id is not empty %}
+                        {% set proceso = documento.tramite.proceso.tipoTramite~" N° "~documento.tramite.proceso.numeroTramite %}
+                           <li><a href="{{ path('tramite_show', { 'id': documento.tramite.proceso.id  }) }}"><span  class='{{ documento.tramite.proceso.tipoTramite.glyphicon}}'></span>{{documento.tramite.proceso.numeroComprar | default(proceso)}}</a></li> 
+                    {% endif %} 
+                    {% if   documento.tramite.tipoTramite.slug == "tramite_proceso" %}
+                      {% set proceso = documento.tramite.tipoTramite~" N° "~documento.tramite.numeroTramite %}
+                      <li class="active"><a href="{{ path('tramite_show', { 'id': documento.tramite.id }) }}"> <span  class='{{ documento.tramite.tipoTramite.glyphicon}}'></span>{{documento.tramite.numeroComprar | default(proceso) }}</li></a>
+                    {% else %}
+                          <li class="active"><a href="{{ path('tramite_show', { 'id': documento.tramite.id }) }}"> <span  class='{{ documento.tramite.tipoTramite.glyphicon}}'></span>{{documento.tramite.tipoTramite}} N° {{documento.tramite.numeroTramite }}</a></li>
+                    {% endif %}
+              {% endif %} 
+          {% endif %}
+          {% if documento.licencia.agente.id is defined %}
+             <li><a href="{{ path('agente_show', { 'id': documento.licencia.agente.id | default(0) }) }}"> <span class="glyphicon glyphicon-user"></span>{{documento.licencia.agente.apellidoNombre | default("n/d") | title }}</a></li>
+          {% endif %}
+          {% if documento.id is not empty %}
+            <li class="active"><span class="glyphicon glyphicon-file"></span> <strong>{{documento}}</strong></li>
+          {% else %}
+           <li class="active"><span class="glyphicon glyphicon-file"></span>Nuevo</li>
+          {% endif %}
+    {% endif %}   
+
+{# Breadcrumbs para ITEMPEDIDO #}
+    {% if itemPedido is defined %} 
+
+          {% if itemPedido.tramite.expediente is defined and itemPedido.tramite.expediente.id | default("") is not empty %}
+                  <li> <a href="{{ path('expediente_show', { 'id': itemPedido.tramite.expediente.id }) }}"  role="button"> <span  class="glyphicon glyphicon-folder-open"></span> {{ itemPedido.tramite.expediente.numeroGde | default(itemPedido.tramite.expediente.ccoo | default("")) }}</a></li>     
+          {% endif %} 
+
+          {% if itemPedido.tramite is defined and itemPedido.tramite.id is not empty %}
+                <li class="active"><a href="{{ path('tramite_show', { 'id': itemPedido.tramite.id }) }}"> <span  class='{{ itemPedido.tramite.tipoTramite.glyphicon}}'></span><strong> {{itemPedido.tramite.tipoTramite}} N° {{itemPedido.tramite.numeroTramite }}</strong></a></li>   
+          {% endif %} 
+
+          {% if itemPedido.id is not empty %}
+            <li class="active"><span class="fa fa-bars" aria-hidden="true"></span> <strong>ITEM N° {{itemPedido.numero}}</strong></li>
+          {% else %}
+           <li class="active"><span class="fa fa-bars" aria-hidden="true"></span>Nuevo</li>
+          {% endif %}
+    {% endif %}  
+
+{# Breadcrumbs para ITEMPROCESO #}
+    {% if itemProceso is defined %} 
+          {% if itemProceso.proceso.expediente is defined and itemProceso.proceso.expediente.id | default("") is not empty %}
+                  <li> <a href="{{ path('expediente_show', { 'id': itemProceso.proceso.expediente.id }) }}"  role="button"> <span  class="glyphicon glyphicon-folder-open"></span> {{ itemProceso.proceso.expediente.numeroGde | default(itemProceso.proceso.expediente.ccoo | default("")) }}</a></li>     
+          {% endif %} 
+          {% if itemProceso.proceso is defined and itemProceso.proceso.id  | default("") is not empty %}
+                <li class="active"><a href="{{ path('tramite_show', { 'id': itemProceso.proceso.id }) }}"> <span  class='{{ itemProceso.proceso.tipoTramite.glyphicon}}'></span><strong> {{itemProceso.proceso.tipoTramite}} N° {{itemProceso.proceso.numeroTramite }}</strong></a></li>   
+          {% endif %} 
+          {% if itemProceso.id is not empty %}
+            <li class="active"><span class="fa fa-bars" aria-hidden="true"></span> <strong>ITEM N° {{itemProceso.numero}}</strong></li>
+          {% else %}
+           <li class="active"><span class="fa fa-bars" aria-hidden="true"></span>Nuevo</li>
+          {% endif %}
+    {% endif %}  
+    
+{# Breadcrumbs para ITEMOFERTA #}
+    {% if itemOferta is defined %} 
+          {% if itemOferta.oferta.expediente is defined and itemOferta.oferta.expediente.id | default("") is not empty %}
+                  <li> <a href="{{ path('expediente_show', { 'id': itemOferta.oferta.expediente.id }) }}"  role="button"> <span  class="glyphicon glyphicon-folder-open"></span> {{ itemOferta.oferta.expediente.numeroGde | default(itemOferta.oferta.expediente.ccoo | default("")) }}</a></li>     
+          {% endif %} 
+          {% if itemOferta.oferta.proceso is defined and itemOferta.oferta.proceso.id is not empty %}
+                {% set proceso = itemOferta.oferta.proceso.tipoTramite ~" N° "~ itemOferta.oferta.proceso.numeroTramite %}
+                <li class="active"><a href="{{ path('tramite_show', { 'id': itemOferta.oferta.id }) }}"> <span  class='{{ itemOferta.oferta.proceso.tipoTramite.glyphicon}}'></span><strong> {{itemOferta.oferta.proceso.numeroComprar | default(proceso)}}</strong></a></li>   
+          {% endif %} 
+          {% if itemOferta.oferta is defined and itemOferta.oferta.id is not empty %}
+                <li class="active"><a href="{{ path('tramite_show', { 'id': itemOferta.oferta.id }) }}"> <span  class='{{ itemOferta.oferta.tipoTramite.glyphicon}}'></span><strong> {{itemOferta.oferta.oferente[0:15]}}</strong></a></li>   
+          {% endif %} 
+          {% if itemOferta.id is not empty %}
+            <li class="active"><span class="fa fa-bars" aria-hidden="true"></span> <strong>ITEM N° {{itemOferta.numero}}</strong></li>
+          {% else %}
+           <li class="active"><span class="fa fa-bars" aria-hidden="true"></span>Nuevo</li>
+          {% endif %}
+    {% endif %} 
+    
+{# Breadcrumbs para ITEMACORDADO #}
+    {% if itemAcuerdo is defined %} 
+          {% if itemAcuerdo.expediente is defined and itemAcuerdo.expediente.id | default("") is not empty %}
+                  <li> <a href="{{ path('expediente_show', { 'id': itemAcuerdo.expediente.id }) }}"  role="button"> <span  class="glyphicon glyphicon-folder-open"></span> {{ itemAcuerdo.expediente.numeroGde | default(itemAcuerdo.expediente.ccoo | default("")) }}</a></li>     
+          {% endif %} 
+          {% if itemAcuerdo.id is not empty %}
+            <li class="active"><span class=" fa fa-list-alt" aria-hidden="true"></span> <strong>ITEM N° {{itemAcuerdo.numero}}</strong></li>
+          {% else %}
+           <li class="active"><span class=" fa fa-list-alt" aria-hidden="true"></span>Nuevo</li>
+          {% endif %}
+    {% endif %}  
+
+
+{# Breadcrumbs para ITEMSOLICITADO #}
+    {% if itemSolicitado is defined %} 
+
+          {% if itemSolicitado.tramite.expediente is defined and itemSolicitado.tramite.expediente.id | default("") is not empty %}
+                  <li> <a href="{{ path('expediente_show', { 'id': itemSolicitado.tramite.expediente.id }) }}"  role="button"> <span  class="glyphicon glyphicon-folder-open"></span> {{ itemSolicitado.tramite.expediente.numeroGde | default(itemSolicitado.tramite.expediente.ccoo | default("")) }}</a></li>     
+          {% endif %} 
+
+          {% if itemSolicitado.tramite is defined and itemSolicitado.tramite.id is not empty %}
+                <li class="active"><a href="{{ path('tramite_show', { 'id': itemSolicitado.tramite.id }) }}"> <span  class='{{ itemSolicitado.tramite.tipoTramite.glyphicon}}'></span><strong> {{itemSolicitado.tramite.tipoTramite}} N° AC-{{itemSolicitado.tramite.numeroTramite }}</strong></a></li>   
+          {% endif %} 
+
+          {% if itemSolicitado.id is not empty %}
+            <li class="active"><span class="fa fa-file-powerpoint-o" aria-hidden="true"></span> <strong>ITEM N° {{itemSolicitado.numero}}</strong></li>
+          {% else %}
+           <li class="active"><span class="fa fa-file-powerpoint-o" aria-hidden="true"></span>Nuevo</li>
+          {% endif %}
+    {% endif %}  
+
+{# Breadcrumbs para MOViMIENTOS #}
+      {% if movimientoPendiente is defined and movimientoPendiente is not empty and movimientoPendiente.expediente is not empty %}
+      {% set expedienteM =  movimientoPendiente.expediente   %}
+          <li class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-folder-open text-warning"></span><span class="badge ">{{expedienteM.tramite | length}}</span></a>
+             <ul  class="dropdown-menu"  style="width:470px;">  <!-- dropdown-menu -->  
+                      {% for tramite in expedienteM.tramite %}                                  
+                    <li class="list-group-item" >   <!-- list-group -->  
+                          {{ loop.index }} - <span> <a data-toggle="tooltip" data-placement="top" title='Pedido' href="{{ path('tramite_show', { 'id': tramite.id }) }}"> <span class='{{ tramite.tipoTramite.glyphicon}} hidden-print' ></span>{{ tramite.numeroTramite }}</a></span>|  {{ tramite.trimestre }}° Trimestre  | Fecha: {% if tramite.fecha %}{{ tramite.fecha |date('d-m-Y') }}{% endif %} | {{ tramite.estadoTramite | default("N/D") }}
+                        </li> <!-- list-group --> 
+                      {% endfor %}
+              </ul> <!-- dropdown-menu -->  
+           </li>
+    {% endif %}
+    <li class="pull-right" >
+              <a href="{{ path('usuario_logout') }}" >
+                  <span class="glyphicon glyphicon-log-out"></span>
+                  Salir
+              </a>                
+    </li>
+    <li class="pull-right" data-toggle="tooltip" data-placement="bottom" title='Ver Perfil' ><span class="glyphicon glyphicon-user text-info"> </span>
+      <a href="{{ path('usuario_show', { 'id': app.user.id }) }}">{{ app.user.usuario }}</a>
+    </li>
+</ol>
+<div id="alerta"></div>
+ {#
+ {{ include('ExpedienteBundle:Tramite:_expediente_enviar.html.twig') }}
+ {{ include('ExpedienteBundle:Expediente:_expediente_pendiente.html.twig') }} 
+ #}
+  

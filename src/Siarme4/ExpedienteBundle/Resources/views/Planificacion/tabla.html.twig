@@ -1,0 +1,17 @@
+<div class="table-responsive">
+    <table id="tablaItemPedido" class="table table-hover text-left">
+        <thead>
+
+        </thead>
+        <tbody>
+        {% for planificacion in planificacions %}
+            <tr>
+                <td><a href="{{ path('planificacion_show', { 'id': planificacion.id }) }}">{{ planificacion.rubro }}</a></td>
+                <td>{{ planificacion.descripcion }}</td>
+                <td>{{ planificacion.monto }}</td>
+                <td>{{ planificacion.estado }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

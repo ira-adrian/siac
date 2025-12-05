@@ -1,0 +1,73 @@
+{# Siarme\ExpedienteBundle\Resources\views\Expediente\_lista.html.twig #}
+             {% set year = 'now' | date('Y')%}
+             {% set movimiento = expediente | movimiento_pendiente(app.user) %}
+            <tr {% if (expediente | movimiento_pendiente(app.user)) %} style="background-color:#FFFFE0;" data-toggle="tooltip" data-placement="top" title='No tiene TAREAS asignadas el Expediente'{% endif %} >
+                <td>
+                    <div class="dropdown text-left hidden-print" style="margin:0px;"> 
+                    {# El tipo puede ser ['EX','DOC','AG'] corresponde con las entidades Expediente, Documento, Agente #}
+                    {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': expediente, 'tipo': constant('TIPO_ENTIDAD', expediente) } %}
+                    {# -------------PARA HABILITAR ----------------------
+                         {% include 'ExpedienteBundle:Expediente:_menu_info_expediente.html.twig' with {'entidad': expediente, 'tipo':constant('TIPO_ENTIDAD', expediente) } %}
+                    #}
+
+                    </div>
+                </td>  
+                <td class="hidden">{{ expediente.id}}</td>  
+                {% if app.user.departamentoRm.slug == "dppr" %}
+                    {# | default('INT-'~ year ~'-'~ expediente.numeroInterno) #}
+                    <td>{{ expediente.numeroGde | default(expediente.numeroInterno) }}</td>
+                    <td><span  class="glyphicon glyphicon-folder-open text-muted"></span> <a href="{{ path('expediente_show', { 'id': expediente.id }) }}" target="_blank">{{ expediente.ccoo | default('NO-'~ year ~ '-n/d')}}</a></td>
+                {% else %} 
+                    <td><a href="{{ path('expediente_show', { 'id': expediente.id }) }}" target="_blank">{{ expediente.numeroGde | default('INT-'~ year ~'-'~ expediente.numeroInterno)}}</a></td>
+                     <td>{{ expediente.ccoo | default('NO-'~ year ~ '-n/d')}}</td>
+                {% endif %}
+                <td>{{ expediente.extracto | raw | nl2br }}</td>
+                <td>{{ expediente.fechaDesde | date('d-m-Y') }}</td>      
+                <td>{{ expediente.fechaHasta | date('d-m-Y') }}</td>      
+                {# <td>{{ expediente.fechaHasta  | cuenta_atras }}</td>#}
+                <td>
+                    {% if expediente.fechaHasta | date('Y-m-d')  < 'now' | date('Y-m-d') %}
+                            <span  class="label label-default"> Finalizado </span>
+                    {% else %}
+                            <span  class="label label-success"> Vigente </span>
+                    {% endif %} <br/> 
+                      {% set difference = date(expediente.fechaHasta).diff(date(expediente.fechaDesde)) %}
+                      {% set leftDays = difference.days %}
+                      {% if leftDays < 60 or leftDays > 182 %}
+                          <dd><span class="glyphicon glyphicon-info-sign text-warning"></span> Verifique el periodo</dd> 
+                      {% elseif leftDays == 1 %}
+                        1 día
+                      {% else %}
+                        {{ leftDays }} días
+                      {% endif %}  
+                </td>      
+               <td>
+
+                    {% if (expediente | movimiento_pendiente(app.user)) or expediente.tramite | length == 0  %}
+                        <span  class="label label-warning">Ingreso</span>
+                    {% else %}
+                        {% if ( expediente | movimiento_estado(app.user))  %} <span  class="label label-primary">Activo</span>{% else %} <span  class="label label-default">Enviado</span> {% endif %}
+                    {% endif %}
+                </td> 
+                <td>
+                {# <a  data-toggle="tooltip" data-placement="top" title='Modificar el Expediente {{ expediente.numeroGde }}' role="button" href="{{ path('expediente_edit' , { 'id': expediente.id }) }}"> <span class="glyphicon glyphicon-pencil"> </span></a>&nbsp;   #} 
+                {% if (expediente.tramite | length <= 0)  %}
+                       <a  role="button" data-toggle="tooltip" data-placement="top" title='Eliminar el Expediente' onclick= "return confirm('¿Desea eliminar el Registro  del Expediente?');" href="{{ path('expediente_eliminar', { 'id': expediente.id }) }}"> <span class="glyphicon glyphicon-trash  text-danger" > </span> Eliminar</a> <br />
+                {% endif %}
+                  <span role="presentation" class="dropdown"   data-toggle="tooltip" data-placement="top" title='Comparte y Notifica a un usuario'>
+                    <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-share"></span> Notificar<span class="caret"></span></a>             
+                     <ul class="dropdown-menu dropdown-menu-right">
+                       <li class="dropdown-header" style="width:40em">
+                        {# El tipo puede ser ['EX','DOC','AG','MSJ'] corresponde con las entidades Expediente, Documento, Agente, Mensaje #}
+                         {{ render(controller('DocumentoBundle:Compartir:new', { 'tipoid': expediente.id, 'tipo': constant('TIPO_ENTIDAD', expediente)})) }}
+                       </li>
+                     </ul>
+                  </span>
+            {#for movimiento in expediente.movimiento  %} 
+               {% if loop.last and movimiento.departamentoRm == app.user.departamentoRm %}  
+                  <a data-toggle="tooltip" data-placement="top" title='Habilita el Expediente para agregar pedidos' role="button" href="{{ path('movimiento_habilitar_expediente', { 'expediente_id': expediente.id }) }}"><span class="glyphicon glyphicon-folder-open" onclick= "return confirm('¿Desea iniciar una Solicitud?');" ></span>+</a>&nbsp;
+               {% endif %}
+            {% endfor #}
+
+                </td>
+            </tr>

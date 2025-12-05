@@ -1,0 +1,62 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\index.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} PRINCIPAL{% endblock %}
+  {% block header %}
+    {{ include('ExpedienteBundle:Default:_header.html.twig') }}
+  {{ include('ExpedienteBundle:Default:_breadcrumb_principal.html.twig') }}
+{% endblock %}
+{% block contenido %}
+  <div id="copy" class="row" style="padding:5px;">
+        {% if app.user.departamentoRm.slug != "dppr" %} {% set modulo ="EXPEDIENTES" %}{% else %}{% set modulo ="CCOO-DPPR" %}{% endif %}
+        {% set modulo2 = "TAREAS" %}  
+        {% for tipoTramite in app.user.departamentoRm.tipoTramite %}
+            {% if loop.first %}
+            {% set modulo2 = tipoTramite %}
+            {% endif %}
+        {% endfor %}
+
+        {{ app.session.set('modulo', modulo2) }}
+        {{ app.session.set('glyphicon', 'glyphicon glyphicon-tasks') }}
+        {{ app.session.set('route', 'tramite_reparticion_index') }}    
+
+     <div class="nav nav-tabs nav-justified hidden-print" style="padding-top:5px;">   
+    {% if app.user.departamentoRm.slug not in ["planificacion", "dlt"] %}
+        <li role="presentation" ><a href="{{ path('expediente_reparticion_index') }}"> <span class="glyphicon glyphicon-folder-open"></span> {{modulo}}</a></li>
+    {% endif %}
+        <li role="presentation" class="active"><a href="{{ path('tramite_reparticion_index') }}"> <span class="glyphicon glyphicon-tasks"></span>{{modulo2}}</a></li>
+        {% if app.user.departamentoRm.slug == "dpcbs" %}
+        <li role="presentation"><a href="{{ path('tramite_oferta_index') }}"> <span class="glyphicon glyphicon-pushpin"></span> OFERTAS</a></li>
+         {% endif %}
+    {% if app.user.departamentoRm.slug not in ["planificacion", "dlt"] %}
+        <li role="presentation"><a style="color:#306066;" href="{{ path('general_reparticion_index', {'id': app.user.departamentoRm.id }) }}"><span class="glyphicon glyphicon-folder-open"></span> ACUERDO MARCO</a></li>
+    {% endif %}
+        <li role="presentation"><a  href="{{ path('reporte_index', {'id': app.user.departamentoRm.id }) }}"> <span class="glyphicon glyphicon-stats"></span> REPORTE</a></li>
+        <li role="presentation"><a href="{{ path('organismo_index', {'id': app.user.departamentoRm.id }) }}"><span class="glyphicon glyphicon-tent" ></span> SAFS</a></li>
+        {% if app.user.departamentoRm.slug in ["dpcbs", "sca"]  %}
+        <li role="presentation"><a href="{{ path('proveedor_index', {'id': app.user.departamentoRm.id }) }}"><span class="glyphicon glyphicon-pushpin" ></span> PROVEEDORES</a></li>
+        {% endif %}
+        <li role="presentation"><a  href="{{ path('usuario_index', {'id': app.user.departamentoRm.id }) }}"> <span class="glyphicon glyphicon-user"></span> USUARIOS</a></li>
+      </div>
+
+      <ol class="breadcrumb"  style="margin-bottom:1px;"> 
+        {% for year in ( ('now' | date("Y") - 3) .. ('now' | date("Y"))) %} 
+            {% if year != anio %}
+              <li><a href="{{ path('tramite_reparticion_index', { 'anio': year }) }}"> <span class="glyphicon glyphicon-calendar"></span>{{year}}</a></li>
+            {% else %}
+                <li class="active"> 
+                  <span class="glyphicon glyphicon-calendar text-success"></span> <strong>{{year}}</strong>
+                </li>
+            {% endif %}
+        {% endfor %}
+      </ol>
+      {% if tramites | length %}
+        {{ include('ExpedienteBundle:Tramite:_lista.html.twig') }}  
+      {% endif %}
+</div>
+{% endblock %}
+{% block javascripts %}  
+{{ parent() }}
+<script> 
+  $("#link-4").addClass('active');
+</script> 
+{% endblock %}

@@ -1,0 +1,16 @@
+      {# En tramite.estadoTramite devuelve el estado con etiquetas label #}
+<div role="presentation" class="dropdown" >
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+      {% if tramite.estadoTramite == "Concluido" %} 
+          <span class="label label-default">{{tramite.estadoTramite}}<span class="caret"></span></span>
+      {% else %}
+      <span class="text-info">{{tramite.estadoTramite}}<span class="caret"></span></span>
+      {% endif %}
+    </a>
+    <ul class="dropdown-menu">
+            {% for estadoTramite in tramite.tipoTramite.estadoTramite %} 
+                <li><a href="{{ path('tramite_estado_cambiar', { 'id': tramite.id, 'estado_id':estadoTramite.id }) }}">{{estadoTramite}}</a></li>
+            {% endfor %}
+    </ul>
+</div>
+

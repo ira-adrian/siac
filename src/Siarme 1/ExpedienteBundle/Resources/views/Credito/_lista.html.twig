@@ -1,0 +1,48 @@
+    {# Siarme\ExpedienteBundle\Resources\views\Credito\_lista.html.twig#}
+    {% set edit = tramite | tramite_editar(app.user) %}
+    <table class="table table-hover table-bordered">
+        <tbody>
+            {% for credito in creditos %}
+                <tr>
+                    {% if app.user.departamentoRm.slug == "dpcbs" %}
+                    <td><a  href="{{ path('tramite_show', { 'id': credito.tramite.id }) }}" target="_blank">PEDIDO {{credito.tramite.numeroTramite}}</a></td>
+                    {% endif %}
+                    <td style="width:35%">{{ credito.texto | upper }}</td>
+                    <td>$ {{ credito.monto | number_format(2, ',', '.') }}</td>
+                    <td>{% if credito.fecha %}{{ credito.fecha | date('d-m-Y') }}{% endif %}</td>
+                    <td>
+                        {% if credito.estado %}                        
+                              Con Credito
+                                {#{% if app.user.departamentoRm.slug == "dppr" or app.user.departamentoRm.slug == "dpcbs" %} #}
+                                {% if edit %}
+                                     &nbsp;&nbsp;<a href="{{ path('credito_estado', { 'id': credito.id }) }}" class="btn-estado-credito" role="button"><span class="glyphicon glyphicon-check" data-toggle="tooltip" data-placement="top" title='Cambiar de estado a "Solicitud de Incremento"'></span></a>
+                                {% endif %} 
+                        {% else %} 
+                            
+                                <span class="text-warning"> <strong>Solicitud de Incremento</strong></span>   {% if app.user.departamentoRm.slug == "dppr" or app.user.departamentoRm.slug == "dpcbs" %} &nbsp;&nbsp;<a href="{{ path('credito_estado', { 'id': credito.id }) }}" class="btn-estado-credito" role="button"> <span class="glyphicon glyphicon-unchecked text-warning" data-toggle="tooltip" data-placement="top" title='Cambiar de estado a "Con Credito"'></span> </a>
+                            {% endif %} 
+                        {% endif %}
+                    </td>
+                    {% if app.user.departamentoRm.slug == "dppr" or app.user.departamentoRm.slug == "dpcbs" %}
+                     <td>
+                        <a role="button" data-href="{{ path('credito_edit', {'id':credito.id})}}" class="btn-editarCredito"> <span class="glyphicon glyphicon-pencil"></span></a> 
+                             {# if app.user.departamentoRm.slug == "dppr" #}
+                             {% if edit %}
+                                &nbsp;
+                                <a class="hidden-print" onclick= "return confirm('¿Desea eliminar el Registro  de Solicitud de Credito?');" href="{{ path('credito_eliminar', { 'id': credito.id }) }}"> <span class="glyphicon glyphicon-trash text-danger"></span></a>
+                            {% endif %} 
+                      </td>
+                    {% endif %} 
+                </tr>
+            {% else %}
+                {% if app.user.departamentoRm.slug == "dpcbs" %}
+                      <tr>
+                        <td><a  href="{{ path('tramite_show', { 'id': tramite.id }) }}" target="_blank">PEDIDO {{tramite.numeroTramite}}</a></td>
+                        <td>Ninguno</td>
+                     </tr>
+                {% else %} 
+                         Ninguno
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>

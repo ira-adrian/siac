@@ -1,0 +1,10 @@
+{# Siarme\ExpedienteBundle\Resources\views\tramite_oferta\_menu_acciones_tramite.html.twig #}
+
+{% if ( app.user.departamentoRm == tramite.departamentoRm ) and ( tramite.expediente | default(null) | movimiento_estado(app.user)) %}
+      <a href="{{ path('oferta_estado', { 'id': tramite.id }) }}" role="button" onclick= "return confirm('¿Desea cambiar al estado ({{ tramite.estado? "Rectificar" : "Válido" }}) la  {{ tramite.tipoTramite }} y los ítems relacionados?');">
+          {% if tramite.estado %}<span class="glyphicon glyphicon-check" data-toggle="tooltip" data-placement="top" title='Cambiar Estado'></span>{% else %}<span class="glyphicon glyphicon-unchecked text-warning" data-toggle="tooltip" data-placement="top" title='Cambiar Estado'></span>{% endif %} </a> <br>
+    &nbsp;
+    {% if (tramite.documento | length <= 0) or (tramite.expediente | length <= 0) %}
+             <a data-toggle="tooltip" data-placement="top" title='Eliminar {{ tramite.oferente }} y los ítems relacionados' role="button" href="{{ path('tramite_eliminar' , { 'id': tramite.id }) }}"><span class="glyphicon glyphicon-trash text-danger" onclick= "return confirm('¿Desea eliminar el Registro  del {{ tramite.tipoTramite }}?');"></span></a>
+    {% endif %} 
+{% endif %}

@@ -1,0 +1,78 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\index.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %}FERIADOS{% endblock %}
+  {% block header %}
+   {{ include('ExpedienteBundle:Default:_header.html.twig') }}
+  {{ include('ExpedienteBundle:Default:_breadcrumb_principal.html.twig') }}
+{% endblock %}
+        
+      {% block stylesheets %}
+        {{ parent() }}
+
+
+      {% endblock %}
+{% block contenido %}
+ <div class="container">
+
+    <h1>Calendario de Eventos</h1>
+        <div id="calendar"></div>
+
+    <h1>Eventos list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Titulo</th>
+                <th>Fechainicio</th>
+                <th>Fechafin</th>
+                <th>Tipo</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for evento in eventos %}
+            <tr>
+                <td><a href="{{ path('evento_show', { 'id': evento.id }) }}">{{ evento.id }}</a></td>
+                <td>{{ evento.titulo }}</td>
+                <td>{% if evento.fechaInicio %}{{ evento.fechaInicio|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{% if evento.fechaFin %}{{ evento.fechaFin|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{{ evento.tipo }}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('evento_show', { 'id': evento.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('evento_edit', { 'id': evento.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('evento_new') }}">Create a new evento</a>
+        </li>
+    </ul>
+</div>
+{% endblock %}
+{% block javascripts %}  
+{{ parent() }}
+
+      <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js'></script>
+    <script>
+
+      document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth'
+        });
+        calendar.render();
+      });
+
+    </script>
+{% endblock %}

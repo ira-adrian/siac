@@ -1,0 +1,215 @@
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} ITEM {{ itemProceso.numero }} {% endblock %}
+{% block contenido %}
+ <div class="container"> 
+{% set items = itemProceso.proceso.itemProceso %}
+{% if items | length > 1  %} 
+<nav aria-label="Page navigation">
+  <ul class="pagination pagination-sm" style="margin-bottom:0px; margin-top:5px;">
+    <li class="disabled">
+      <a href="#" aria-label="Previous">
+        <span aria-hidden="true">Ítems: &laquo;</span>
+      </a>
+    </li>
+    {% for item in items %}
+        {% set itemsPedidos = item | item_pedido %}
+        {% set itemsPedidos2 = item | item_pedido(true) %}
+        {% if itemProceso.numero == loop.index %}
+            <li class="active"><a href="{{ path('itemproceso_show', { 'id': item.id }) }}"><span class="{% if (itemsPedidos | length <= 0 ) or (itemsPedidos2 | length > 0) %} text-danger {% endif %}">{{loop.index}}</span></a></li>
+        {% else %}
+            <li><a href="{{ path('itemproceso_show', { 'id': item.id }) }}"><span class="{% if (itemsPedidos | length <= 0 ) or (itemsPedidos2 | length > 0) %} text-danger {% endif %}">{{loop.index}}</span></a></li>
+        {% endif %}
+    {% endfor %}
+    <li class="disabled">
+      <a href="#" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+{% endif %} 
+<div class="nav nav-pills hidden-print"> 
+    <li role="presentation" class="disabled"><a href="#">Menu</a></li>
+{% if edit %}
+      <li role="presentation"  class="dropdown overflow" >
+            <a class="dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-pencil"></span> Modificar <span class="caret"></span></a>
+            <div class="dropdown-menu" style="width: 400px;" aria-labelledby="dropdownMenuLink">
+              <div class="list-group-item">
+                  {{ render(controller('AusentismoBundle:ItemProceso:edit', {'id': itemProceso.id  })) }}
+              </div>
+            </div>
+      </li>
+{#
+    <li role="presentation" data-toggle="tooltip" data-placement="top" title='Eliminar el Item' >
+                  {{ form_start(delete_form) }}
+                  <input class="btn btn-danger" onclick= "return confirm('¿Desea ELIMINAR elItem?');" type="submit" value="Eliminar"> 
+                  {{ form_end(delete_form) }}   
+    </li> 
+#}
+{% endif %} 
+    <!-- Menu DERECHO *** IMPRIMIR - COPIAR -->
+    <div class="pull-right">
+            <li  role="presentation">
+              <a id="printer"  value="Imprimir" role="button"><!-- Printer-imprime el texto de clase="print" -->
+                <span class="glyphicon glyphicon-print"></span> Imprimir</a>
+
+                <a class="btn" data-clipboard-target="#copy"><!-- clipboard-copiar texto de id="copy" -->
+                  <span class="glyphicon glyphicon-copy"></span>Copiar</a>
+            </li>
+    </div>
+</div>
+
+
+<div id="copy" class="panel panel-default print">
+        <style type="text/css" media="print">
+        @media print {
+            a[href]:after {
+                content: none !important;
+            }
+        }
+      </style> 
+  <!-- Default panel contents -->
+  <div class="panel-heading"> <span class="glyphicon glyphicon-shopping-cart"></span> ITEM SOLICITADO N°  {{ itemProceso.numero }} - <span class="estadoTramite">{% if itemProceso.proceso.adjudicado %}(<span class=" text-success">Adjudicado</span>){% else %} (Evaluación){% endif %}</span>
+        {# if itemProceso.proceso.expediente.id is defined %}
+                {% if ( itemProceso.proceso.expediente |  default(null) | movimiento_estado(app.user))  %}
+                    {% set tramite = itemProceso.proceso %}
+                    <span class="pull-right">{{ include('ExpedienteBundle:Tramite:_estado_etiqueta.html.twig') }}</span><span class="pull-right">Estado:</span>{% else %} <span  class="label label-default pull-right" data-toggle="tooltip" data-placement="bottom" title='Para modificar el ÍTEM debe cambiar el estado de la Nota DPPR que lo contiene'>Enviado</span> {% endif %}
+        {% endif #}
+        <span class="pull-right"> {{ include('AusentismoBundle:ItemProceso:_etiqueta_estado.html.twig') }}</span>
+  </div>
+  <div class="panel-body"> 
+    
+        <dl>
+<div class="panel-heading text-center">
+        <dt>Expediente</dt>
+         <dd>
+             <a href="{{ path('expediente_show', { 'id': itemProceso.proceso.expediente.id }) }}">{{itemProceso.proceso.expediente}}</a>
+         </dd>
+         <dt>Proceso</dt>
+         <dd>
+            <a   href="{{ path('tramite_show', { 'id': itemProceso.proceso.id }) }}">{{ itemProceso.proceso.numeroComprar  | default("n/d" )}}</a>
+         </dd>
+</div>
+         <dt>Código</dt>
+         <dd>{{ itemProceso.codigo }}</dd>
+         <dt>Descripción del ítem solicitado</dt>
+         <dd>{{ itemProceso.item }}</dd>         
+         <dt>Unidad de Medida</dt>
+         <dd>{{ itemProceso.unidadMedida }}</dd>        
+          <dt>Cantidad Solicitada</dt>
+         <dd>{{ itemProceso.cantidad }}</dd>         
+         <dt>Estado</dt>
+         <dd> -</dd>
+         <dt>Detalle técnico solicitado {% if  itemProceso.proceso.expediente  | default(null) | movimiento_estado(app.user) %}
+               <a class="texto hidden-print" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample"> {% if itemProceso.texto  is empty %} |  <span class="glyphicon glyphicon-plus-sign"></span>Agregar{% else %} |  <span class="glyphicon glyphicon-pencil"></span> Modificar{% endif %}</a>
+            {% endif %} 
+        </dt>
+         <dd> 
+            <div id="texto">
+                {{ itemProceso.texto | raw }}
+            </div>
+            <div class="collapse" id="collapseExample">
+                {{ render(controller('AusentismoBundle:ItemProceso:editTexto', {'id': itemProceso.id  }))}}
+            </div>
+         </dd>
+        </dl>
+            <h4><span class="glyphicon glyphicon-barcode"></span> ÍTEM EVALUADO ({{itemProceso.itemOferta  | length}}) - <strong>EVALUACION TÉCNICA</strong></h4>
+                <table id="#" class="table table-hover text-left">
+                    <thead>
+                       {{ include('AusentismoBundle:ItemOferta:_thead_completo.html.twig') }}
+                    </thead>
+                     <tbody>
+                    {% for itemOferta in itemProceso.itemOferta %}
+                        {{ include('AusentismoBundle:ItemOferta:_tbody_completo.html.twig') }}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% if itemProceso.itemOferta  | length  >= 1 %}
+            <h4><span class="glyphicon glyphicon-barcode"></span> ÍTEM ADJUDICADO - <strong>FACTOR DE PONDERACIÓN</strong></h4>
+            <table id="#" class="table table-hover text-left">
+                <thead>
+                   {{ include('AusentismoBundle:ItemOferta:_thead_ponderado.html.twig') }}
+                </thead>
+                 <tbody>
+                {% for itemOferta in itemProceso.itemOferta %}
+                    {{ include('AusentismoBundle:ItemOferta:_tbody_ponderado.html.twig') }}
+                {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+            {% set itemsPedidos = itemProceso | item_pedido %}
+            {% set itemsPedidos2 = itemProceso | item_pedido(true) %}
+            <h4><span class="glyphicon glyphicon-align-justify"></span> ÍTEM DE NOTA PEDIDO ({{  itemsPedidos | length}})</h4>
+                    <table id="#" class="table table-hover text-left">
+                        <thead>
+                           {{ include('AusentismoBundle:ItemPedido:_thead_completo.html.twig') }}
+                        </thead>
+                         <tbody>
+                                {# Si item_pedido(true) devuelve todas la coincidencias de codigos de itms pedidos #}
+                                {% for itemPedido in itemsPedidos %}
+                                    {{ include('AusentismoBundle:ItemPedido:_tbody_completo.html.twig') }}
+                                {% endfor %}
+                                {% if edit and itemsPedidos2 | length >= 1 %}
+                                    <tr><td colspan="9">             
+                                      &nbsp;&nbsp; <span class="text-danger">No se pudo establecer la relación con el ítem PEDIDO por el SAF</span> 
+                                     &nbsp;&nbsp;<span>Identifique el Ítem Correspondiente y haga Click en </span><span class="glyphicon glyphicon-plus-sign text-info">Relacionar</span>
+                                    </td></tr>  
+                                {% endif %}
+                                {% for itemPedido in itemsPedidos2 %}
+                                    {{ include('AusentismoBundle:ItemPedido:_tbody_completo.html.twig') }}
+                                {% endfor %}
+                        </tbody>
+                    </table>
+  </div>
+
+</div>
+ {{ render(controller('ExpedienteBundle:Comentario:index',
+            { 'tipoid': itemProceso.id, 'tipo': constant('TIPO_ENTIDAD', itemProceso)  })) }}
+
+{{ render(controller('ExpedienteBundle:Comentario:new', { 'tipoid': itemProceso.id, 'tipo': constant('TIPO_ENTIDAD', itemProceso) })) }}
+</div>
+{% endblock %}
+
+{% block javascripts %} 
+    {{parent()}}
+     <script> 
+
+     $('.texto').on('click',function () {
+
+        if($('#texto').is(':visible')){
+        $('#texto').fadeOut("fast");
+      }else{
+        $('#texto').fadeIn("fast");
+      }
+
+     });
+        CKEDITOR.replace('siarme_ausentismobundle_item_texto_texto', {  height: 400, 
+         // Configure SCAYT to load on editor startup.
+         scayt_autoStartup: true,
+          autoGrow_onStartup: true,
+        } );
+
+$("#siarme_ausentismobundle_itempedido_item").change(function() {
+  let str = $(this).val();
+  str = str.trim();
+  $("#siarme_ausentismobundle_itempedido_item").val(str);
+            });
+$("#siarme_ausentismobundle_itempedido_codigo").change(function() {
+  let str = $(this).val();
+  str = str.trim();
+  $("#siarme_ausentismobundle_itempedido_codigo").val(str);
+            });
+$("#siarme_ausentismobundle_itempedido_precio").change(function() {
+  let str = $(this).val();
+  str = str.replace("$", "");
+  str = str.replace(".", "");
+  str = str.trim();
+  $("#siarme_ausentismobundle_itempedido_precio").val(str);
+            });
+
+     </script>
+{% endblock %}
+
+{% block footer %}
+<dir class="footer"></dir>
+{% endblock %}

@@ -1,0 +1,40 @@
+{# C:\xampp\htdocs\siac_ftp\src\Siarme\ExpedienteBundle\Resources\views\Planificacion\_tbody_completo.html.twig#}
+{% if planificacion.pedido %}
+     {% set proceso, procesos = null, planificacion.pedido.expediente | tramite_por_expediente_slug("tramite_proceso")  %}
+     {% for tramite1 in procesos | reverse %}
+        {% if loop.first  %}
+           {% set proceso = tramite1 %}
+        {% endif %} 
+     {% endfor %}
+{% endif %}
+<tr>
+    <td><a href="{{ path('planificacion_show', { 'id': planificacion.id }) }}" target="_blank">{{ planificacion.rubro }}</a></td>
+    <td>{{ planificacion.descripcion }}</td>
+    <td>
+        Estimado: <strong>${{ planificacion.importe  | default(0) | number_format(2, ',', '.')  }}</strong> 
+        {% if planificacion.pedido.PresupuestoOficial | default(0) > 0  %}
+            <br/>Presupuestado: ${{ planificacion.pedido.PresupuestoOficial | default(0) | number_format(2, ',', '.')  }}
+        {% endif %} 
+        {% if proceso.montoAdjudica  | default(0)  > 0  %} 
+            {% set monto = 0 %}
+            {% for item in planificacion.pedido.itemPedido %}
+                {% for itemOferta in item.itemProceso.itemOferta if itemOferta.adjudicado %}
+                        {% set cantidad = (item.cantidad/item.itemProceso.cantidad)*itemOferta.cantidadAdjudicada %}
+                            {% set monto = monto + ((cantidad | round) * itemOferta.precio ) %}
+                {% endfor %}
+            {% endfor %}
+                <br/>Adjudicado: ${{ monto | default(0) | number_format(2, ',', '.')  }}
+        {% endif %}  
+    </td>
+    <td> 
+        {% if planificacion.pedido %} {{ planificacion.pedido.numeroTramite}}
+                 -  <a  data-toggle="tooltip" data-placement="top" title='{{ planificacion.pedido.texto | upper }}'  href="{{ path('tramite_show', { 'id': planificacion.pedido.id }) }}" target="_blank">{{ planificacion.pedido.ccoo | default('NO-'~ year ~ '-n/d')}}</a>  
+                    {% if proceso %}
+                       <br/>Llamado: {% set  agenda = agenda_ultima(proceso, "llamado") %}{% if agenda.fecha | default(false)%}{{ agenda.fecha | default("now") | date('d-m-Y') }} (Hace {% set hoy = 'now' | date('Y-m-d')  %} {% set diff = date(date(hoy)).diff( agenda.fecha) %} {{diff.days}} días) {% endif %}
+                    {% endif %} 
+         {% else %} 
+            - 
+        {% endif %}
+    </td>
+    <td>{% include 'ExpedienteBundle:Planificacion:_concentra_etiqueta.html.twig' %}</td>
+</tr>

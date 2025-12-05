@@ -1,0 +1,32 @@
+
+<ul  class="pager" style="margin:0px;" >
+      {% set expedienteArray = [] %} 
+           {% for expediente in agente.expediente | sort | reverse  %}    
+                  {% set expedienteArray = expedienteArray|merge([expediente]) %}        
+           {% endfor %} 
+<div class="dropup"> <!-- Dropup -->
+    <li class="dropdown-toggle previous hidden-print" data-toggle="dropdown" role="button" aria-expanded="false">{% if expedienteArray | length > 0 %}<span  class="glyphicon glyphicon-folder-open text-primary" aria-hidden="true">.{{ expedienteArray | length }}</span>{% else %}<span  class="glyphicon glyphicon-folder-open text-muted" aria-hidden="false">.{{ expedienteArray | length }}</span>{% endif %}</li>
+       <div  class="dropdown-menu"  >  <!-- dropdown-menu -->                 
+           <div class="list-group" style="margin:2px">   <!-- list-group -->                                                 
+              {% for expediente in expedienteArray %}                                  
+              {% if expediente.estado %}
+                   <a href="{{ path('expediente_show', { 'id': expediente.id }) }}"><span class="glyphicon glyphicon-folder-open text-success"></span><small>{% if expediente | length > 10 %}{{ expediente | default ("N/D") | upper | replace({ (find) :'<mark>'~find~'</mark>' })  | raw  }}{% else %} {{ expediente.extracto[:14] | default ("N/D") | upper | replace({ (find) :'<mark>'~find~'</mark>' })  | raw  }} {% endif %}</small>
+                   </a><br>          
+                 {% else %}  
+                  <a  href="{{ path('expediente_show', { 'id': expediente.id }) }}"><span class="glyphicon glyphicon-folder-close text-default"></span> &nbsp;<small>{% if expediente | length > 10 %} {{ expediente | default ("N/D") | upper | replace({ (find) :'<mark>'~find~'</mark>' })  | raw  }}   {% else %} {{ expediente.extracto[:14] | default ("N/D") | upper | replace({ (find) :'<mark>'~find~'</mark>' })  | raw  }} {% endif %}</small>
+                   </a><br>           
+             {% endif %}
+                 
+
+              {% endfor %} 
+              
+           </div> <!-- list-group -->                 
+      </div> <!-- dropdown-menu --> 
+</div> <!-- Dropup -->
+
+
+</ul>
+
+
+
+

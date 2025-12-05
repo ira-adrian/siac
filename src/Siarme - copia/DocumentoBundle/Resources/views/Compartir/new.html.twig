@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+    {{ form_start(form,  {'action': path('compartir_new', {'tipoid':tipoid, 'tipo':tipo}), 'method': 'POST'}) }}
+        {{ form_widget(form) }}
+        <div class="text-right">
+            <input class="btn btn-sm btn-default"  type="submit" value="Aceptar" />
+        </div>
+    {{ form_end(form) }}
+

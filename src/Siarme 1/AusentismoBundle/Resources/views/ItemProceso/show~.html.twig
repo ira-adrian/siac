@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Itemproceso</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ itemProceso.id }}</td>
+            </tr>
+            <tr>
+                <th>Fecha</th>
+                <td>{% if itemProceso.fecha %}{{ itemProceso.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Numero</th>
+                <td>{{ itemProceso.numero }}</td>
+            </tr>
+            <tr>
+                <th>Tipo</th>
+                <td>{{ itemProceso.tipo }}</td>
+            </tr>
+            <tr>
+                <th>Codigoespecial</th>
+                <td>{{ itemProceso.codigoEspecial }}</td>
+            </tr>
+            <tr>
+                <th>Codigo</th>
+                <td>{{ itemProceso.codigo }}</td>
+            </tr>
+            <tr>
+                <th>Item</th>
+                <td>{{ itemProceso.item }}</td>
+            </tr>
+            <tr>
+                <th>Marca</th>
+                <td>{{ itemProceso.marca }}</td>
+            </tr>
+            <tr>
+                <th>Unidadmedida</th>
+                <td>{{ itemProceso.unidadMedida }}</td>
+            </tr>
+            <tr>
+                <th>Cantidad</th>
+                <td>{{ itemProceso.cantidad }}</td>
+            </tr>
+            <tr>
+                <th>Preciounitario</th>
+                <td>{{ itemProceso.precioUnitario }}</td>
+            </tr>
+            <tr>
+                <th>Pfprecio</th>
+                <td>{{ itemProceso.pFPrecio }}</td>
+            </tr>
+            <tr>
+                <th>Pfcalidad</th>
+                <td>{{ itemProceso.pFCalidad }}</td>
+            </tr>
+            <tr>
+                <th>Pfplazoentrega</th>
+                <td>{{ itemProceso.pFPlazoEntrega }}</td>
+            </tr>
+            <tr>
+                <th>Pfantecedente</th>
+                <td>{{ itemProceso.pFAntecedente }}</td>
+            </tr>
+            <tr>
+                <th>Cantidadadjudicada</th>
+                <td>{{ itemProceso.cantidadAdjudicada }}</td>
+            </tr>
+            <tr>
+                <th>Estado</th>
+                <td>{{ itemProceso.estado }}</td>
+            </tr>
+            <tr>
+                <th>Estotal</th>
+                <td>{% if itemProceso.esTotal %}Yes{% else %}No{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Esoferta</th>
+                <td>{% if itemProceso.esOferta %}Yes{% else %}No{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Texto</th>
+                <td>{{ itemProceso.texto }}</td>
+            </tr>
+            <tr>
+                <th>Sistema</th>
+                <td>{{ itemProceso.sistema }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('itemproceso_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('itemproceso_edit', { 'id': itemProceso.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

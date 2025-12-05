@@ -1,0 +1,28 @@
+{# C:\xampp\htdocs\siac_ftp\src\Siarme\ExpedienteBundle\Resources\views\Planificacion\_tbody_completo.html.twig#}
+<tr>  
+        <td width="30%"><a href="{{ path('planificacion_show', { 'id': planificacion.id }) }}" target="_blank">{{ planificacion.rubro }}</a></td>
+        <td>{{ planificacion.descripcion }}</td>
+        <td>
+                {% if planificacion.importe > 0 %}
+                        ${{ planificacion.importe  | default(0) | number_format(2, ',', '.')  }}
+                 {% endif %}
+        </td>
+        {% if   quitar %}
+                <td>
+                    {% if planificacion.importe > 0 %}   
+                                        {% if diferencia < 0 %} <span class="text-warning"> {% else %} <span>{% endif %}
+                                            Diferencia: {{ diferencia | number_format(2, ',', '.') }}
+                                        </span>
+                    {% endif %}
+                </td>
+                <td> <a  href="{{ path('planificacion_quitar', { 'id':planificacion.id }) }}"><span class="glyphicon glyphicon-remove text-danger"></span></a></td>
+        {% else %}
+                <td> 
+                        {% if not planificacion.pedido %} 
+                                <a  href="{{ path('planificacion_seleccionar', { 'id':planificacion.id, 'id2': tramite.id }) }}">Seleccionar</a> 
+                        {% else %}
+                               <a  data-toggle="tooltip" data-placement="top" title='{{ planificacion.pedido.texto | upper }}'  href="{{ path('tramite_show', { 'id': planificacion.pedido.id }) }}" target="_blank">{{ planificacion.pedido.numeroTramite}} - {{ planificacion.pedido.ccoo | default('NO-'~ year ~ '-n/d')}}</a>
+                        {% endif %}
+                </td>
+        {% endif %}
+</tr> 

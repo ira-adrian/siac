@@ -1,0 +1,110 @@
+{% set items = itemAcuerdo.itemSolicitado %}
+{% if (items | length > 0 ) %}
+<span data-toggle="tooltip" data-placement="top" title='Items Solicitados'> 
+        <a aria-hidden="true" class="dropdown-toggle overflow fa fa-file-powerpoint-o text-info" data-toggle="dropdown" role="button" aria-expanded="false">{{items | length}}</a>
+        <div  class="dropdown-menu" style="width: 600px;">  
+             <ul class="list-group">
+            {% for item in items %}
+                {% if loop.first %}
+                    <table id="tablaItemDuplicado" class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Solicitudes</th>
+                                <th>N°</th>
+                                <th>Codigo</th>
+                                {% if  not item.tramite.estado %}
+                                    <th>Cantidad <span class="label label-warning">Pedida</span></th>        
+                                    <th>Cantidad Autorizada</th>
+                                    <th>Cantidad <span class="label label-default">Disponible</span></th>
+                                {% else %}
+                                    <th>Cantidad Pedida</th>  
+                                    <th>Cantidad Autorizada</th>
+                                    <th>Cantidad Disponible</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                {% endif %}
+                                <tr>
+                                    <td>
+                                        <small>
+                                        <small><span class="{{item.tramite.estadoTramite.class}}"  data-toggle="tooltip" data-placement="bottom" title='{{item.tramite.estadoTramite}}' >-</span></small>
+                                        <a  href="{{ path('tramite_show', { 'id': item.tramite.id }) }}" target="_blank"> {{item.tramite.tipoTramite}} AC-{{ item.tramite.numeroTramite }}</a>
+                                    </small>
+                                    </td>
+                                    <td>{{ item.numero }}</td>
+                                    <td><a href="{{ path('itemsolicitado_show', { 'id': item.id }) }}" target="_blank"><strong> {{ item.codigo }} </strong></a></td>
+                                    <td>{{item.cantidad | number_format(2, ',', '.')}}</td>
+                                    <td>
+                                        {% if  item.itemAcuerdoMarco.cantidadRestante | default(0) - item.cantidadAutorizada  < 0 and  not item.tramite.estado %}  
+                                              <span class="text-danger"> <strong> {{ item.cantidadAutorizada | number_format(2, ',', '.') }} </strong></span>     
+                                         {% else %}
+                                                 {{ item.cantidadAutorizada | number_format(2, ',', '.') }} 
+                                         {% endif %}
+                                    </td>
+                                    <td>
+                                         {% if  not item.tramite.estado %}  
+                                            <strong>{{ item.itemAcuerdoMarco.cantidadRestante | default(0) | number_format(2, ',', '.') }} </strong>   
+
+                                           {% if  item.itemAcuerdoMarco.cantidadRestante | default(0)  >  0 %}
+                                           {% set porcentajeSolicitado = ( item.cantidadAutorizada * 100 ) / item.itemAcuerdoMarco.cantidadRestante | default(0) %}
+                                 
+                                                    {% if porcentajeSolicitado <= 100 %}
+                                                                <div class="progress progress-striped">
+                                                                  <div class="progress-bar progress-bar-warning active" style="width: {{porcentajeSolicitado |round }}%">
+                                                                    {{porcentajeSolicitado |round }}%
+                                                                  </div> 
+                                                                </div>
+                                                             {% else %}
+                                                                    <div class="progress progress-striped">
+                                                                      <div class="progress-bar progress-bar-danger active" style="width: {{porcentajeSolicitado |round }}%">
+                                                                       {{porcentajeSolicitado |round }}%
+                                                                      </div>  
+                                                                    </div>
+                                                            {% endif %}
+                                                    {% else %}
+                                                                    <div class="progress">
+                                                                      <div class="progress-bar progress-bar-danger" style="width: 100%">
+                                                                       -
+                                                                      </div>  
+                                                                    </div>
+                                                    {% endif %}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+
+                                     </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>                
+             </ul>
+        </div>
+       </span>
+{% endif %}
+{% set comentarios = itemAcuerdo.id | default(null)| Comentario(tipo)  %}
+{% if (comentarios | length > 0 ) %}
+     <span data-toggle="tooltip" data-placement="top" title='Comentario' class='hidden-print'> 
+        <a class="dropdown-toggle glyphicon glyphicon-comment text-info" data-toggle="dropdown" role="button" aria-expanded="false">{{ comentarios | length }}</a>
+        <div  class="dropdown-menu" style="width:400px;">  
+            
+            <ul class="list-group">
+               {% for comentario in comentarios | sort | reverse %}
+                   <li class="list-group-item">
+                              <small>{% if ( app.user.id == comentario.usuario.id) %}
+                              <a data-toggle="tooltip" data-placement="top" title='{{ comentario.usuario}}' class='glyphicon glyphicon-cog glyphicon text-success small'>
+                               </a>  
+                              {% else %}       
+                               <a data-toggle="tooltip" data-placement="top" title='{{ comentario.usuario}}' class='glyphicon glyphicon-cog text-muted'></a> 
+                             {% endif %} <span class="text-muted">  {{ comentario.usuario.usuario}} ha comentado  {% if comentario.fecha %}{{ comentario.fecha|long_time }} ({{ comentario.fecha|date('d-m-Y') }}){% endif %}</span></small> <br> {{ comentario.texto }}
+
+                              {% if ( is_granted('ROLE_ADMIN')) or ( app.user.id == comentario.usuario.id) %}
+                           &emsp;
+                              <a data-href="{{ path('comentario_eliminar', { 'id': comentario.id }) }}" class="btn-eliminar-comentario"><span data-toggle="tooltip" data-placement="top" title='Quitar comentario' class="glyphicon glyphicon-trash" ></span></a>
+                              {% endif %}
+                      </li>
+              {% endfor %}
+          </ul>
+        </div>
+       </span>
+{% endif %}

@@ -1,0 +1,67 @@
+<script>
+$(".btn-editarPonderacionOferta").unbind('click').click( function(){
+        var $href= $(this).attr("data-href");
+        
+        $.ajax({
+             url: URL+$href,
+             type: 'GET',
+             success: function(response){
+             var msj= document.getElementById("modal-body-ponderacion");
+             msj.innerHTML =response;
+             $('#modal-ponderacion').modal('show');  
+             $('select').select2({width:'100%', allowClear:true, placeholder:"Seleccionar"});       
+            } 
+        }); 
+    });
+
+    function verificarCalidadPonderada() {
+        var $href= "{{ path('item_oferta_calidad_ponderada', { 'id': tramite.id | default(1)}) }}";
+        $.ajax({
+             url: URL+$href,
+             type: 'POST',
+             success: function(response){
+                if (response) {
+                    $("#pPFcalidadPonderada").removeClass("glyphicon glyphicon-remove text-warning").addClass("glyphicon glyphicon-ok text-info");
+                    $("#textoCalidadPonderada").html(" Realizado");
+                } else {
+                    $("#pPFcalidadPonderada").removeClass("glyphicon glyphicon-ok text-info").addClass("glyphicon glyphicon-remove text-warning");
+                    $("#textoCalidadPonderada").html(" <span class='text-warning'><strong>Falta Evaluar</strong></span>"); 
+          
+                }
+                console.log( response);
+             } 
+        });
+        }
+        $(function () {
+            verificarCalidadPonderada();
+        });
+        
+   <!--boton cambiar es ESTADO itemOferta tramite PROCESO-->
+
+    $(".btn-calidad").unbind('click').click( function(){
+       var $href= $(this).attr("data-href");
+       var $etiqueta= $(this).attr("data-etiqueta");
+       //$("#etiqueta-calidad").html($etiqueta);
+        $(this).parent().parent().parent().find('.etiqueta-calidad').html($etiqueta);
+        //alert(URL+$
+        $.ajax({
+
+             url: URL+$href,
+             type: 'POST',
+             success: function(response){
+
+                if (response != "ninguno") {
+                    $(".estadoTramite").html("(Evaluación)");
+                    if($('#actualizar-pagina').is(':hidden')){
+                        $('#actualizar-pagina').removeClass("hidden");
+                    }    
+                }
+               verificarCalidadPonderada();
+                console.log( response);
+
+             } 
+        });
+
+    });
+    
+</script>

@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Itempedido</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ itemPedido.id }}</td>
+            </tr>
+            <tr>
+                <th>Fecha</th>
+                <td>{% if itemPedido.fecha %}{{ itemPedido.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Trimestre</th>
+                <td>{{ itemPedido.trimestre }}</td>
+            </tr>
+            <tr>
+                <th>Codigo</th>
+                <td>{{ itemPedido.codigo }}</td>
+            </tr>
+            <tr>
+                <th>Item</th>
+                <td>{{ itemPedido.item }}</td>
+            </tr>
+            <tr>
+                <th>Condetalle</th>
+                <td>{{ itemPedido.conDetalle }}</td>
+            </tr>
+            <tr>
+                <th>Unidadmedida</th>
+                <td>{{ itemPedido.unidadMedida }}</td>
+            </tr>
+            <tr>
+                <th>Precio</th>
+                <td>{{ itemPedido.precio }}</td>
+            </tr>
+            <tr>
+                <th>Cantidad</th>
+                <td>{{ itemPedido.cantidad }}</td>
+            </tr>
+            <tr>
+                <th>Estado</th>
+                <td>{% if itemPedido.estado %}Yes{% else %}No{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('itempedido_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('itempedido_edit', { 'id': itemPedido.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

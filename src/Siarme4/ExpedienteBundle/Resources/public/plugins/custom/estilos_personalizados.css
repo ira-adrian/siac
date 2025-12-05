@@ -1,0 +1,36 @@
+/* Estilo para label-success-1 */
+.label-success-1 {
+    background-color: #5fee2a; /* Un verde más claro que el success por defecto */
+}
+.label-success-1[href]:hover,
+.label-success-1[href]:focus {
+    background-color: #64d13b; /* Color más oscuro para hover/focus */
+}
+
+/* Estilo para tab-success-1 */
+.nav-tabs > li > a.tab-success-1 {
+    background-color: #49f766; /* Mismo verde claro */
+    color: #fff; /* Texto blanco para contraste */
+    border: medium none; /* Quita bordes por defecto */
+}
+.nav-tabs > li > a.tab-success-1:hover,
+.nav-tabs > li > a.tab-success-1:focus {
+    background-color: #27ae60; /* Color más oscuro para hover/focus */
+    color: #fff;
+}
+.nav-tabs > li.active > a.tab-success-1,
+.nav-tabs > li.active > a.tab-success-1:hover,
+.nav-tabs > li.active > a.tab-success-1:focus {
+    background-color: #27ae60; /* Color activo */
+    color: #fff;
+    border: medium none;
+    border-bottom: 2px solid #27ae60; /* Línea inferior para indicar tab activa */
+}
+
+
+
+@media print {
+    a[href]:after {
+        content: none !important;
+    }
+}

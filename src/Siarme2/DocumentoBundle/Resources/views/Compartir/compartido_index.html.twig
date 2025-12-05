@@ -1,0 +1,94 @@
+{# Siarme\DocumentoBundle\Resources\views\Compartir\compartido_index.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} Turnos {% endblock %}
+  {% block header %}
+    {{ include('ExpedienteBundle:Default:_header.html.twig') }}
+  {{ include('ExpedienteBundle:Default:_breadcrumb_principal.html.twig') }}
+{% endblock %}
+
+{% block contenido %}
+        {{ app.session.set('modulo', 'NOTIFICACIONES') }}
+        {{ app.session.set('glyphicon', 'glyphicon glyphicon-share') }}
+        {{ app.session.set('route', 'compartidos_index') }} 
+
+ {% set msjs_compartido = app.user.id | Comparte('MSJ') %}
+ {% set msjs_compartido_total = msjs_compartido | length %}
+
+ {% set ags_compartido = app.user.id | Comparte('TRA') %} 
+ {% set ags_compartido_total = ags_compartido | length %} 
+ {% set expts_compartido = app.user.id | Comparte('EXP') %} 
+ {% set expts_compartido_total = expts_compartido | length  %} 
+ {% set docs_compartido = app.user.id | Comparte('DOC') %} 
+ {% set docs_compartido_total = docs_compartido | length  %}
+ 
+   {% set classac="" %}
+   {% set classdc="" %}
+   {% set classec="" %}
+
+
+<br>
+ {# -- ------------------------------------------------------------------ --#} 
+    {% if expts_compartido_total > 0 %}
+
+    <span class="glyphicon glyphicon-folder-open"></span> CCOO DPPR<span class="badge">{{expts_compartido_total}}</span><hr style="margin:5px">
+
+    {% if expts_compartido_total > 0  %} 
+    <table id="tablaExpediente" class="table table-responsive table-hover">
+        <thead>
+                {{ include('ExpedienteBundle:Expediente:_thead_completo.html.twig') }}
+        </thead>
+        <tbody>
+                {% for expediente in expts_compartido %}
+                     {{ include('ExpedienteBundle:Expediente:_tbody_completo.html.twig') }}
+                {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+   {% endif %}
+
+   {# -- ------------------------------------------------------------------ --#} 
+     {% if ags_compartido_total > 0 %}
+        <span class="glyphicon glyphicon-wrench"></span> PEDIDOS <span class="badge">{{ags_compartido_total}}</span><hr style="margin:5px">
+    
+    {% if ags_compartido_total > 0  %} 
+         {% for tramite in ags_compartido %}   
+         {% if loop.first %}
+         <table id="tablaTramite" class="table table-responsive table-hover">
+            <thead>
+              {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_thead_completo.html.twig') }}         
+            </thead>
+            <tbody>
+        {% endif %}
+              {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_tbody_completo.html.twig') }} 
+         {% else %}
+            <h2>No hay Pedidos</h2>  
+         {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+ {% endif %}
+ {# -- ------------------------------------------------------------------ --#} 
+    {% if docs_compartido_total > 0 %}
+
+       <span class="glyphicon glyphicon-file"></span> Documentos<span class="badge">{{docs_compartido_total}}</span><hr style="margin:5px">
+
+    {% if docs_compartido > 0  %}
+                <ul class="list-inline text-center">
+                  {% for documento in docs_compartido %} 
+
+                  {{ include('DocumentoBundle:Documento:_lista_documento.html.twig') }}
+                 
+                  {% endfor %}       
+               </ul>
+    {% endif %}
+   {% endif %}
+  {# -- ------------------------------------------------------------------ --#} 
+
+
+{% endblock %}
+{% block javascripts %}  
+{{ parent() }}
+<script> 
+ $("#link-5").addClass('active');
+ </script>
+{% endblock %}

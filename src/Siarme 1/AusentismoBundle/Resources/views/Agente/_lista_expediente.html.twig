@@ -1,0 +1,31 @@
+
+
+    {% for expediente in pagination  | sort | reverse %}
+
+    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2 text-center" style="margin:2px; padding:2px;">
+      <div class="panel panel-default" style="margin:2px;">
+       <div class="panel-heading" style="margin:2px; padding:0px;"><div class="dropdown text-left" style="margin:0px;"> 
+             {# El tipo puede ser ['EX','DOC','AG'] corresponde con las entidades Expediente, Documento, Agente #}
+            {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': expediente, 'tipo': 'EXP'} %}
+        </div>
+      </div>
+          <dl><dd>
+            <h3 style="margin:0px;" data-toggle="tooltip" data-placement="top" title='{{expediente.extracto}}'>
+    {% if expediente.estado %}
+              <a href="{{ path('expediente_show', { 'id': expediente.id }) }}"><span class="glyphicon glyphicon-folder-open"></span></a>
+     {% else %}
+              <a href="{{ path('expediente_show', { 'id': expediente.id }) }}"><span class="glyphicon glyphicon-folder-close"></span></a> 
+    {% endif %}
+            </h3><small> {% if expediente | length > 10 %}
+                {{ expediente | default ("N/D") | upper | replace({ (find) :'<mark>'~find~'</mark>' })  | raw  }}</a> {% set extracto = expediente.extracto %}
+           {% else %}
+            
+               {{ expediente.extracto[:14] | default ("N/D") | upper | replace({ (find) :'<mark>'~find~'</mark>' })  | raw  }}</a> {% set extracto = expediente.extracto[14: ] %}        
+           {% endif %}
+         </small>
+          </dd> </dl>
+      </div>
+    </div> 
+   {% endfor %}          
+
+<div class="clearfix">  </div>

@@ -1,0 +1,42 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\_registro_completo.html.twig#}
+<tr>
+        {#<td>
+            <div class="dropdown text-left hidden-print" style="margin:0px;"> 
+            {% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': tramite, 'tipo': constant('TIPO_ENTIDAD', tramite) } %}
+            {% include 'ExpedienteBundle:tramite_oferta:_menu_info_tramite.html.twig' with {'entidad': tramite, 'tipo':constant('TIPO_ENTIDAD', tramite) } %}
+            </div>
+        </td>#}
+        <td><a  href="{{ path('tramite_show', { 'id': tramite.proceso.id }) }}"><small><span class="{{tramite.proceso.estadoTramite.class}}"  data-toggle="tooltip" data-placement="bottom" title='{{tramite.proceso.estadoTramite}}' >-</span></small>{{ tramite.proceso.numeroComprar  | default("-")}}</a></td>
+        <td>{{ tramite.fechaDestino  | date('Y/m/d')}}</td>
+        <td> 
+             <a  href="{{ path('tramite_show', { 'id': tramite.id }) }}">{{tramite.oferente | default("-")}}</a>
+                <br>
+                 {% if tramite.estado %}<span class="glyphicon glyphicon-check text-info" data-toggle="tooltip" data-placement="top" title='Estado Admisible'></span><small class="text-muted"> Admisible</small>{% else %}<span class="glyphicon glyphicon-unchecked text-warning" data-toggle="tooltip" data-placement="top" title='Estado No Válido'></span><small class="text-muted"> No Válido</small>{% endif %}
+             
+        </td>
+        <td> {{ tramite.cuit  | default("") | mostrar_como_cuil }}</td>
+        <td>${{ tramite.montoOfertado | number_format(2, ',', '.')  }}</td>
+        <td>
+            {% if tramite.proceso.adjudicado %}
+                ${{ tramite.montoAdjudicado | number_format(2, ',', '.')  }} 
+            {% else %}
+                -
+            {% endif %} 
+        </td>
+{% if tramites is defined or  tareas is defined or realizadas is defined %}
+        <td>
+            {% set pedidos = tramite.expediente | tramite_por_expediente_slug("tramite_pedido") %}
+            {% for pedido in pedidos %}
+               - {{pedido.organismoOrigen.organismo}} <br>
+            {% endfor %}
+        </td>
+ {% endif %} 
+        <td>        
+            {% if tramite.proceso.adjudicado %}
+                {% if tramite.montoAdjudicado > 0 %}<span class="label label-success">Adjudicado</span>{% else %}<span class="label label-default">Sin Adjudicar</span>{% endif %} 
+            {% else %} 
+                    <span class="label label-primary">Ingresado</span>
+            {% endif %} 
+        </td>
+
+</tr>

@@ -1,0 +1,119 @@
+
+{% set year, agenda = 'now' | date('Y') , agenda_ultima(documento.tramite, "llamado") %}
+{% set tramites = documento.tramite.expediente | tramite_por_expediente_slug("tramite_pedido") %}
+{% set itemDesierto, itemFracasado = [], [] %}
+{% set numero = 1 %}
+{% for itemProceso in documento.tramite.itemProceso %}
+    {% if itemProceso.itemOferta | length > 0 %}
+       {% set  fracasado = true %}
+       {% for item in itemProceso.itemOferta if item.adjudicado %}
+            {% set fracasado = false %}
+       {% endfor %}     
+       {% if  fracasado %}
+          {% set  itemFracasado = itemFracasado | merge([itemProceso]) %}
+       {% endif %}
+    {% else %}
+        {% set itemDesierto = itemDesierto | merge([itemProceso]) %}
+    {% endif %}
+{% endfor %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p><strong>VISTO:</strong></p>
+<p style="text-align:justify">El	expediente	{{documento.tramite.expediente.numeroGde | default('EX-' ~ year ~'-000- -CAT-DPCBS#MEC')}},	por	el	cual	se	tramita	el	llamado	a {{documento.tramite.tipoProceso | title }} Nº {{documento.tramite.numeroComprar | upper}}, Articulo 98 inc. a) de la Ley 4938,  {{documento.tramite.tipo}}, modalidad  {{documento.tramite.modalidad}}, para la {{documento.tramite.expediente.extracto |replace({'<br>': ", ", '<br />': ", "})  |upper}}; y</p>
+
+<p><strong>CONSIDERANDO:</strong></p>
+<p style="text-align:justify">Que a orden 03, obra Nota {{documento.tramite.expediente.ccoo | default('NO-' ~ year ~'-000-CAT-DPPR#MEC')}}, de la Dirección Provincial de Planificación y Registro de la Secretaría de Compras dependiente del Ministerio de Economía, informando el requerimiento de {{documento.tramite.expediente.extracto[0:30] | replace({'<br>': ", ", '<br />': ", "}) | raw}} solicitados por {% for tramite in tramites %} {{tramite.organismoOrigen | title }}, {% endfor %} por un total de {{ numero_a_letras(documento.tramite.expediente.PresupuestoOficial ,2, documento.tramite.moneda) }} ($ {{ documento.tramite.expediente.PresupuestoOficial | default(0) | number_format(2, ',', '.')  }}), adjuntando como archivos embebidos: Formularios de Necesidades Trimestrales, Notas de Pedidos, A.P.G. y Solicitudes de Gastos, por el monto total de la pretendida contratación.</p>
+<p style="text-align:justify">Que en orden 00 toma intervención, mediante IF-2023-0000-CAT-DLT#MEC, la Dirección de Legal y Técnica de la Secretaría de Compras y Abastecimiento, por el cual se expide en relación procedimiento de selección de contratista.</p>
+<p style="text-align:justify">Que a  orden 11 obra Resolución RESOL-2023-000-E-CAT-SCA#MEC de fecha 00 de 00 de {{ 'now' | date('Y')}} de la Secretaría de Compras, Ministerio de Economía, mediante la cual Autoriza el llamado al {{documento.tramite.tipoProceso | title }} Nº {{documento.tramite.numeroComprar | upper}}, {{documento.tramite.tipo}}, bajo la modalidad  {{documento.tramite.modalidad}},  para la {{documento.tramite.expediente.extracto |replace({'<br>': ", ", '<br />': ", "})  |upper}}, con un presupuesto oficial de {{ numero_a_letras(documento.tramite.expediente.PresupuestoOficial ,2, documento.tramite.moneda) }} ($ {{ documento.tramite.expediente.PresupuestoOficial | default(0) | number_format(2, ',', '.')  }}), aprueba las Bases de Condiciones Particulares, con sus respectivos Anexos; establece fecha y hora termino para la presentación y apertura de ofertas y designa a los integrantes de la Comisión Evaluadora de Oferta.</p>
+<p style="text-align:justify">Que en orden 00, obra Dictamen de la Comisión Evaluación de Ofertas, IF-2023-000-CAT-DPCBS#MEC de fecha 00 de ... de {{ 'now' | date('Y')}}, emitido por la Comisión constituida al efecto, quienes sugieren: “(…)……………”.</p>
+<p style="text-align:justify">Que en orden 00, toma intervención la Contaduría General de la Provincia mediante informe IF-2023-000-CAT-SCGC#CGP, la cual concluye manifestando que corresponde a la Autoridad Competente, Aprobar lo actuado y Adjudicar la Contratación de conformidad a lo normado por el Artículo 18° del Decreto Acuerdo N° 1127 y sus modificatorios.
+</p>
+<p style="text-align:justify">Que en orden 39 a 43 se adjunta documentación de afectación preventiva de créditos presupuestarios por parte de las unidades solicitantes.</p>
+<p style="text-align:justify">Que a orden 00, toma intervención Asesoría Legal del Ministerio de Economía, a través de Dictamen ....</p>
+<p style="text-align:justify">Que por el monto estimado del contrato se encuentra correctamente encuadrado el procedimiento de selección, de conformidad con lo establecido en Artículos 31° y 32° del Reglamento Parcial N° 2 Decreto Acuerdo N° 1127/2020 y sus modificatorios. </p>
+<p style="text-align:justify">Que mediante Decreto Acuerdo N° 751/2018 se aprobó la implementación del Sistema Electrónico de Contrataciones de la Administración Provincial COMPR.AR.</p>
+<p style="text-align:justify">Que por Resolución RESOL-2020-23-E-CAT-CGP#MHF el Órgano Rector del Sistema de Contrataciones implementa el Sistema Electrónico de Contrataciones de la Administración Provincial "COMPR.AR".</p>
+<p style="text-align:justify">Que por el Artículo 8° de Anexo I –Reglamento Parcial Nº 2 de la Ley N°4938– Decreto Acuerdo Nº 1127/2020, establece a la Secretaría de Compras y Abastecimiento, dependiente del Ministerio de Hacienda Pública (hoy Ministerio de Economía), como órgano ejecutor del sistema de contrataciones.</p>
+<p style="text-align:justify">Que el presente acto se dicta en uso de las facultades otorgadas; conforme lo previsto en los artículos 17° inc. f) y 18° “in fine” del Reglamento Parcial N.º 2 de la Ley N.º 4938 – Aprobado por Decreto Acuerdo N.º 1127/2020, modificado por Decreto Acuerdo N° 1573/20 y N° 2036/20.</p>
+<p style="text-align:justify">Por ello; </p>
+<p style="text-align:center"><strong>EL MINISTRO DE ECONMÍA <br> RESUELVE:</strong></p>
+
+<p style="text-align:justify"><strong>ARTÍCULO 1°</strong>.- <strong>APRUÉBASE</strong> lo actuado por la Secretaría de Compras y Abastecimiento dependiente del Ministerio de Economía, en {{documento.tramite.tipoProceso | upper}} Nº {{documento.tramite.numeroComprar | upper}} , Articulo 98 inc. a) de la Ley 4938, {{documento.tramite.tipo}}, modalidad  {{documento.tramite.modalidad}}, para la {{documento.tramite.expediente.extracto | replace({'<br>': ", ", '<br />': ", "}) |upper}}, cuyo presupuesto oficial es de {{ numero_a_letras(documento.tramite.expediente.PresupuestoOficial ,2, 'pesos') }} ($ {{ documento.tramite.expediente.PresupuestoOficial | default(0) | number_format(2, ',', '.')  }}).</p>
+
+{% if itemDesierto | length > 0   %}
+     {% set numero = numero + 1 %}
+    <p style="text-align:justify"><strong>ARTÍCULO {{numero}}°</strong>.- <strong>DECLARASE DESIERTOS</strong> los ítems N° <strong>{% for itemP in itemDesierto %} {{itemP.numero}}, {% endfor %}</strong> </p>
+{% endif %}
+
+{% if  itemFracasado | length > 0 and documento.tramite.estado   %}
+    {% set numero = numero + 1 %}
+   <p style="text-align:justify"><strong>ARTÍCULO {{numero}}°</strong>.- <strong>DECLARASE FRACADADO </strong> los ítems N° <strong>{% for itemP in itemFracasado %} {{itemP.numero}}, {% endfor %}</strong> </p>
+{% endif %}
+{% set numero = numero + 1 %}
+<p style="text-align:justify"><strong>ARTÍCULO {{numero}}°</strong>.- <strong>ADJUDICASE</strong>  
+    {% for tramite in documento.tramite.oferta | reverse  %}
+             {% set oferente = tramite.oferente %}
+             a la firma {{ tramite.proveedor  | default(oferente)}} los ítems N° <strong>
+                {% if tramite.proceso.adjudicado %}
+                    {% for itemOferta in tramite.itemOferta if itemOferta.adjudicado %}
+                        {{itemOferta.numero}},&nbsp;
+                    {% else %}  
+                      -     
+                    {% endfor %}      
+                {% else %} 
+                    -
+                {% endif %}</strong>
+                {% if tramite.proceso.adjudicado %}
+                 por la suma de {{ numero_a_letras(tramite.montoAdjudicado,2, '') | title }} (${{ tramite.montoAdjudicado | number_format(2, ',', '.')  }});&nbsp;
+               {% endif %} 
+      {% endfor %} por, respectivamente, ajustarse sus ofertas a lo solicitado, obtener mayor puntaje y ser económicamente convenientes a los intereses del Estado Provincial.  </p>
+<p style="text-align:justify">El monto total adjudicado asciende a la suma de {{ numero_a_letras(documento.tramite.montoAdjudicado,2, '') | title }} (${{ documento.tramite.montoAdjudicado | number_format(2, ',', '.')  }})</p>
+{% set numero = numero + 1 %}
+<p style="text-align:justify"><strong>ARTÍCULO {{numero}}°</strong>.- <strong>AUTORIZASE</strong> a la Secretaría de Compras y Abastecimiento dependiente del Ministerio de Economía a emitir las correspondientes Órdenes de Compra a la Razones Sociales: 
+{% for tramite in documento.tramite.oferta | reverse  %}
+        {% set oferente = tramite.oferente %}
+        {{ tramite.proveedor  | default(oferente)}}; &nbsp;
+{% endfor %} 
+</p>
+{% set numero = numero + 1 %}
+<p style="text-align:justify"><strong>ARTÍCULO {{numero}}°</strong>.- <strong>AUTORIZASE</strong> a la Dirección de Administración, Servicio Administrativo Financiero o quien haga sus veces, {% for tramite in tramites %} {{tramite.organismoOrigen | title }}, {% endfor %}  a emitir las Ordenes de Pagos correspondientes por el importe total de {{ numero_a_letras(documento.tramite.montoAdjudicado,2, '') | upper }} (${{ documento.tramite.montoAdjudicado | number_format(2, ',', '.')  }}) correspondiente a la presente adjudicación. </p>
+{% set numero = numero + 1 %}
+<p style="text-align:justify"><strong>ARTÍCULO {{numero}}°</strong>.- El gasto emergente será imputado a las partidas presupuestarias vigentes de los organismos solicitantes: {% for tramite in tramites %} {{tramite.organismoOrigen | upper }}, {% endfor %} </p>
+{% set numero = numero + 1 %}
+<p style="text-align:justify"><strong>ARTÍCULO {{numero}}°</strong>.- Tomen conocimiento a sus efectos Secretaría de Compras y Abastecimiento del Ministerio de Economía, {% for tramite in tramites %} {{tramite.organismoOrigen | upper }}, {% endfor %}, Contaduría General de la Provincia y Tesorería General de la Provincia </p>
+{% set numero = numero + 1 %}
+<p style="text-align:justify"><strong>ARTÍCULO {{numero}}º</strong>.- Comuníquese, publíquese, dese al Registro Oficial y Archívese.
+</p>

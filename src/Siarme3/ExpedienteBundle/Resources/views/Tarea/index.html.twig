@@ -1,0 +1,63 @@
+{# Siarme/AusentismoBundle/Resources/views/Agente/index.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} AGENTE{% endblock %}
+
+{% block menu_li%}
+
+{% endblock %}
+{% block contenido %}
+ <div class="container"> 
+{% block mensaje %}
+ {{ include('ExpedienteBundle:Default:_mensaje.html.twig') }}
+{% endblock %}
+
+    <h1>Tareas list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Fechatarea</th>
+                <th>Fecharesponsable</th>
+                <th>Fechaagenda</th>
+                <th>Horaagenda</th>
+                <th>Fecharealizado</th>
+                <th>Realizado</th>
+                <th>Destacar</th>
+                <th>Prioridad</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for tarea in tareas %}
+            <tr>
+                <td><a href="{{ path('tarea_show', { 'id': tarea.id }) }}">{{ tarea.id }}</a></td>
+                <td>{% if tarea.fechaTarea %}{{ tarea.fechaTarea|date('Y-m-d') }}{% endif %}</td>
+                <td>{% if tarea.fechaResponsable %}{{ tarea.fechaResponsable|date('Y-m-d') }}{% endif %}</td>
+                <td>{% if tarea.fechaAgenda %}{{ tarea.fechaAgenda|date('Y-m-d') }}{% endif %}</td>
+                <td>{% if tarea.horaAgenda %}{{ tarea.horaAgenda|date('H:i:s') }}{% endif %}</td>
+                <td>{% if tarea.fechaRealizado %}{{ tarea.fechaRealizado|date('Y-m-d') }}{% endif %}</td>
+                <td>{% if tarea.realizado %}Yes{% else %}No{% endif %}</td>
+                <td>{% if tarea.destacar %}Yes{% else %}No{% endif %}</td>
+                <td>{{ tarea.prioridad }}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('tarea_show', { 'id': tarea.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('tarea_edit', { 'id': tarea.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('tarea_new') }}">Create a new tarea</a>
+        </li>
+    </ul>
+{% endblock %}

@@ -1,0 +1,55 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\_menu_acciones_tramite.html.twig #}
+{% set edit = tramite | tramite_editar(app.user) %}
+<div class="pull-left hidden-print">
+    {% if expediente is defined  %}
+            {% if tramite.tipoTramite.slug in ["tramite_solicitud", "tramite_despacho", "tramite_pago" ] %}
+                {% if edit %}
+                    {% if (tramite.documento | length <= 0) and not tramite.estado %}
+                          <a data-toggle="tooltip" data-placement="top" title='Eliminar el {{ tramite.tipoTramite }}' role="button" href="{{ path('tramite_eliminar' , { 'id': tramite.id }) }}"><span class="glyphicon glyphicon-trash text-danger" onclick= "return confirm('¿Desea eliminar el Registro  del {{ tramite.tipoTramite }}?');"></span>Eliminar</a>
+                    {% endif %} 
+                {% endif %}   
+            {% endif %}
+            {% if tramite.expediente.id is defined and tramite.departamentoRm == app.user.departamentoRm and app.user.departamentoRm.slug == "dppr"%}
+                <a  data-toggle="tooltip" data-placement="top" title="Quitar de la lista" onclick= "return confirm('¿Desea quitar el pedido de este expediente?');" href="{{ path('tramite_expediente_quitar', {'tramite_id': tramite.id}) }}" ><span class="glyphicon glyphicon-remove-sign text-danger"></span></a>
+            {% endif %}
+            {% if tramite.expediente.id is not defined %}
+                        <a data-toggle="tooltip" data-placement="top" title='Añade este {{ tramite.tipoTramite }} al Expediente' role="button" href="{{ path('tramite_expediente_add' , { 'id': tramite.id, 'expediente_id': expediente.id  }) }}"><span class="glyphicon glyphicon-plus-sign"></span>Agregar</a>
+            {% endif %}
+    {% else %} 
+         {% if (tramite.documento | length <= 0) and edit %}
+             <a data-toggle="tooltip" data-placement="top" title='Eliminar el {{ tramite.tipoTramite }}' role="button" href="{{ path('tramite_eliminar' , { 'id': tramite.id }) }}"><span class="glyphicon glyphicon-trash text-danger" onclick= "return confirm('¿Desea eliminar el Registro  del {{ tramite.tipoTramite }}?');"></span>Eliminar</a>
+         {% endif %} 
+         {#{% if tarea is defined and tarea.usuario.id == app.user.id %}
+                       -----------PARA HABILITAR  ---------    
+                    {% if tarea.tramite is defined and tarea.tramite is not empty  %}
+                     {% if tarea.esResponsable and tarea.realizada == false %} 
+                          <span  data-toggle="tooltip" data-placement="top" title='Asignar un colaborador al {{tarea.tramite}}' role="button">
+                            <!-- Button trigger modal -->
+                            <a type="button" data-toggle="modal" data-target='#{{tarea.tramite.id}}'> <span class="glyphicon glyphicon-wrench"> </span> Asignar</a>
+                          </span> <br>
+                      {% endif %}
+                       
+                    {% endif %}
+                         
+                    <br>
+                    {% if tarea.realizada == false %}
+                          <a data-toggle="tooltip" data-placement="top" title='Marcar como realizada' role="button"  href="{{ path('tarea_cambiar_estado' , { 'id': tarea.id }) }}"><span class="glyphicon glyphicon-unchecked text-warning"></span> Realizar</a>
+                     {% elseif tarea.realizada %}
+                       <a data-toggle="tooltip" data-placement="top" title='Avocarme Nuevamente' role="button"  href="{{ path('tarea_cambiar_estado' , { 'id': tarea.id }) }}"><span class="glyphicon glyphicon-check"></span>Avocarme</a>
+                     {% endif %}
+            {{ render(controller('ExpedienteBundle:Tarea:modalTareaNew', {'tramite_id': tarea.tramite.id})) }} 
+
+         {% endif %}#}
+    {% endif %} 
+    {# if expediente is not defined  %}
+      <span role="presentation" class="dropdown"   data-toggle="tooltip" data-placement="top" title='Comparte y Notifica a un usuario acerca este {{tramite}}'>
+            <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-share"></span> Notificar<span class="caret"></span></a> 
+            <ul class="dropdown-menu dropdown-menu-right">
+               <li class="dropdown-header" style="width:40em">
+                {# El tipo puede ser ['EX','DOC','AG','MSJ'] corresponde con las entidades Expediente, Documento, Agente, Mensaje }
+                 {{ render(controller('DocumentoBundle:Compartir:new', { 'tipoid': tramite.id, 'tipo': constant('TIPO_ENTIDAD', tramite)})) }}
+               </li>
+             </ul>
+        </span>
+    {% endif #} 
+</div>

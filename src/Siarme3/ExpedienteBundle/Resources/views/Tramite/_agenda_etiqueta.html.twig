@@ -1,0 +1,25 @@
+
+{% set day = 'now' | date('w') %}
+{% set weekStart = 'now' | date_modify("-#{day} days") | date('Y-m-d') %}
+{% set weekEnd = 'now' | date_modify("+#{6-day} days") | date('Y-m-d') %}
+{% set day = 'now' | date('w') %}
+{% set monthStart = 'now' | date_modify("-#{day} days") | date('Y-m-d') %}
+{% set monthEnd = 'now' | date_modify("+#{30-day} days") | date('Y-m-d') %}    
+
+{% if   recordatorio.fecha  | date('Y-m-d')  ==  'now' | date('Y-m-d')%}  <div class="label label-success"> <span data-toggle="tooltip" data-placement="top" title='Hoy' class="glyphicon glyphicon-pushpin" ></span> Hoy {{recordatorio.hora | date('H:i')}}</div>
+  {% elseif  date(recordatorio.fecha )  >  date('now') %}
+      {% if  ( date(weekEnd)) >= ( date(recordatorio.fecha)) %} 
+           <div class="label label-warning" data-toggle="tooltip" data-placement="top" title='Esta Semana'><span class="glyphicon glyphicon-pushpin"></span></div> <strong></strong> <strong>{{recordatorio.fecha | localizeddate('full', 'none', 'es')    }} &nbsp;&nbsp;&nbsp; - &nbsp;&nbsp;&nbsp;  {{recordatorio.hora | date('H:i')}}</strong>       
+    {% else %}
+            {% if  date(monthEnd) >= date(recordatorio.fecha) %} <div class="label label-info" data-toggle="tooltip" data-placement="top" title='Este Mes'><span class="glyphicon glyphicon-pushpin"></span></div> <strong>{{recordatorio.fecha | localizeddate('full', 'none', 'es')    }} &nbsp;&nbsp;&nbsp; - &nbsp;&nbsp;&nbsp; {{recordatorio.hora | date('H:i')}}</strong> 
+           {% else %}                
+                 <div class="label label-default" data-toggle="tooltip" data-placement="top" title='Mas de un Mes'><span class="glyphicon glyphicon-pushpin"></span> </div><strong>{{recordatorio.fecha | localizeddate('full', 'none', 'es')    }} &nbsp;&nbsp;&nbsp; - &nbsp;&nbsp;&nbsp; {{recordatorio.hora | date('H:i')}}</strong> 
+            {% endif  %} 
+       {% endif  %} 
+{% else  %} 
+   <div class="label label-default"><span class="glyphicon glyphicon-pushpin"></span></div>  {{recordatorio.fecha | localizeddate('full', 'none', 'es')    }} &nbsp;&nbsp;&nbsp; - &nbsp;&nbsp;&nbsp; {{recordatorio.hora | date('H:i')}}
+{% endif  %} 
+&nbsp;&nbsp;&nbsp; - &nbsp;&nbsp;&nbsp;
+<span id="tiempo">
+{{ recordatorio.fecha | cuenta_atras }}
+</span>

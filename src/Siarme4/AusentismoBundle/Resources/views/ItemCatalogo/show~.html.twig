@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Itemcatalogo</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ itemCatalogo.id }}</td>
+            </tr>
+            <tr>
+                <th>Codigo</th>
+                <td>{{ itemCatalogo.codigo }}</td>
+            </tr>
+            <tr>
+                <th>Rubro</th>
+                <td>{{ itemCatalogo.rubro }}</td>
+            </tr>
+            <tr>
+                <th>Clase</th>
+                <td>{{ itemCatalogo.clase }}</td>
+            </tr>
+            <tr>
+                <th>Item</th>
+                <td>{{ itemCatalogo.item }}</td>
+            </tr>
+            <tr>
+                <th>Ipp</th>
+                <td>{{ itemCatalogo.ipp }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('item_catalogo_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('item_catalogo_edit', { 'id': itemCatalogo.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

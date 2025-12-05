@@ -1,0 +1,32 @@
+{# Siarme\DocumentoBundle\Resources\views\Compartir\compartido_index.html.twig #}
+
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} Turnos {% endblock %}
+{% block menu_li %}
+
+{% endblock %}
+
+{% block contenido %}
+
+{% block mensaje %}
+<br>
+ {{ include('ExpedienteBundle:Default:_mensaje.html.twig') }}
+{% endblock %}
+<br>
+ {% set msjs_compartido = app.user.id | Comparte('MSJ') %}
+ {% set msjs_compartido_total = msjs_compartido | length %}
+
+{# -- ------------------------------------------------------------------ --#} 
+
+    {% if msjs_compartido_total > 0 %}
+ 
+   {% set find = "--..--" %}
+  <div class="col-sm-offset-2 col-sm-8 col-md-offset-2 col-md-8"  style="font-size:15px;">
+    {{ include('DocumentoBundle:Compartir:index.html.twig', {'compartidos' : msjs_compartido , 'find': find | upper }) }}
+</div>
+
+
+   {% endif %}
+
+
+{% endblock %}

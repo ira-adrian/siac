@@ -1,0 +1,110 @@
+{# Siarme\ExpedienteBundle\Resources\views\Reporte\_reporte_pedidos.html.twig#}
+  <div class="list-group-item" style="height: 100%;">
+          <table class="table table-striped">
+            <thead class="text-center">
+              <tr> <h3> CANTIDAD DE PEDIDOS POR TRIMESTRE</h3> </tr>
+             <tr>
+                <th>Trimestres</th>
+                <th>Cantidad</th>
+                <th>Presupuesto</th>
+             </tr>
+           </thead>
+            <tbody>
+              {% set resportePorTrimestre, sumaCantidad, sumaPresupuesto, sumaTotal = tramites_por_trimestre(app.user.departamentoRm, anio), 0, 0, 0 %}
+      
+              {% for reporte  in resportePorTrimestre %}
+                <tr> 
+                  <th>{{reporte.trimestre}}° Trimestre</th>
+                  <td>{{reporte.cantidad}} </td>
+                  <td>$ {{reporte.presupuesto | number_format(2, ',', '.')}}</td>
+                </tr> 
+                {% set sumaCantidad, sumaPresupuesto, sumaTotal = 
+                              sumaCantidad + reporte.cantidad , 
+                              sumaPresupuesto +  reporte.presupuesto, 
+                              sumaTotal + (reporte.cantidad * reporte.presupuesto) 
+
+                %}
+              {% endfor %}
+              <tr>
+                <th>Totales</th>
+                <th>{{sumaCantidad}}</th>
+                <th>$ {{sumaPresupuesto | number_format(2, ',', '.')}}</th>
+              </tr> 
+            </tbody>
+          </table>
+      <div id="chartTrimestre" style="height: 300px; max-width: 80%"></div>
+    </div>
+    {# SALTO DE PAGINA #}
+    <div style="page-break-after:always"><span style="display:none">&nbsp;</span></div> 
+    <div class="list-group-item">
+        <table class="table table-striped">
+            <thead class="text-center">
+              <tr> <h3>CANTIDAD DE PEDIDOS POR FINALIDADES</h3> </tr>
+             <tr>
+                <th>Finalidad</th>
+                <th>Cantidad</th>
+                <th>Presupuesto</th>
+             </tr>
+           </thead>
+            <tbody>
+              {% set reportePorFinalidad, sumaCantidad, sumaPresupuesto, sumaTotal = tramites_por_grupo_rubro(app.user.departamentoRm, anio), 0, 0, 0 %}
+      
+              {% for reporte  in reportePorFinalidad %}
+                <tr> 
+                  <th><a href="{{ path('grupo_rubro_show', { 'id': reporte.grupoRubro.id | default(0), 'anio': anio }) }}" target="_blank">{{reporte.grupoRubro.codigo}} - {{reporte.grupoRubro.grupo}}</a></th>
+                  <td>{{reporte.cantidad}} </td>
+                  <td>$ {{reporte.presupuesto | number_format(2, ',', '.')}}</td>
+                </tr> 
+                {% set sumaCantidad, sumaPresupuesto, sumaTotal = 
+                              sumaCantidad + reporte.cantidad , 
+                              sumaPresupuesto +  reporte.presupuesto, 
+                              sumaTotal + (reporte.cantidad * reporte.presupuesto) 
+
+                %}
+              {% endfor %}
+              <tr>
+                <th>Totales</th>
+                <th>{{sumaCantidad}}</th>
+                <th>$ {{sumaPresupuesto | number_format(2, ',', '.')}}</th>
+              </tr> 
+            </tbody>
+        </table>
+     <div id="chartFinalidad"  style="height: 600px; max-width: 80%;"></div>
+    </div>
+    {# SALTO DE PAGINA #}
+    <div style="page-break-after:always"><span style="display:none">&nbsp;</span></div>
+    <div class="list-group-item">
+        <table class="table table-striped">
+            <thead class="text-center">
+              <tr> <h3>CANTIDAD DE PEDIDOS POR SAF</h3> </tr>
+             <tr>
+                <th>SAF</th>
+                <th>Cantidad</th>
+                <th>Presupuesto</th>
+             </tr>
+           </thead>
+            <tbody>
+              {% set reportePorSaf, sumaCantidad, sumaPresupuesto, sumaTotal = tramites_por_saf(app.user.departamentoRm, anio), 0, 0, 0 %}
+      
+              {% for reporte  in reportePorSaf %}
+                <tr> 
+                  <th><a href="{{ path('organismo_show', { 'id': reporte.tramite.organismoOrigen.id | default(0), 'anio': anio }) }}" target="_blank">{{reporte.tramite.organismoOrigen}}</a></th>
+                  <td> {{reporte.cantidad}} </td>
+                  <td>$ {{reporte.presupuesto | number_format(2, ',', '.')}}</td>
+                </tr> 
+                {% set sumaCantidad, sumaPresupuesto, sumaTotal = 
+                              sumaCantidad + reporte.cantidad , 
+                              sumaPresupuesto +  reporte.presupuesto, 
+                              sumaTotal + (reporte.cantidad * reporte.presupuesto) 
+
+                %}
+              {% endfor %}
+              <tr>
+                <th>Totales</th>
+                <th>{{sumaCantidad}}</th>
+                <th>$ {{sumaPresupuesto | number_format(2, ',', '.')}}</th>
+              </tr> 
+            </tbody>
+        </table>
+        <div id="chartSaf"  style="height: 600px; max-width: 80%;"></div>
+    </div>

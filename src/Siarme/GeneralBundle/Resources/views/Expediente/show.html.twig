@@ -1,0 +1,655 @@
+{#   Siarme\GeneralBundle\Resources\views\Expediente\show.html.twig   #}
+  {% set solicitudes = expediente | tramite_por_expediente_slug("tramite_solicitud") %}
+{% extends 'GeneralBundle:Default:layout.html.twig' %}
+{% block title %} INT N° {{ expediente.numeroInterno }}{% endblock %}
+{% block contenido %}
+ <div class="container"> 
+<div class="nav nav-pills hidden-print"> 
+      <li role="presentation" class="disabled"><a href="#">Menu</a></li>
+      <li role="presentation"  class="dropdown overflow">
+            <a class="dropdown-toggle" href="#" role="presentation" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-pencil"></span> Modificar <span class="caret"></span></a>
+            <div class="dropdown-menu" style="width: 600px;" aria-labelledby="dropdownMenuLink">   <div class="list-group-item">
+                    {{ render(controller('ExpedienteBundle:Expediente:edit', {'id': expediente.id  }))}}
+              </div>
+            </div>
+      </li>    
+       {% if ( expediente.tramite | length <= 0)  %}
+            <li role="presentation" data-toggle="tooltip" data-placement="top" title='Eliminar el {{expediente }}' >
+                <a  role="button"  href="{{ path('expediente_eliminar' , { 'id': expediente.id }) }}"> <span class="glyphicon glyphicon-trash text-danger"> </span> Eliminar</a>
+            </li>  
+        {% endif %} 
+
+    {#   
+    {% if movimientoPendiente is defined and movimientoPendiente.expediente is not defined %}
+        {% for movimiento in expediente.movimiento %} 
+               {% if loop.last and movimiento.departamentoRm == app.user.departamentoRm and movimiento.departamentoRm.id == 2 %}  
+                <li data-toggle="tooltip" data-placement="top" title='Habilita el Expediente para agregar pedidos existentes'>
+                  <a role="button" href="{{ path('movimiento_habilitar_expediente', { 'expediente_id': expediente.id }) }}"  onclick= "return confirm('¿Desea habilitar el expediente para agregar pedidos?');" ><span class="glyphicon glyphicon-folder-open"></span> Agregar Pedidos</a>
+                </li>
+               {% endif %}
+        {% endfor %}
+   {% endif %}
+        <li role="presentation" data-toggle="tooltip" data-placement="bottom" title='Enviar el Expediente a otra reparticion'>
+
+        {%  for movimiento in expediente.movimiento if movimiento.departamentoRm.id is defined and movimiento.departamentoRm == app.user.departamentoRm %} 
+                      <a href="" type="button" data-toggle="modal" data-target="#modalMovimientoNew"> <span class="glyphicon glyphicon-send"></span> ENVIAR</a>
+        {% else %} 
+                       <a href="" type="button" data-toggle="modal" data-target="#modalExpedienteSend"> <span class="glyphicon glyphicon-send"></span> ENVIAR</a>
+                           
+        {% endfor %}
+       </li> 
+        <li role="presentation" data-toggle="tooltip" data-placement="bottom" title='Enviar el Expediente a otra reparticion'>
+                      <a href="" type="button" data-toggle="modal" data-target="#modalMovimientoNew"> <span class="glyphicon glyphicon-send"></span> ENVIAR</a>
+       </li>  
+    #}
+        <li role="presentation" class="dropdown" data-toggle="tooltip" data-placement="bottom" title='Comparte y Notifica a un usuario acerca este EXPEDIENTE'>
+                    <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-share"></span> Notificar<span class="caret"></span></a>             
+                     <ul class="dropdown-menu">
+                       <li class="dropdown-header" style="width:40em">
+                        {# El tipo puede ser ['EX','DOC','AG','MSJ'] corresponde con las entidades Expediente, Documento, Agente, Mensaje #}
+                         {{ render(controller('DocumentoBundle:Compartir:new', { 'tipoid': expediente.id, 'tipo': constant('TIPO_ENTIDAD', expediente)})) }}
+                       </li>
+                     </ul>
+        </li>
+    <!-- Menu IMPRIMIR - COPIAR -->
+    <div class="pull-right">
+            <li  role="presentation">
+                <a href="javascript:if(window.print)window.print()" value="Imprimir" role="button"><!-- Printer-imprime el texto de clase="print" -->
+                <span class="glyphicon glyphicon-print" ></span> Imprimir</a>
+
+                <a class="btn" data-clipboard-target="#copy"><!-- clipboard-copiar texto de id="copy" -->
+                  <span class="glyphicon glyphicon-copy"></span>Copiar</a>
+            </li>
+    </div>
+</div>
+<div id="copy" class="panel panel-primary print">
+      <!-- Default panel contents -->
+      
+      <div class="panel-heading">
+      <style type="text/css" media="print">
+        @media print {
+            a[href]:after {
+                content: none !important;
+            }
+        }
+      </style> 
+          &nbsp;&nbsp;<span style="font-size: 20px" class="glyphicon glyphicon-folder-open"></span> &nbsp; <span style="font-size: 20px"><strong> ACUERDO MARCO {{ expediente.numeroInterno }}</strong></span> 
+          <div class="pull-right">
+                     {% if (expediente | movimiento_pendiente(app.user) ) %}
+                        <span  class="label label-warning">Ingreso</span>
+                    {% else %}
+                        Estado: <a data-toggle="tooltip" data-placement="bottom" title='Cambia el Estado' href="{{ path('movimiento_cambiar_estado', { 'id': expediente.id }) }}">
+                        {% if ( expediente | movimiento_estado(app.user))  %}
+                            <span  class="label label-primary">Activo</span>
+                        {% else %}
+                            <span  class="label label-default">Enviado</span> <span class="glyphicon glyphicon-info-sign text-danger"></span>
+                        {% endif %}</a>
+                    {% endif %}  
+          </div>
+      </div>
+      <div class="panel-body"> 
+        <dl class="text-center">
+            <dt>N° CCOO</dt>
+            <dd>{{ expediente.ccoo }}</dd> 
+            <dt>N° de Expediente GDE</dt>
+            <dd>{{ expediente.numeroGde | default("-") }}</dd>
+            <dt>Descripcion del Proceso</dt>
+            <dd>{{ expediente.extracto | upper | raw | nl2br }}</dd>
+            <dt>Periodo {% if expediente.fechaHasta | date('Y-m-d')  < 'now' | date('Y-m-d') %} <span  class="label label-default"> Finalizado </span> {% else %} <span  class="label label-success"> Vigente </span> {% endif %}</dt>
+               {# endDate and startDate are strings or DateTime objects #}
+              {% set difference = date(expediente.fechaHasta).diff(date(expediente.fechaDesde)) %}
+              {% set leftDays = difference.days %}
+            <dd> <strong>Fecha desde:</strong> {{ expediente.fechaDesde | date('d-m-Y')  }}  &nbsp;&nbsp;&nbsp; |  &nbsp;&nbsp;&nbsp;<strong>Fecha Hasta:</strong> {{ expediente.fechaHasta | date('d-m-Y')  }} 
+               &nbsp;&nbsp;&nbsp; |  &nbsp;&nbsp;&nbsp;<strong>Periodo: </strong>
+              {% if leftDays < 60 %}
+                  {{ leftDays }} días
+                  <span class="glyphicon glyphicon-info-sign text-warning"></span> Verifique el periodo 
+              {% elseif leftDays == 1 %}
+                1 día
+              {% else %}
+                {{ leftDays }} días
+              {% endif %}
+              {% if 'now' | date('Y-m-d') <=  expediente.fechaHasta | date('Y-m-d')  %}
+                 &nbsp;&nbsp;&nbsp; |  &nbsp;&nbsp;&nbsp;
+                {% set hoy = 'now' | date('Y-m-d')  %}
+
+                {% set restante = date(expediente.fechaHasta).diff(date(hoy)) %}
+                {% set diasRestantes = restante.days %}
+                        {% if diasRestantes > 0 %}
+                            <strong>Restan: </strong> {{diasRestantes}} días
+                        {% else %}
+                            -
+                        {% endif %}
+              {% endif %}
+              </dd>
+              <dd style="margin-top:3px">                     
+                {% if app.user.departamentoRm.slug == "dppr"  %}
+                    <a href="{{ path('expediente_porroga_new', { 'id': expediente.id }) }}"  role="button"> <span style="font-size:18px;" class='glyphicon glyphicon-plus-sign' data-toggle="tooltip" data-placement="bottom"  title='Crea una nueva prorroga para este ACUERDO MARCO'></span> CREAR PRORROGA</a></span>                         
+                {% endif %}
+              </dd>
+            {% set montoAdjudica = 0 %}
+            {% for solicitud1 in solicitudes  %}
+                {% set montoAdjudica = montoAdjudica + solicitud1.montoAutorizado %}
+            {% endfor %}
+            <dt>Monto Autorizado</dt>
+                <dd> ${{ montoAdjudica | default(0) | number_format(2, ',', '.')  }}
+            </dd>
+             {#   
+              <hr/>
+              <dt> Organismos o SAFs del Acuerdo Marco  <a href="" type="button" data-toggle="modal" data-target="#modal_index" data-toggle="tooltip" data-placement="top" title='Permite seleccionar de una lista los SAF '><span class='glyphicon glyphicon-plus-sign' {% if expediente.organismos | length == 0 %}  tabindex="0" data-placement="top" id="popover-nuevo" data-toggle="popover" data-trigger="show" title="1. Agregar Organismos" data-content="Has click y selecciona los organismos que comprenden el Acuerdo Marco"{% endif %} ></span> Agregar</a> </dt>
+              <dd>        
+                  <ol>
+                    {% for organismo in expediente.organismos %}
+                        <li style="padding-top:5px;"> &nbsp;&nbsp;&nbsp;{{organismo}} {% if solicitudes | length  == 0 %}  &nbsp;&nbsp;&nbsp; <a class="organismo_accion" href="#" data-href="{{ path('organismo_quitar', { 'id': organismo.id, 'expediente_id': expediente.id }) }}"><span class="glyphicon glyphicon glyphicon-remove text-danger"></span> Quitar</a>{% endif %}</li>   
+                    {% endfor %}
+                      
+                 </ol>
+             </dd>
+             #}
+            {% if app.user.departamentoRm.slug == "dppr" and expediente.itemAcuerdoMarco | length > 0 %}
+               <dd style="margin-top:3px">
+                 <a  href="{{ path( 'documento_expediente_pnt_new' , {'id': expediente.id, 'slug' : "item-sinstock" } ) }}" role="button"><span style="font-size:15px;"  class= 'glyphicon glyphicon-file'></span> Informe de Ítems sin Stock </a>
+                {% set  tramiteDoc= expediente | tramite_por_expediente_slug("tramite_doc") %}
+                  {% for tramite in tramiteDoc %}
+                  {% if  not tramite.documento.isEmpty %} 
+                    <div class="list-group-item">
+                         <ul id="documentos" class="list-inline text-center text-info"> 
+                             {% for documento in tramite.documento | reverse %}  
+                               {{ include('DocumentoBundle:Documento:_lista_documento.html.twig') }}
+                             {% endfor %}
+                        </ul> 
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </dd> 
+           {% endif %}
+        </dl>
+
+    </div>
+{# ---------------MENU 1-------------------#}
+    <div class="list-group-item hidden-print">
+      {% if ( expediente | movimiento_estado(app.user)) %}
+         {% for tipoTramite in app.user.departamentoRm.tipoTramite %}
+           {% if loop.first %}
+               <a data-toggle="tooltip" data-placement="bottom"  title="Crea un Nuevo {{tipoTramite}} para este expediente"  href="{{ path('tramite_expediente_new', { 'id': expediente.id, 'tipo_id': tipoTramite.id }) }}"  role="button"><span style="font-size:18px;" class='{{tipoTramite.glyphicon}}'></span> Nuevo {{tipoTramite}} {% if tipoTramite.slug == "tramite_pedido" %} TRIMESTRAL {% endif %}</a>
+          {% endif %}          
+         {% endfor %} 
+         {# if app.user.departamentoRm.slug == "dppr"  %}
+               &nbsp;&nbsp;&nbsp;
+                <a href="" type="button" data-toggle="modal" data-target="#modal_index" data-toggle="tooltip" data-placement="top" title='Permite seleccionar de una lista los PEDIDOS que se encuantran libres '><span style="font-size:18px;" class='glyphicon glyphicon-plus-sign' {% if (expediente.tramite | length) == 0  %} tabindex="0" data-placement="top" id="popover-nuevo" data-toggle="popover" data-trigger="show" title="Agregar PEDIDOS" data-content="Permite seleccionar de una lista los PEDIDOS que se encuantran libres" {% endif %}></span> Agregar PEDIDOS existentes</a>
+          {% endif #} 
+      {% endif %}
+    </div>
+
+{# ---------------LISTAR TRMITES-------------------#}
+<div class="panel-group" id="accordion">
+{% if (tipoTramites | length) != 0  %}
+  {% for tipoTramite in tipoTramites | reverse if tipoTramite.slug not in ["tramite_oferta", "tramite_solicitud", "tramite_doc"] %}
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h4 class="panel-title text-info">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href='#{{tipoTramite}}'>
+          <span {% if tipoTramite.departamentoRm == app.user.departamentoRm %} class="glyphicon glyphicon-minus"{% else %}class="glyphicon glyphicon-plus  text-info" {% endif %}  ></span> <span class="{{tipoTramite.glyphicon}}"></span>{{tipoTramite}} ({{expediente | tramite_por_expediente_tipo( tipoTramite ) | length }})
+        </a>
+      </h4>
+    </div>
+    <div id="{{tipoTramite}}" class="panel-collapse collapse {% if tipoTramite.departamentoRm == app.user.departamentoRm %} in {% endif %}">
+      <div  class="panel-body ">            
+   {% if tipoTramite.departamentoRm.slug == "sca"  %}<a class="btn pull-right hidden-print" data-clipboard-target="#tablaCuadro"><!-- clipboard-copiar texto de id="copy" --><span class="glyphicon glyphicon-copy"></span>Copiar Cuadro</a>{% endif %} 
+            
+
+            {% if tipoTramite.slug == "tramite_pago" and  tipoTramite.tramite | length > 0 %}
+                              {% set tramite1, anterior, organismos, pagos1 = 0, 0, {}, expediente | tramite_por_expediente_tipo(tipoTramite) %}
+                                
+                                {% for tramite1 in pagos1 | sort((a, b) => a.organismoOrigen <=> b.organismoOrigen ) %}
+                                  {% if loop.first %}
+                                      {% set organismos = organismos | merge([tramite1.organismoOrigen]) %}
+                                      {% set anterior = tramite1.organismoOrigen.id %}
+                                  {% elseif anterior != tramite1.organismoOrigen.id  %}
+                                    {% set organismos = organismos | merge([tramite1.organismoOrigen]) %}
+                                     {% set anterior = tramite1.organismoOrigen.id %}
+                                  {% endif %}
+                                {% endfor %}
+
+                              {% set tramite1, anterior, proveedores = 0, 0, {} %}
+                                {% for tramite1 in pagos1 | sort((a, b) => a.proveedor.id <=> b.proveedor.id) %}
+                                  {% if loop.first %}
+                                      {% set proveedores = proveedores | merge([tramite1.proveedor]) %}
+                                      {% set anterior = tramite1.proveedor.id %}
+                                  {% elseif anterior != tramite1.proveedor.id  %}
+                                    {% set proveedores = proveedores | merge([tramite1.proveedor]) %}
+                                     {% set anterior = tramite1.proveedor.id %}
+                                  {% endif %}
+                                {% endfor %}
+                <div class="table-responsive">
+                  <table id="tablaCuadro" class="table table-hover table-bordered">
+                    <thead>
+                            <th>Proveedor</th> 
+                            {% for organismo1 in organismos %}
+                                  <th>{{organismo1.codigoGde}}</th> 
+                            {% endfor %}
+                            <th>Total</th>
+                      </thead>
+                      <tbody> 
+                      
+                        {% set sumafila , sumaCelda= 0, 0 %}
+                        {% for proveedor1 in proveedores %}
+                          <tr>
+                            <td>{{proveedor1}}</td> 
+                           
+                            {% for organismo1 in organismos %}
+                                {% set pagos = pagos_por_proveedor_organismo( proveedor1, organismo1, expediente ) %}
+                                  <td> 
+                                    {% for pago in pagos %}
+                                       {% set sumafila, sumaCelda = sumafila + pago.montoAdjudica, sumaCelda + pago.montoAdjudica  %}
+                                       <span class="{{pago.estadoTramite.class}}" style="font-size:8px; margin:0px; padding:1px;" data-toggle="tooltip" data-placement="bottom" title='{{pago.estadoTramite}}' >-</span> <span style="font-size:12px">{{loop.index}}° {{ pago.ccoo  | default("EX-2022-000000-N/D")}}(<strong>${{pago.montoAdjudica | number_format(2, ',', '.')}})</strong></span><br> 
+                                    {% endfor %}
+                                    {# if sumaCelda > 0  %} ${{sumaCelda  | number_format(2, ',', '.') }} {% else %} - {% endif #}
+                                  </td> 
+                                  {% set sumaCelda = 0 %}
+                            {% endfor %}
+                            <th>${{sumafila | number_format(2, ',', '.') }}</th>
+                              {% set sumafila = 0 %}
+                          </tr>
+                        {% endfor %}  
+                        
+                            <tr>
+                            <th> Total</th>
+                            {% set sumaColumna, sumaTotal = 0, 0 %}
+                            {% for organismo1 in organismos %}
+                              {% for proveedor1 in proveedores %}
+                                    {% set pagos = pagos_por_proveedor_organismo( proveedor1, organismo1, expediente ) %}
+                                    {% for pago in pagos %}
+                                        {% set sumaCelda = sumaCelda + pago.montoAdjudica %}  
+                                    {% endfor %}
+                              {% endfor %}
+                                    <th>${{sumaCelda  | number_format(2, ',', '.') }}</th>
+                                    {% set sumaTotal, sumaCelda = sumaTotal + sumaCelda, 0 %}
+                            {% endfor %}
+                            <th>${{sumaTotal  | number_format(2, ',', '.')}}{% if montoAdjudica | default(0) < sumaTotal   %}<span class="glyphicon glyphicon-plus text-warning" data-toggle="tooltip" data-placement="top" title='El monto de PAGOS es MAYOR al monto Autorizado' ></span>{% endif %}</th>
+                          </tr>
+                      </tbody>
+                </table>   
+                </div>
+                {% if montoAdjudica | default(0) > sumaTotal   %}
+                    <h4 class="text-warning">FALTAN EXPEDIENTES DE PAGOS</h4>
+                {% endif %}
+        {% endif %}
+            <div class="table-responsive">
+              <table class="table table-hover table-bordered">
+                  <thead>
+                     {{ include('ExpedienteBundle:'~ tipoTramite.slug ~':_thead_completo.html.twig') }}  
+                  </thead>
+                  <tbody>
+         
+                      {# filtro los tramites que no tienen expedientes #}
+                 {% for tramite in tipoTramite.tramite | reverse  %}
+                     {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_tbody_completo.html.twig') }}    
+                  {% endfor %}
+
+                  </tbody>
+              </table>  
+            </div>              
+      </div>
+    </div>
+  </div>
+{% endfor %}
+{% endif %}
+</div>
+
+{# ---------------MENU 2-------------------#}
+{% set procesos, proceso = expediente | tramite_por_expediente_slug("tramite_proceso"), 0 %}
+    {% for proceso1 in procesos %}
+        {% set proceso = proceso1 %}
+    {% endfor %}
+    <div class="list-group-item hidden-print">
+              {% if ( expediente | movimiento_estado(app.user)) and app.user.departamentoRm.slug == "dppr"  %}
+                          <ul class="list-inline">
+                            {% if expediente.itemAcuerdoMarco | length > 0  %} 
+                                <li data-toggle="tooltip" data-placement="bottom"  title='2. Crea una nueva SOLICITUD de autorizacion de SAF para este ACUERDO MARCO'><span {% if  expediente.itemAcuerdoMarco | length > 0  and solicitudes  | length == 0  %}  tabindex="0" data-placement="top" id="popover-dos" data-toggle="popover" data-trigger="show" data-content="Has click para crear un Nueva SOLICITUD de autorizacion"{% endif %}></span><a href="{{ path('tramite_expediente_new', { 'id': expediente.id , 'tipo_id': 5 }) }}"  role="button"> <span style="font-size:18px;" class='glyphicon glyphicon-tasks'></span> Nuevo SOLICITUD DE PROVISIÓN</a></li> 
+                            {% else %}
+                                <li class="text-muted" data-toggle="tooltip" data-placement="bottom"  title='Para habilitar esta opcion debes: 1. Cargar los Ítems Adjudicados'> <span style="font-size:18px;" class='glyphicon glyphicon-tasks' ></span> Nueva SOLICITUD DE PROVISIÓN</li> 
+                            {% endif %}
+                            {# <a class="btn text-info" href="{{ path( 'acuerdo_subir_item' , {'id': expediente.id, 'slug': 'exp_acuerdo'  } ) }}" role="button" ><span style="font-size:20px; margin:2px;"  class= 'glyphicon glyphicon-shopping-cart' {% if expediente.organismos | length > 1  and expediente.itemAcuerdoMarco | length == 0 %}  tabindex="0" data-placement="top" id="popover-nuevo" data-toggle="popover" data-trigger="show" title="2. Cargar Items" data-content="Has click para subir el archivo Excel que contiene los Ítems del Acuerdo Marco"{% endif %} ></span>Cargar los ÍTEMS Adjudicados</a> #}
+                          </ul>
+                {% endif %}       
+    </div>
+{# ---------------LISTAR SOLICITUDES UNICAMENTE-------------------#}
+ 
+<ul class="nav nav-tabs nav-justified navbar-default">
+  {% if solicitudes  | length > 0 %} 
+      <li  class="active"><a data-toggle="tab" href="#menu1"> <span class="glyphicon glyphicon-tasks"></span> SOLICITUDES ({{ solicitudes  | length }})</a></li> 
+  {% else %}
+     <li ><a data-toggle="tab" href="#menu1" class="text-muted"><span class="glyphicon glyphicon-tasks"></span> SOLICITUDES ({{solicitudes | length }})</a></li> 
+  {% endif %}
+    <li {% if  solicitudes  | length  == 0 %} class="active"{% endif %}> <a data-toggle="tab" href="#items"><span class="glyphicon glyphicon-shopping-cart"></span> ÍTEMS ADJUDICADOS ({{expediente.itemAcuerdoMarco | length }})</a></li>
+    {% if expediente.tramite | length  > 0 %}
+         <li><a id="reporte" data-toggle="tab" href="#menu2"><span class="glyphicon glyphicon-stats"></span> REPORTE</a></li> 
+     {% else %}
+        <li><a class="text-muted" data-toggle="tab" href="#menu2"><span class="glyphicon glyphicon-stats"></span> REPORTE</a></li> 
+     {% endif %}
+     {% if expediente.prorroga | length  > 0 or expediente.acuerdo | length  > 0  %}
+        <li><a data-toggle="tab" href="#menu3"><span class="glyphicon glyphicon-folder-open"></span> PRORROGAS</a></li>
+     {% else %}
+          <li><a class="text-muted"  data-toggle="tab" href="#menu3"><span class="glyphicon glyphicon-folder-open"></span> PRORROGAS</a></li>
+     {% endif %}
+  </ul>
+  <div class="tab-content">
+
+      {#-----------------------------------------------------------------TAB CONTENT SOLICITUDES --------------------------------------#}
+
+    <div id="menu1" class="tab-pane fade  {% if  solicitudes | length  > 0 %} in active {% endif %} table-responsive">
+
+              {% for tipoTramite in tipoTramites | reverse if tipoTramite.slug == "tramite_solicitud"%}
+            
+                      <table class="table table-hover tablaItem">
+                          <thead>
+                             {{ include('ExpedienteBundle:'~ tipoTramite.slug ~':_thead_completo.html.twig') }}  
+                          </thead>
+                          <tbody>
+                 
+                              {# filtro los tramites que no tienen expedientes #}
+                         {% for tramite in tipoTramite.tramite | reverse  %}
+                             {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_tbody_completo.html.twig') }}    
+                          {% endfor %}
+
+                          </tbody>
+                      </table>         
+              {% endfor %}
+
+    </div>
+      {#-----------------------------------------------------------------TAB CONTENT ITEMS --------------------------------------#}
+    <div id="items" class="tab-pane fade {% if  solicitudes  | length == 0 %} in active {% endif %}">
+                <div class="list-group-item  text-center">
+                    {#
+                       <a class="btn text-info" href="{{ path( 'acuerdo_subir_item' , {'id': expediente.id, 'slug': "exp_acuerdo"  } ) }}" role="button" ><span style="font-size:20px; margin:2px;"  class= 'fa fa-file-excel-o text-success' {% if expediente.organismos | length > 1  and expediente.itemAcuerdoMarco | length == 0 %}  tabindex="0" data-placement="top" id="popover-nuevo" data-toggle="popover" data-trigger="show" title="2. Cargar Items" data-content="Has click para subir el archivo Excel que contiene los Ítems del Acuerdo Marco"{% endif %} ></span>Cargar los ÍTEMS</a>
+                            &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+                            {% if expediente.tramite | length > 0 %}                               
+                                    <a class="text-muted"> <span style="font-size:18px;" class='glyphicon glyphicon-plus-sign' ></span>Nuevo Ítem Acordado</a>                               
+                            {% else %} 
+                                                                
+                                    <a data-href="{{ path('itemacuerdomarco_new', { 'id': expediente.id }) }}" role="button" class="btn-nuevo-item" data-toggle="tooltip" data-placement="bottom"  title='Permmite cargar manualemente el ÍTEM ACORDADO'> <span style="font-size:18px;" class='glyphicon glyphicon-plus-sign' ></span>Nuevo Ítem Acordado</a>
+                                
+                            {% endif %} 
+                        #}
+                        {% if (proceso.estado | default(false) and expediente.itemAcuerdoMarco | length == 0) or  app.user.id == 1   %} 
+                                <a class="btn text-info" href="{{ path( 'acuerdo_cargar_items' , {'id': proceso.id  } ) }}" role="button" data-toggle="tooltip" data-placement="bottom"  title='Cargar los ÍTEMS Adjudicados de {{proceso.numeroComprar}} (más reciente)' ><span style="font-size:20px; margin:2px;"  class= 'glyphicon glyphicon-shopping-cart' {% if expediente.itemAcuerdoMarco | length == 0  %}  tabindex="0" data-placement="top" id="popover-nuevo" data-toggle="popover" data-trigger="show" title="1. Cargar Items" data-content="Has click para cargar  los Ítems adjudicados en el Acuerdo Marco"{% endif %} ></span>Cargar los ÍTEMS Adjudicados</a>
+                        {% elseif not proceso.estado | default(false) %}
+                                <a class="text-muted" data-toggle="tooltip" data-placement="bottom"  title='Para habilitar esta opcion debe existir un PROCESO con estado <Ajudicado>'> <span style="font-size:18px;" class='glyphicon glyphicon-shopping-cart' ></span>Cargar los ÍTEMS Adjudicados</a> 
+                        {% endif %}
+                       <a class="btn text-info" href="#" data-clipboard-target="#tablaItemTodo"><span class="glyphicon glyphicon-copy"></span>Copiar</a>
+                       {% if  (( expediente | default(null) | movimiento_estado(app.user)) )%}
+                          {% if solicitudes | length > 0 %} 
+                            &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+                            <a  class="text-muted" data-toggle="tooltip" data-placement="top" title='Se habilita la opcion cuando no existen SOLICITUDES'  role="button" ><span class='glyphicon glyphicon-trash '></span>Quitar Todos</a>
+                          {% else %}
+                            {#--------SI SE HABILITA CUANDO EXISTAN SOLICIUDES SE ELIMINARIAS LOS ITEMS DE ESTAS PORQUE ESTAN RELACIONADOS CON LOS ITEM DEL ACUERDO#}
+                            &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+                            <a class="btn text-info" onclick= "return confirm('¿Desea eliminar todos los ítems?');" href="{{ path('itemacuerdomarco_delete_all', { 'id': expediente.id}) }}"><span class='glyphicon glyphicon-trash text-danger'></span>Quitar Todos</a>
+                          {% endif %}
+
+                                
+                       {% endif %}
+                  </div>
+        <div class="table-responsive">
+             <table  id="tablaItemTodo" class="table table-hover tablaItem text-left">
+                  <thead>
+                    {{ include('GeneralBundle:ItemAcuerdoMarco:_thead_completo.html.twig') }}
+                  </thead>
+                  <tbody>
+                    {# for itemPedido in tramite.itemPedido  | sort((a, b) => a.item <=> b.item) #}
+                     {% for itemAcuerdo in expediente.itemAcuerdoMarco  %}
+                         {{ include('GeneralBundle:ItemAcuerdoMarco:_tbody_completo.html.twig') }}
+                     {% endfor %}
+                </tbody> 
+              </table>
+        </div>   
+    </div>
+    {#-----------------------------------------------------------------TAB CONTENT REPORTE --------------------------------------#}
+    <div id="menu2" class="tab-pane fade" >
+
+
+    <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+      <hr>
+&nbsp;&nbsp;&nbsp;<h3><span class="glyphicon glyphicon-tasks"></span>Cantidad de SOLICITUDES por SAF</h3>
+              {% set organismos2, tramitesPorOrganismo, organismo = {}, {}, null %}
+
+              {% for tramite in solicitudes | sort((a, b) => a.organismoOrigen <=> b.organismoOrigen)  %}
+                    {% if loop.first %}
+                         {% set organismo = tramite.organismoOrigen %}
+                         {% set tramitesPorOrganismo = tramitesPorOrganismo | merge([tramite]) %}
+                    {% elseif  organismo == tramite.organismoOrigen %}
+                          {% set tramitesPorOrganismo = tramitesPorOrganismo | merge([tramite]) %}
+                    {% else %}
+                       {% set organismos2 = organismos2 | merge([{organismo, tramitesPorOrganismo}]) %}
+
+                         {% set organismo, tramitesPorOrganismo = tramite.organismoOrigen, {} %}
+
+                         {% set tramitesPorOrganismo = tramitesPorOrganismo | merge([tramite]) %}
+                    {% endif %}
+              {% endfor %}
+
+              {% set organismos2 = organismos2 | merge([{organismo, tramitesPorOrganismo}]) %}
+            <div class="panel-group" id="accordion">
+            {% for id, consulta  in organismos2 %}
+              {% if consulta.organismo is not empty %} 
+              <div class="panel panel-primary">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href='#{{consulta.organismo.id}}'>
+                      <span {% if loop.first %}class="glyphicon glyphicon-minus"{% else %}class="glyphicon glyphicon-plus  text-info" {% endif %}></span>  {{ consulta.organismo}} ( {{consulta.tramitesPorOrganismo | length }})
+                    </a>
+                  </h4>
+                </div>
+                <div id="{{consulta.organismo.id}}" class="panel-collapse collapse {% if loop.first %}in{% endif %}">
+                  <div  class="panel-body table-responsive">            
+                      <table class="table table-hover">
+                          <thead>
+                             {{ include('ExpedienteBundle:tramite_solicitud:_thead_completo.html.twig') }}  
+                          </thead>
+                          <tbody>
+                 
+                              {# filtro los tramites que no tienen expedientes #}
+                         {% for tramite in consulta.tramitesPorOrganismo  | reverse  %}
+                             {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_tbody_completo.html.twig') }}    
+                          {% endfor %}
+
+                          </tbody>
+                      </table>   
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+         {% endfor %}
+
+
+    </div>
+  </div>
+  {#-----------------------------------------------------------------TAB CONTENT PRORROGAS --------------------------------------#}
+<div id="menu3" class="tab-pane fade">
+
+{% if expediente.acuerdo is not empty %}
+    <h3>Acuerdo Marco Inicial</h3>
+    <div class="table-responsive">
+        <table id="tablaExpediente"  class="table table-hover table-responsive">
+            <thead>
+                {{ include('GeneralBundle:Expediente:_thead_completo.html.twig') }} 
+            </thead>
+            <tbody>
+                         {{ include('GeneralBundle:Expediente:_tbody_completo.html.twig' , {'expediente': expediente.acuerdo}) }}    
+
+            </tbody>
+        </table>
+    </div>  
+{% endif %}
+
+    <h3>Prorrogas de Acuerdo Marco</h3>
+    <div class="table-responsive">
+        <table id="tablaExpediente"  class="table table-hover table-responsive">
+            <thead>
+                {{ include('GeneralBundle:Expediente:_thead_completo.html.twig') }} 
+            </thead>
+            <tbody>
+            {% if expediente.prorroga is not empty %}
+                {% for exp in expediente.prorroga %}
+                         {{ include('GeneralBundle:Expediente:_tbody_completo.html.twig' , {'expediente': exp}) }}    
+                {% endfor %}
+            {% endif %}
+            {% if expediente.acuerdo is not empty %}
+                {% for exp in expediente.acuerdo.prorroga %}
+                    
+                         {{ include('GeneralBundle:Expediente:_tbody_completo.html.twig' , {'expediente': exp}) }}    
+                {% endfor %}
+            {% endif %}
+            </tbody>
+      </table>
+    </div>
+</div>
+</div>
+</div>
+
+<!-- Large modal -->
+<div id="modal-nuevo-item" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+<div class="modal-dialog " role="document">
+  <div class="modal-content">
+     <div class="modal-header text-center">
+            <h3>Nuevo Ítem Acordado <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> </h3>
+            
+        
+     </div><!-- /.header -->
+         <div id="modal-body-nuevo-item" class="modal-body">
+
+        </div><!-- /.body -->
+    <!--    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button> 
+     </div> /.footer -->
+  </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+{{ include('ExpedienteBundle:tramite_solicitud:modal_index.html.twig') }}  
+
+ {{ render(controller('ExpedienteBundle:Comentario:index',
+            { 'tipoid': expediente.id, 'tipo': constant('TIPO_ENTIDAD', expediente) }
+        )) }}
+ {{ render(controller('ExpedienteBundle:Comentario:new',
+            { 'tipoid': expediente.id, 'tipo': constant('TIPO_ENTIDAD', expediente) }
+        )) }}
+</div>
+
+{{ render(controller('ExpedienteBundle:Movimiento:modalMovimientoNew', {'id': expediente.id  }))}}
+
+{{ app.session.set('organismos2', organismos2) }}
+
+{% endblock %}
+{% block footer %}
+<dir class="footer"></dir>
+{% endblock %}
+{% block javascripts %}  
+
+{{ parent() }}
+<script src='https://canvasjs.com/assets/script/canvasjs.min.js'></script>
+
+{% set organismos2, cantidad, cantidadTotal= app.session.get('organismos2'),0, 0 %}
+{% for itemac in expediente.itemAcuerdoMarco %}
+        {% set cantidadTotal = cantidadTotal + itemac.cantidad %}
+{% endfor %}
+
+{% set restante = cantidadTotal %}
+
+
+<script>
+
+$(".btn-nuevo-item").unbind('click').click( function(){
+        var $href= $(this).attr("data-href");
+        $.ajax({
+             url: URL+$href,
+             type: 'POST',
+             success: function(response){
+             var msj= document.getElementById("modal-body-nuevo-item");
+             msj.innerHTML =response;
+             $('#modal-nuevo-item').modal('show');
+             $('select').select2({width:'100%', allowClear:true, placeholder:"Seleccionar"});
+
+             $("#siarme_generalbundle_itemacuerdomarco_precio").change(function() {
+              let str = $(this).val();
+              str = str.replace("$", "");
+              str = str.replace(".", "");
+              str = str.replace(".", "");
+              str = str.replace(".", "");
+              str = str.trim();
+              $("#siarme_generalbundle_itemacuerdomarco_precio").val(str);
+             }); 
+
+             } 
+        }); 
+    });
+
+$('#reporte').on('click',function () {
+    
+var chart = new CanvasJS.Chart("chartContainer", {
+  exportEnabled: true,
+  animationEnabled: true,
+  title:{
+    text: "Porcentaje de cantidades por SAF"
+  },
+  legend:{
+    cursor: "pointer",
+    itemclick: explodePie
+  },
+  data: [{
+    type: "pie",
+    showInLegend: false,
+    toolTipContent: "{name} - {organismo}: <strong>{y}%</strong>",
+    indexLabel: "{name} | {y}%",
+    dataPoints: [
+{% for consulta in organismos2 %}
+        {% set items = items_ac_por_expediente_organismo(expediente,consulta.organismo ) %}
+        {% for item in items %}
+            {% set cantidad = cantidad + item.cantidadAutorizada %}
+        {% endfor %}
+        {% if cantidad > 0 %}
+            {% set restante, cantidad = restante - cantidad, 0 %}
+        {% endif %}
+{% endfor %} 
+
+{% if cantidadTotal > 0  %}
+        {% set porcetaje = (restante * 100) / cantidadTotal %}
+        { y: {{porcetaje | round(0, 'floor') }}, name: 'Disponible', exploded: true },
+        {% for consulta in organismos2 %}
+                {% set items = items_ac_por_expediente_organismo(expediente,consulta.organismo ) %}
+                {% for item in items %}
+                        {% set cantidad = cantidad + item.cantidadAutorizada %}
+                {% endfor %}
+                {% if cantidad > 0 %}
+                        {% set porcetaje = (cantidad * 100) / cantidadTotal %}
+                         { y: {{porcetaje | round(0, 'ceil') }},  name: 'SAF {{consulta.organismo.saf.numeroSaf}}', organismo: '{{consulta.organismo.organismo}}'  },
+                        
+                {% endif %}
+                {% set cantidad = 0 %}
+        {% endfor %}  
+{% else %}
+   { y: 0, name: 'Disponible', exploded: true },
+{% endif %}
+
+  
+
+    ]
+  }]
+});
+chart.render();
+
+function explodePie (e) {
+  if(typeof (e.dataSeries.dataPoints[e.dataPointIndex].exploded) === "undefined" || !e.dataSeries.dataPoints[e.dataPointIndex].exploded) {
+    e.dataSeries.dataPoints[e.dataPointIndex].exploded = true;
+  } else {
+    e.dataSeries.dataPoints[e.dataPointIndex].exploded = false;
+  }
+  e.chart.render();
+
+}
+     });
+
+</script> 
+
+{% endblock %}

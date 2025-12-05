@@ -1,0 +1,23 @@
+    <p style="text-align:center"> 
+        <strong> 
+        INFORME DE ACTA MEDICA N°: {{acta.numero | default("N/D")}} - {{acta.anio | default('now' | date('Y') )}} de fecha: {{acta.fechaDocumento|  default( 'now' | date('d-m-Y') )  | date('d-m-Y') }} 
+        </strong> 
+    </p> 
+<p style="margin-left:0cm;"class="text-uppercase text-left"> 
+        <strong> <u>Referencia: </u></strong><small>{{documento.tramite.expediente.extracto}}</small><br>
+        <strong><u>Agente: </u></strong><br>
+       {{documento.tramite.expediente.agente.apellidoNombre}} - <u><strong>CUIL N°: </strong></u>{{documento.tramite.expediente.agente.cuil}} - <u><strong>DNI N°: </strong></u> {{documento.tramite.expediente.agente.dni}}</small><br> 
+        <strong><u>Edad:</u></strong> {{ documento.tramite.expediente.agente.fechaNacimiento | age }}  - <strong><u>Antiguedad:</u></strong> {{ documento.tramite.expediente.agente.fechaInicioLaboral | age }} - <strong><u>Localidad:</u></strong> <small> {{ documento.tramite.expediente.agente.localidad | default("N/D") }}  </small> <br>
+        <strong><u>Cargos:</u></strong> <br>
+       <small>{% for cargo in documento.tramite.expediente.agente.cargo %} {{ cargo }} - {{ cargo.funcion }} {% endfor %} </small>
+        <br>        
+</p> 
+<p style="margin-left:0cm; margin-right:0cm; text-align:justify; font-family:&quot;Arial&quot; "><span style="font-size:14px">&emsp;&emsp;Durante la Junta Médica, se entrevistó al agente y se evaluó documentación previa y actualizada presentada: Historia Clínica del Dr. con diagnóstico de &emsp;<br>
+Se observa al examen físico:
+&emsp;<br> <br>
+<strong>&emsp;&emsp;MOTIVOS POR LOS QUE ESTA JUNTA MEDICA DICTAMINA:</strong>
+<ul> <li></li><li>Fecha Desde: <strong>{% if acta.licencia.fechadesde is defined  %}{{ acta.licencia.fechadesde |date('d-m-Y') }} {% endif %}</strong>                - Fecha Hasta:   <strong>{% if acta.licencia.fechahasta is defined  %}{{ acta.licencia.fechahasta |date('d-m-Y') }} {% endif %} </strong></li>
+    <li> Diagnostico Codificado:<strong>  {{acta.licencia.enfermedad.codigoEnfermedad | default("N/D")}}</strong> </li>
+    <li>Enfermedad:<strong>  {{acta.licencia.enfermedad.enfermedad | default("N/D")}} </strong> </li>
+</ul>
+</span></p>

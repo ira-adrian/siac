@@ -1,0 +1,36 @@
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %}DOCUMENTO{% endblock %}
+
+{% block main %}
+{% autoescape %}
+
+
+                {% set texto1  %}
+                    <span style="font-size:14px; text-aling: justify">
+                   {% if slug not in ["caratula" , "observacion-proceso"]  %}
+                        {{ include('DocumentoBundle::Documento/include/fecha_text.html.twig') }}
+                    {% endif %}
+                {#                     {{ include( template_from_string(documento.tipoDocumento.texto),['DocumentoBundle::Documento/include/'~ slug ~'_text.html.twig', 'DocumentoBundle::Documento/include/default_text.html.twig']) }} #}
+                    {{ include(['DocumentoBundle::Documento/include/'~ slug ~'_text.html.twig', 'DocumentoBundle::Documento/include/default_text.html.twig']) }}
+                    </span>          
+                {% endset %} {% endautoescape %}
+            <div class="panel panel-default">
+                 <div class="panel-body"> 
+                   {% if documento.tipoDocumento.esArchivo %}
+                         {{ include('DocumentoBundle::Documento/include/form_archivo.html.twig')}}
+                   {% elseif documento.tipoDocumento.slug == "licencia" %}  
+                        {{ include('DocumentoBundle::Documento/include/form_licencia.html.twig')}}
+                   {% else %}  
+                         {{ include(['DocumentoBundle::Documento/include/form_documento.html.twig', 'DocumentoBundle::Documento/include/form_'~ documento.tipoDocumento ~'.html.twig', 'DocumentoBundle::Documento/include/form_default.html.twig']) }}
+                   {% endif %}
+                 </div>
+            </div>   
+               {{ documento.tipoDocumento.texto | raw}}
+{% endblock %} 
+{% block javascripts %} 
+{{ parent() }}
+         {{ include('DocumentoBundle::Documento/javascripts.html.twig') }}
+ {% endblock %} 
+ {% block footer %}
+<dir class="footer"></dir>
+{% endblock %}

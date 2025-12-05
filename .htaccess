@@ -1,0 +1,9 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ /web/$1 [QSA,L]
+</IfModule>
+# DO NOT REMOVE THIS LINE AND THE LINES BELOW IPALLOWID:HaxUePTxR9
+allow from 181.15.95.61
+# DO NOT REMOVE THIS LINE AND THE LINES ABOVE HaxUePTxR9:IPALLOWID
+

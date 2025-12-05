@@ -1,0 +1,174 @@
+{# Siarme\ExpedienteBundle\Resources\views\Externo\index.html.twig #}
+{% extends 'frontend.html.twig' %}
+{% block stylesheets %}   
+     <link href="{{ asset('bundles/expediente/plugins/boostrap3/css/bootstrap_cerulean.min.css') }}" type="text/css" rel="stylesheet"> 
+    <link rel="stylesheet" href="{{ asset('bundles/expediente/plugins/font-awesome/css/font-awesome.min.css') }}">  
+    <link href="{{ asset('bundles/expediente/plugins/datatables/jquery.dataTables.min.css')}}" type="text/css" rel="stylesheet">
+    <style type="text/css" media="print">
+        @media print {
+            a[href]:after {
+                content: none !important;
+            }
+        }
+    </style>     
+{% endblock %}
+{% block body %}
+
+ <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#reporte">
+          <span class="glyphicon glyphicon-plus  text-info"></span> <span class="glyphicon glyphicon-stats"></span> REPORTE {{organismo}} - {{anio}}
+        </a>
+      </h4>
+    </div>
+        <div class="list-group-item" style="height: 100%;">
+            <table class="table table-striped">
+            <thead class="text-center">
+              <tr> <h3> CANTIDAD DE PEDIDOS POR TRIMESTRE </h3> </tr>
+             <tr>
+                <th>Trimestres</th>
+                <th>Cantidad</th>
+                <th>Presupuesto</th>
+             </tr>
+           </thead>
+            <tbody>
+
+              {% set resportePorTrimestreSaf, sumaCantidad, sumaPresupuesto = tramites_por_trimestre_saf(2, anio, organismo.id), 0, 0 %}
+      
+              {% for reporte  in resportePorTrimestreSaf %}
+                <tr> 
+                  <th>{{reporte.trimestre}}° Trimestre</th>
+                  <td> {{reporte.cantidad}} </td>
+                  <td>$ {{reporte.presupuesto | number_format(2, ',', '.')}}</td>
+                </tr> 
+                {% set sumaCantidad, sumaPresupuesto = 
+                              sumaCantidad + reporte.cantidad , 
+                              sumaPresupuesto +  reporte.presupuesto 
+
+                %}
+              {% endfor %}
+              <tr>
+                <th>Totales</th>
+                <th>{{sumaCantidad}}</th>
+                <th>$ {{sumaPresupuesto | number_format(2, ',', '.')}}</th>
+              </tr> 
+            </tbody>
+          </table>
+            <div id="chartTrimestre{{organismo.id}}" style="height: 300px; max-width: 80%"></div>
+          </div>
+          
+          <div class="list-group-item">
+          <table class="table table-striped">
+            <thead class="text-center">
+              <tr> <h3> CANTIDAD DE PEDIDOS POR RUBRO</h3> </tr>
+             <tr>
+                <th>Rubro</th>
+                <th>Cantidad</th>
+                <th>Presupuesto</th>
+             </tr>
+           </thead>
+            <tbody>
+              {% set resportePorRubroSaf, sumaCantidad, sumaPresupuesto = tramites_por_rubro_saf(2, anio, organismo.id), 0, 0 %}
+      
+              {% for reporte  in resportePorRubroSaf %}
+                <tr> 
+                  <th>{{reporte.tramite.rubro}}</th>
+                  <td> {{reporte.cantidad}} </td>
+                  <td>$ {{reporte.presupuesto | number_format(2, ',', '.')}}</td>
+                </tr> 
+                {% set sumaCantidad, sumaPresupuesto = 
+                              sumaCantidad + reporte.cantidad , 
+                              sumaPresupuesto +  reporte.presupuesto 
+
+                %}
+              {% endfor %}
+              <tr>
+                <th>Totales</th>
+                <th>{{sumaCantidad}}</th>
+                <th>$ {{sumaPresupuesto | number_format(2, ',', '.')}}</th>
+              </tr> 
+            </tbody>
+          </table>
+              <div id="chartRubro{{organismo.id}}"  style="height: 700px; max-width: 80%;"></div>
+          </div>
+</div>
+
+{% endblock %}
+{% block javascripts %}   
+   <script src="{{ asset('bundles/expediente/plugins/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('bundles/expediente/plugins/boostrap3/js/bootstrap.min.js') }}"></script>         
+    <script src="{{ asset('bundles/expediente/plugins/print/printArea.js') }}"></script> 
+    <script src="{{ asset('bundles/expediente/plugins/dropzone/dist/dropzone.js') }}"></script>
+    <script src="{{ asset('bundles/expediente/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('bundles/expediente/plugins/clipboard/dist/clipboard.min.js') }}"></script>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+<script>    
+{# obtengo los reportes para ITEMPEDIDO #}
+{% set itemsPorTrimestreSaf, itemsPorRubroSaf= tramites_por_trimestre_saf(2,anio, organismo.id), tramites_por_rubro_saf(2,anio, organismo.id) %}
+
+$(function () {
+
+  CanvasJS.addCultureInfo("es", 
+    {      
+      decimalSeparator: ",",// Observe ToolTip Number Format
+      digitGroupSeparator: ".", // Observe axisY labels                   
+      days: ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"]
+      
+    });
+
+///GRAFICO CANTIDAD DE ITEMS POR TRIMESTRE
+var chart = new CanvasJS.Chart("chartTrimestre{{organismo.id}}", {
+  theme: "light2", // "light2", "dark1", "dark2"
+  culture: "es",
+  animationEnabled: false, // change to true    
+  title:{
+    text: ""
+  },
+  data: [
+  {
+    // Change type to "bar", "area", "spline", "pie",etc.
+    type: "column",
+    toolTipContent: "<b>{label}</b><br>Cantidad de ítems: {cantidad}<br>Presupuesto: $ {presupuesto}",
+    dataPoints: [
+      {% for reporte in itemsPorTrimestreSaf %}
+        { label: "{{reporte.trimestre}} ° Trimestre",  y: {{reporte.presupuesto}}, cantidad:'{{reporte.cantidad}}', presupuesto:'{{reporte.presupuesto | number_format(2, ',', '.')}}' },
+      {% endfor %}
+    ]
+  }
+  ]
+});
+chart.render();
+
+///GRAFICO RUBRO POR TOTAL POR RUBRO Y AÑO
+var chart = new CanvasJS.Chart("chartRubro{{organismo.id}}", {
+  culture: "es",
+  animationEnabled: true,
+  
+  title:{
+    text:""
+  },
+  axisX:{
+    interval: 1
+  },
+  axisY2:{
+    interlacedColor: "rgba(1,77,101,.2)",
+    gridColor: "rgba(1,77,101,.1)",
+    title: ""
+  },
+  data: [{
+    type: "bar",
+    name: "Rubros",
+    axisYType: "secondary",
+    toolTipContent: "<b>{rubro}</b><br>Cantidad de ítems: {cantidad}<br>Presupuesto: $ {presupuesto}",
+    dataPoints: [
+          {% for reporte in itemsPorRubroSaf %}
+                { y: {{reporte.presupuesto}}, label: '{{reporte.tramite.rubro.ipp}}', rubro:'{{reporte.tramite.rubro}}', cantidad:'{{reporte.cantidad}}', presupuesto:'{{reporte.presupuesto | number_format(2, ',', '.')}}'},
+          {% endfor %} 
+    ]
+  }]
+});
+chart.render();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,109 @@
+<table class="table table-hover table-responsive" >
+   <tbody>
+
+   {% set compartiste = entidad_comparido[0] %}
+   {% set compartieron = entidad_comparido[1] %}
+
+{% if compartiste | length > 0 %}
+
+{% for compartido in compartiste %}
+
+{% if ( app.user.id == compartido.usuarioEnvia.id) or ( app.user.id == compartido.usuarioRecive.id) %}
+      <tr>                
+          <td> 
+              <small>                
+             <span class="text-muted"> Compartiste con &nbsp;
+
+              {% if ( app.user.id == compartido.usuarioRecive.id) %}
+                   <a data-toggle="tooltip" data-placement="top" title='{{ compartido.usuarioRecive }}' class='glyphicon glyphicon-user glyphicon text-success small'>
+                   </a>  
+              {% else %}       
+                    <a data-toggle="tooltip" data-placement="top" title='{{ compartido.usuarioRecive}}' class='glyphicon glyphicon-user glyphicon text-default'></a> 
+             {% endif %}
+             {{ compartido.usuarioRecive.usuario}} &nbsp;
+             {% if compartido.fecha %}{% endif %}
+             </span> </small> <br> 
+             {% set entidad = compartido.id | Compartido(tipo) %}
+             <small>  {{ entidad | raw }}</small> <br>
+             {{ compartido.texto }}
+
+          </td>                
+          <td class="text-center"> 
+             
+
+              {% if ((compartido.estado == true) or (compartido.tipo == "MSJ")) and ( app.user.id == compartido.usuarioEnvia.id)  %}
+
+               <a class="text-danger" href="{{ path('compartir_eliminar', { 'id': compartido.id }) }}"><span data-toggle="tooltip" data-placement="top" title='Eliminar Notificación' class="glyphicon glyphicon-trash"></span></a>
+
+              {% endif %}
+              {% if (compartido.tipo != "MSJ")  %}
+              <br> 
+                <a href="{{ path('compartir_show', { 'id': compartido.id }) }}"><span data-toggle="tooltip" data-placement="top" title='Ver' class="glyphicon glyphicon-eye-open"></span></a>
+              {% endif %}
+                <br>
+                <br>
+               {% if compartido.estado %}
+                  <span data-toggle="tooltip" data-placement="top" title='Visto' class="glyphicon glyphicon-ok text-success"></span>
+
+              {% else %}
+                     <span data-toggle="tooltip" data-placement="top" title='Pendiente' class="glyphicon glyphicon-ok text-muted"></span>
+             {% endif %}
+           </td>
+      </tr>
+  {% endif %}
+{% endfor %}
+
+  {% endif %} 
+
+
+{% if compartieron | length > 0 %}
+{% for compartido in compartieron  %}
+
+{% if ( app.user.id == compartido.usuarioEnvia.id) or ( app.user.id == compartido.usuarioRecive.id) %}
+      <tr>                
+          <td> 
+              <small>
+              {% if ( app.user.id == compartido.usuarioEnvia.id) %}
+                   <a data-toggle="tooltip" data-placement="top" title='{{ compartido.usuarioEnvia }}' class='glyphicon glyphicon-user glyphicon text-success small'>
+                   </a>  
+              {% else %}       
+                    <a data-toggle="tooltip" data-placement="top" title='{{ compartido.usuarioEnvia}}' class='glyphicon glyphicon-user glyphicon text-default'></a> 
+             {% endif %} 
+
+             <span class="text-muted">  {{ compartido.usuarioEnvia.usuario}} &emsp; Compartió contigo &emsp;
+             {% if compartido.fecha %}{{ compartido.fecha| long_time }}{% endif %}
+             </span> </small> <br> 
+             {% set entidad = compartido | Compartido(tipo) %}
+             <small>  {{ entidad | raw  }}</small> <br>
+             {{ compartido.texto }}
+
+          </td>                
+          <td class="text-center"> 
+              
+
+              {% if ((compartido.estado == true) or (compartido.tipo == "MSJ")) and ( app.user.id == compartido.usuarioRecive.id) %}
+               <a  class="text-danger" href="{{ path('compartir_eliminar', { 'id': compartido.id }) }}" ><span data-toggle="tooltip" data-placement="top" title='Eliminar Notificación' class="glyphicon glyphicon-trash"></span></a>
+              {% endif %}
+              {% if (compartido.tipo != "MSJ")  %}
+              <br> 
+                <a href="{{ path('compartir_show', { 'id': compartido.id }) }}"><span data-toggle="tooltip" data-placement="top" title='Ver' class="glyphicon glyphicon-eye-open"></span></a>
+                {% endif %}
+                <br>
+                <br>
+              {% if compartido.estado %}
+                  <span data-toggle="tooltip" data-placement="top" title='Visto' class="glyphicon glyphicon-ok text-success"></span>
+
+              {% else %}
+                     <span data-toggle="tooltip" data-placement="top" title='Pendiente' class="glyphicon glyphicon-ok text-muted"></span>
+             {% endif %}
+           </td>
+      </tr>
+  {% endif %}
+
+{% endfor %}
+  {% endif %} 
+ 
+</tbody>
+</table>
+</div>
+       

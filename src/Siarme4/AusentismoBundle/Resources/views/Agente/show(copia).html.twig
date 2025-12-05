@@ -1,0 +1,280 @@
+{# Siarme/AusentismoBundle/Resources/views/Agente/show.html.twig#}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} AGENTE{% endblock %}
+{% block stylesheets %}   
+    <link href="{{ asset('bundles/expediente/plugins/boostrap3/css/bootstrap_yeti.min.css') }}" type="text/css" rel="stylesheet">  
+    <link href="{{ asset('bundles/expediente/select2/css/select2.min.css') }}" rel="stylesheet">   
+
+    
+{% endblock %}
+{% block menu_li %}    
+                <li>
+                    <a   href="{{ path('agente_index') }}" role="button"> <span class="glyphicon glyphicon-list-alt"> Lista </span></a>
+                </li> 
+                <li>
+                    {% if agente.localidad is empty %}
+                      <a class="btn btn-info" data-toggle="tooltip" data-placement="bottom" title="ACTUALIZAR los datos del Agente para CREAR un Expediente" href="{{ path('agente_edit', { 'id': agente.id }) }}"> Modificar </a> 
+                    {% else %}
+                    <a  data-toggle="tooltip" data-placement="top" title="ACTUALIZAR datos del Agente"  href="{{ path('agente_edit', { 'id': agente.id }) }}" role="button"> <span class="glyphicon glyphicon-pencil"> Modificar </span></a>
+                    {% endif %}
+                </li>
+   
+                      
+                 {% set botonDelet %}                     
+                    {{ form_start(delete_form, {'attr': {'onclick': 'return confirm("¿Desea ELIMINAR el Agente?")'}}) }}                       
+                     <button class="btn btn-danger btn-sm" type="submit" value="Eliminar"><span class="glyphicon glyphicon-trash"> Eliminar  </span> </button>
+                     {{ form_end(delete_form) }}
+                {% endset %}
+
+                   {% if (agente.licencia | length == 0) and (agente.expediente | length == 0) %} 
+                        <li> 
+                        {{ botonDelet }}
+                        </li>
+             
+                    {% endif %}       
+           
+                 <li><a  id="printer"  value="Imprimir" role="button"><span class="glyphicon glyphicon-print"></span> Imprimir </a>
+
+                </li>
+                <li role="presentation" class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-share-alt"> Compartir</span></a>             
+                     <ul class="dropdown-menu">
+                       <li class="dropdown-header" style="width:40em">
+                        {# El tipo puede ser ['EX','DOC','AG','MSJ'] corresponde con las entidades Expediente, Documento, Agente, Mensaje #}
+                          {{ render(controller('DocumentoBundle:Compartir:new',
+                    { 'tipoid': agente.id, 'tipo': "AG" }
+                )) }}
+                       </li>
+                     </ul>
+                </li>
+                <form class="navbar-form navbar-right" method="POST" action="{{ path('agente_index')}}" role="search">
+              <div class="form-group">
+              <input name="consulta"  type="text" class="form-control" placeholder="Buscar" required />
+              </div>
+              <button type="submit" class="btn btn-sm  btn-primary">Buscar</button>
+              </form>
+ {% endblock %}   
+ {#
+ {% block izquierdo %}
+<div id="compartir">
+{{ render(controller('DocumentoBundle:Compartir:index',
+            { 'tipoid': agente.id, 'tipo': "AG" }
+        )) }} 
+</div>
+{% endblock %}
+#}
+{% block main %}
+<div class="dropdown text-left" style="margin-left:20px;"> 
+          {# El tipo puede ser ['EXP','DOC','AG','MSJ'] corresponde con las entidades Expediente, Documento, Agente, Mensaje #}
+          {% include 'DocumentoBundle:Documento:_menu_comun_panel_heading.html.twig' with {'entidad': agente, 'tipo': 'AG'} %}
+        
+
+{# 
+          {% if is_granted('ROLE_ADMIN') and (agente.papelera == true) %}
+             <a data-toggle="tooltip" data-placement="top" title='Restaurar Documento de Papelera'
+             role="button" onclick= "return confirm('¿Desea  Restaurar?');"
+            href="{{ path('documento_restaurar', { 'id': agente.id }) }}"
+           
+            class='glyphicon glyphicon-repeat'>
+            </a> &nbsp;&nbsp;              
+         {% endif %} #}
+ </div>
+<div id="mensaje"></div>
+<!-- Large modal -->
+<div id="modal-organismo"class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+<div class="modal-dialog modal-lg" role="document">
+  <div class="modal-content">
+     <div class="modal-header text-center">
+        Organismo
+     </div><!-- /.header -->
+         <div id="modal-body" class="modal-body">
+        </div><!-- /.body -->
+    <!--    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button> 
+     </div> /.footer -->
+  </div><!-- /.modal-content -->
+</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="print" class="panel panel-default print">
+    <div class="panel-heading text-uppercase text-center"> 
+
+       <span class="glyphicon glyphicon-user"> |
+      {{ agente }} </span>
+
+    </div>
+            <table class="table table-responsive table-hover text-uppercase">
+                <tbody>
+                    <tr>
+                        <th>Fecha de Nacimiento</th>
+                        <td>{% if agente.fechaNacimiento %}{{ agente.fechaNacimiento|date('d-m-Y') }} - {{ agente.fechaNacimiento| age }} Años {% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th> Inicio Laboral</th>
+                        <td>{% if agente.fechaInicioLaboral %} {{ agente.fechaInicioLaboral|date('d-m-Y') }} - {{ agente.fechaInicioLaboral| age }} Años {% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th>Domicilio</th>
+                        <td>{{ agente.domicilio | default("N/D") }}</td>
+                    </tr>
+                    <tr>
+                        <th>Localidad</th>
+                        <td>{{ agente.localidad | default("N/D") }}</td>
+                    </tr>
+                   <tr>
+                        <th>Telefonos:</th>
+                        <td> Fijo:{{ agente.telefonoFijo | default( "N/D")}} - Movil: {{ agente.telefonoMovil | default( "N/D")}}</td>   
+                    </tr>       
+                </tbody>
+            </table>
+ {% set find = null %}
+<hr style="margin-top:0px;">
+<div class="dropdown" style="margin-left:20px;">
+         <!-- Button trigger modal -->
+        <a  class="hidden-print" role="button"  data-toggle="modal" data-target="#myModal"> <span class="glyphicon glyphicon-wrench"  data-toggle="tooltip" data-placement="top" title="Nuevo Cargo">Cargo</span>
+        </a> &nbsp;&nbsp;
+
+        <a role="button"  data-href="{{ path('organismo_new') }}" class="btn-nuevo"> <span  class="glyphicon glyphicon-tent"
+          data-toggle="tooltip" data-placement="top" title="Nuevo Organismo">Organismo</span></a>
+  </div>        
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingOne">
+
+      <h4 class="panel-title"> 
+        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne"><span class="badge">+</span> Cargos ({{agente.cargo | length | default(0)}})</a>
+      </h4>
+    </div>
+
+    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+
+           <table id="tablaCargo"  class="table table-responsive table-hover">
+
+                <tbody>
+                {% for cargo in agente.cargo  %}
+                    <tr> 
+                        <td> <strong>  {{ cargo}}  <a data-toggle="tooltip" data-placement="top" title="Modificar este Organismo" role="button"><span data-href="{{ path('organismo_edit', { 'id': cargo.organismo.id }) }}" data-id="{{cargo.organismo.id}}" class="btn-modificar glyphicon glyphicon-glyphicon glyphicon-pencil"></span> </a> </strong></td>
+                        <td>  <strong>{{ cargo.funcion }}  </strong></td>
+                        <td>
+                            <a class="hidden-print" data-toggle="tooltip" data-placement="top" title="Modificar CARGO"  href="{{ path('cargo_edit', { 'id': cargo.id }) }}">MODIFICAR </a>
+                        </td> 
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+  </div>
+  </div>
+
+
+  <a  style="margin-left:20px;" class="hidden-print" data-toggle="tooltip" data-placement="top" title="Nuevo Expediente" href="{{ path('expediente_new', { 'id': agente.id , 'tipo': "INT" }) }}"><span class="glyphicon glyphicon-folder-open"> Expediente</span> </a>
+
+ <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingTwo">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo"><span class="badge">+</span> Ultimos Expedientes ({{expedientes | length | default("-")}})</a>
+      </h4>
+    </div>
+    <div id="collapseTwo" class="panel-collapse" aria-expanded="true"  role="tabpanel" aria-labelledby="headingTwo">
+
+       {{ include('ExpedienteBundle:Expediente:_panel_expediente.html.twig' , {'pagination': expedientes }) }}
+
+    </div>
+  </div>
+
+<div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingThree">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree"><span class="badge">+</span> Ultimos Documentos M&eacute;dicos ({{ licencias | length | default("-")}})</a>
+        {#
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+         <a class="hidden-print" data-toggle="tooltip" data-placement="top" title="CREAR Licencia" href="{{ path('licencia_new', { 'id': agente.id , 'tipo': "INT" }) }}"> <span class="glyphicon glyphicon-tag text-info"> Nueva </span> </a>#}
+      </h4>
+    </div>
+    <div id="collapseThree" class="panel-collapse " role="tabpanel" aria-labelledby="headingThree">
+
+      {#    {{ render(controller('AusentismoBundle:Licencia:lista',
+      { 'agenteId': agente.id } )) }} #}
+          {{ include('AusentismoBundle:Licencia:lista.html.twig' , {'pagination': licencias }) }}
+ 
+    </div>
+  </div>
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+</div>
+
+
+
+
+</div>
+
+     <!-- Modal CREAR CARGO -->
+     {{ render(controller('AusentismoBundle:Cargo:new',
+            { 'id': agente.id } )) }}
+
+{% endblock %}
+ {% block derecho %}
+
+ {{ render(controller('ExpedienteBundle:Comentario:index',
+            { 'tipoid': agente.id, 'tipo': "AG" }
+        )) }}
+        
+ {{ render(controller('ExpedienteBundle:Comentario:new',
+            { 'tipoid': agente.id, 'tipo': "AG" }
+        )) }}
+
+ {% endblock %}
+{% block javascripts %} 
+{{ parent() }}
+<script type="text/javascript">$.fn.modal.Constructor.prototype.enforceFocus = function() {};</script>
+    <script src="{{ asset('bundles/expediente/select2/js/select2.min.js') }}"></script>
+  
+ 
+    <script> /*-- $('select').select2({  allowClear:true, placeholder:""});*/
+          $('#siarme_ausentismobundle_cargo_organismo').select2({ width: '100%'});
+    </script>
+    <script type="text/javascript"> 
+    $(function(){
+      $(".btn-modificar").unbind('click').click( function(){
+        var $href= $(this).attr("data-href");
+        //alert(URL+$href);
+        $.ajax({
+
+             url: URL+$href,
+             type: 'GET',
+             success: function(response){
+
+             var msj= document.getElementById("modal-body");
+
+             msj.innerHTML =response;
+             $('#modal-organismo').modal('show');
+            /*-- $('select').select2({  allowClear:true, placeholder:""});*/
+          $('#siarme_ausentismobundle_organismo_localidad').select2({ width: '100%', allowClear:true, placeholder:"Buscar"});
+
+             } 
+        }); 
+
+      
+    });
+
+    $(".btn-nuevo").unbind('click').click( function(){
+        var $href= $(this).attr("data-href");
+       // alert(URL+$href);
+        $.ajax({
+
+             url: URL+$href,
+             type: 'GET',
+             success: function(response){
+
+             var msj= document.getElementById("modal-body");
+
+             msj.innerHTML =response;
+             $('#modal-organismo').modal('show');
+            /*-- $('select').select2({  allowClear:true, placeholder:""});*/
+          $('#siarme_ausentismobundle_organismo_localidad').select2({ width: '100%', allowClear:true, placeholder:"Buscar"});
+
+             } 
+        }); 
+   });
+
+  });
+  </script>
+{% endblock %}

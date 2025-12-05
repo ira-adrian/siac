@@ -1,0 +1,54 @@
+<?php
+
+namespace Siarme\AusentismoBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Articulo
+ *
+ * @ORM\Table(name="articulo")
+ * @ORM\Entity(repositoryClass="Siarme\AusentismoBundle\Repository\ArticuloRepository")
+ */
+class Articulo
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="codigoArticulo", type="string", length=5, unique=true)
+     */
+    private $codigoArticulo;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="descripcion", type="string", length=255, unique=true)
+     */
+    private $descripcion;
+
+    /** 
+     *@ORM\OneToMany(targetEntity="Siarme\AusentismoBundle\Entity\Licencia", mappedBy="articulo") 
+     */
+    private $licencia;
+
+    /** 
+     * @ORM\ManyToOne(targetEntity="Siarme\AusentismoBundle\Entity\GrupoArticulo", inversedBy="articulo") 
+     * @ORM\JoinColumn(name="grupo_articulo_id", referencedColumnName="id")
+     */
+    private $grupoArticulo;
+
+    public function __toString()
+    {
+         return $this->getCodigoArticulo().' - '.$this->getDescripcion();
+    }
+
+}

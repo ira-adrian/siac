@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+{# Siarme\ExpedienteBundle\Resources\views\Credito\modal_new.html.twig#}
+  <h3>{{tramite.oferente}}</h3> 
+  <br>
+{{ form_start(form,  {'action': path('tramite_oferta_new', {'id':tramite.proceso.id}), 'method': 'POST'}) }}
+          {{ form_widget(form) }}
+            <div class="text-right">
+                 <input class="btn btn-danger" type="submit" value="GUARDAR" />
+            </div>
+{{ form_end(form) }}

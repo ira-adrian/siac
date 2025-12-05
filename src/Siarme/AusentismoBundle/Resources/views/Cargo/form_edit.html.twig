@@ -1,0 +1,6 @@
+ {{ form_start(form, {'action': path('cargo_edit', { 'id': cargo.id } ), 'method': 'POST'}) }}
+    {{ form_widget(form) }}
+	       <div class="text-right">
+	            <input class="btn btn-sm btn-default"  type="submit" value="Aceptar" />
+	        </div>
+{{ form_end(form) }}

@@ -1,0 +1,23 @@
+{{ documento.fechaDocumento |
+                    date('l, j  F  Y') |replace({
+                        'January'  : 'de Enero de de ',
+                        'February' : 'de Febrero de',
+                        'March' : 'de Marzo de',
+                        'April' : 'de Abril de',
+                        'May' : 'de Mayo de',
+                        'June' : 'de Junio de',
+                        'July' : 'de Julio de',
+                        'August' : 'de Agosto de',
+                        'September' : 'de Septiembre de',
+                        'October' : 'de Octubre de',
+                        'November' : 'de Nombiembre de',
+                        'December' : 'de Diciembre de',
+                        'Monday'   : ' Lunes',
+                        'Tuesday'   : ' Martes',
+                        'Wednesday'   : ' Miércoles',
+                        'Thursday'   : ' Jueves',
+                        'Friday'   : ' Viernes',
+                        'Saturday'  : ' Sábado',
+                        'Sunday'   : ' Domingo'
+                    }) 
+}}  | 
