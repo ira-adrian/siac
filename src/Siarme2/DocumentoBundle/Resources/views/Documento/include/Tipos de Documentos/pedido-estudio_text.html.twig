@@ -1,8 +1,0 @@
-<p class="text-uppercase text-left"> <span style="font-size:14pt">
-         <strong>Referencia: </strong>{{documento.tramite.expediente}} <br>
-        {{documento.tramite.expediente.agente}} - Departamento: {{ documento.tramite.expediente.agente.localidad.departamento | default("N/D") }} <br>
-        <strong>Lugar de Trabajo:</strong> <small>{% for cargo in documento.tramite.expediente.agente.cargo %} {{ cargo }} - {{ cargo.funcion }} {% endfor %} </small> 
-        <br> </span>
-</p> 
-<p style="margin-left:0cm; margin-right:0cm; text-align:justify"><span style="font-size:14pt"><span style="font-family:&quot;Times New Roman&quot;,serif"><span style="font-family:&quot;Arial&quot;,sans-serif">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;En el día de la fecha se comunica a Usted que en relación a la denuncia de {{documento.tramite.expediente.tipoTramite}} con Fecha {{ documento.tramite.expediente.datoAt.fechaAt | date('d-m-Y')  }}, deberá presentar en el plazo de 10 (diez) días, los estudios complementarios (R.x, R.M.N., Ecografía, T.A.C, etc.), relacionados con dicha contingencia.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Atentamente. </span></span></span></p>

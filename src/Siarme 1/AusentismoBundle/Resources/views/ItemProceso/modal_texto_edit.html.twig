@@ -1,8 +1,0 @@
-{# Siarme\ExpedienteBundle\Resources\views\Expediente\modal_edit.html.twig #}
-
-{{ form_start(edit_form,  {'action': path('itemproceso_texto_edit', {'id': itemProceso.id}), 'method': 'POST'}) }}
-        {{ form_widget(edit_form) }}
-          <div class="text-right">
-            <input class="btn btn-danger" onclick= "return confirm('¿Desea GUARDAR?');" type="submit" value="GUARDAR"/>
-          </div>
-{{ form_end(edit_form) }}

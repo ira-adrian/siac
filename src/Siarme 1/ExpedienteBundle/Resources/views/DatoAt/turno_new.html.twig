@@ -1,9 +1,0 @@
-
- {{ form_start(edit_form,  {'action': path('datoat_turno_new', {'id':datoAT.id }), 'method': 'POST'}) }}
-{{ form_widget(edit_form) }}
-
-            <div class="text-right">     
-                <input class="btn btn-default" type="submit" onclick= "return confirm('¿Desea GUARDAR los cambios?');" value="Aceptar" />
-            </div>
-
-{{ form_end(edit_form) }}

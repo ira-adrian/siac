@@ -1,8 +1,0 @@
-    <h1>Recordatorio edit</h1>
-    {{ form_start(edit_form) }}
-        {{ form_widget(edit_form) }}
-            <div class="text-right">
-               <a  class="btn btn-primary" href="{{ referer }}"> CANCELAR </span></a>
-              <input class="btn btn-danger" onclick= "return confirm('¿Desea GUARDAR?');" type="submit" value="GUARDAR" />
-            </div>
-    {{ form_end(edit_form) }}

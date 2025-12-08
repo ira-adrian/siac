@@ -1,8 +1,0 @@
-{# C:\xampp\htdocs\siac_ftp\src\Siarme\ExpedienteBundle\Resources\views\Planificacion\_tbody_completo.html.twig#}
-<tr>
-    <td><a href="{{ path('planificacion_show', { 'id': planificacion.id }) }}" target="_blank">{{ planificacion.rubro }}</a></td>
-    <td>{{ planificacion.descripcion }}</td>
-    <td>${{ planificacion.importe  | default(0) | number_format(2, ',', '.')  }}</td>
-    <td> {% if planificacion.pedido %} {{ planificacion.pedido.numeroTramite}} -  <a  data-toggle="tooltip" data-placement="top" title='{{ planificacion.pedido.texto | upper }}'  href="{{ path('tramite_show', { 'id': planificacion.pedido.id }) }}" target="_blank">{{ planificacion.pedido.ccoo | default('NO-'~ year ~ '-n/d')}}</a> {% else %} - {% endif %}</td>
-    <td>{% include 'ExpedienteBundle:Planificacion:_concentra_etiqueta.html.twig' %}</td>
-</tr>

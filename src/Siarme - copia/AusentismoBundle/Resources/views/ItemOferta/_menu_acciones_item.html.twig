@@ -1,6 +1,0 @@
-{# Siarme\ExpedienteBundle\Resources\views\Tramite\_menu_acciones_tramite.html.twig #}
-    <a data-href="{{ path('item_oferta_estado', { 'id': itemOferta.id }) }}" class="btn-estado-item" role="button">
-          {% if itemOferta.estado %}<span class="glyphicon glyphicon-check" data-toggle="tooltip" data-placement="top" title='Cambiar Estado'></span>{% else %}<span class="glyphicon glyphicon-unchecked text-warning" data-toggle="tooltip" data-placement="top" title='Cambiar Estado'></span>{% endif %} </a>
-    &nbsp;
-    <a  data-href="{{ path('item_oferta_eliminar', { 'id': itemOferta.id }) }}" class="btn-eliminar-item" role="button" ><span class="glyphicon glyphicon-trash text-danger"></span></a>
-

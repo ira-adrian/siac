@@ -1,7 +1,0 @@
-<hr>
-    {{ form_start(form,  {'action': path('comentario_new', {'tipoid':tipoid, 'tipo':tipo}), 'method': 'POST'}) }}
-        {{ form_widget(form) }}
-        <div class="text-right"> 
-           <input type="submit" class="btn btn-sm btn-default" value="Comentar" />
-        </div>
-    {{ form_end(form) }}

@@ -1,7 +1,0 @@
-<ul class="list-group" style="margin:1px;">
-    {% for articulo in articulos if articulo.id != 9  %}
-        <li class="list-group-item" style="margin:0px;" >  
-            <a href="{{ path('documento_new', { 'tramite_id': agente.id , 'slug':"licencia" }) }}" role="button"><span  style="font-size: 20px" class='glyphicon glyphicon-tags text-info'></span>&nbsp;&nbsp;{{ articulo }}</a>   
-        </li> 
-    {% endfor %}  
-</ul>  

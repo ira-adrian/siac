@@ -1,8 +1,0 @@
-
-    {{ form_start(form, {'attr': { 'class': 'dropzone' }, 'action': path('documento_upload', {'tramite_id': documento.tramite.id}), 'method': 'POST'})  }}
-    {{ form_errors(form) }}
-    <div class="fallback">   
-        {{ form_row(form.archivo) }}
-    </div>
-    <div class="dz-message" data-dz-message><h4><span>Has <strong>Click</strong>  o Arrastra los archivos aquí para subirlos </span></h4></div>
-    {{ form_end(form) }}
