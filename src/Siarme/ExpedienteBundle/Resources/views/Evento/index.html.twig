@@ -63,16 +63,80 @@
 {% block javascripts %}  
 {{ parent() }}
 
-      <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js'></script>
-    <script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Promesa para Feriados (ya incluye el mapeo)
+    const feriadosPromise = fetch('https://api.argentinadatos.com/v1/feriados/2025')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al cargar feriados: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => data.map(item => ({
+            title: item.nombre,
+            start: item.fecha,
+            display: 'background',
+            color: '#ffdddd'
+        })));
 
-      document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-          initialView: 'dayGridMonth'
+    // 2. Promesa para tus eventos de Symfony con CORRECCIÓN de Mapeo
+    const eventosAppPromise = fetch('{{ path('api_eventos') }}')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al cargar eventos de app: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => data.map(item => ({
+            // Asegúrate de que las claves de tu API (ej. item.titulo, item.fechaInicio)
+            // se mapeen a las claves de FullCalendar (title, start, end).
+            // Si usaste el controlador anterior, estas claves son correctas:
+            title: item.title,         // Mapea la clave 'title' de la API
+            start: item.start,         // Mapea la clave 'start' de la API
+            end: item.end,             // Mapea la clave 'end' de la API
+            // display: 'list-item', // Campo adicional que puedes usar
+            allDay : false
+            // Puedes añadir otras propiedades de FullCalendar aquí (color, url, etc.)
+        })));
+
+
+    // 3. Usa Promise.all para esperar a que ambas peticiones terminen
+    Promise.all([feriadosPromise, eventosAppPromise])
+        .then(([feriados, eventosApp]) => {
+            // Combinar los dos arrays de eventos en uno solo
+            const eventosCombinados = feriados.concat(eventosApp);
+
+            // Inicializar y renderizar FullCalendar
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    center: 'title',
+                },
+                locale: 'es',
+                // Usar el array combinado de eventos
+                events: eventosCombinados,
+
+                /** Opcional: Renderizar la descripción en el calendario
+                eventContent: function(arg) {
+                    let description = arg.event.extendedProps.description || '';
+                    return {
+                        html: '<b>' + arg.timeText + '</b> ' + arg.event.title
+                    };
+                }*/
+            });
+
+            calendar.render();
+        })
+        .catch(error => {
+            console.error('Error al cargar datos:', error);
+            alert('No se pudieron cargar todos los datos del calendario. Intente de nuevo más tarde.');
         });
-        calendar.render();
-      });
+});
 
-    </script>
+   
+
+
+</script>
 {% endblock %}

@@ -5,7 +5,9 @@ namespace Siarme\ExpedienteBundle\Controller;
 use Siarme\ExpedienteBundle\Entity\Evento;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * Evento controller.
@@ -31,6 +33,26 @@ class EventoController extends Controller
         ));
     }
 
+    /**
+     * @Route("/api/eventos", name="api_eventos")
+     */
+    public function obtenerEventosAction()
+    {
+        $eventos = $this->getDoctrine()->getRepository(Evento::class)->findAll();
+
+        $eventosArray = [];
+        foreach ($eventos as $evento) {
+            $eventosArray[] = [
+                'title' => $evento->getTitulo(),
+                'start' => $evento->getFechaInicio()->format('Y-m-d'),
+                'end' => $evento->getFechaFin() ? $evento->getFechaFin()->format('Y-m-d') : null,
+                //'description' => $evento->getDescripcion(),
+                // Puedes agregar más campos si es necesario
+            ];
+        }
+
+        return new JsonResponse($eventosArray);
+    }
     /**
      * Creates a new evento entity.
      *
