@@ -1,18 +1,19 @@
 {% extends 'ExpedienteBundle:Default:layout.html.twig' %}
-{% block title %} FERIADO {% endblock %} 
+{% block title %} Calendario {% endblock %} 
 {% block contenido %}
- <div class="container"> 
-    <h1>Evento creation</h1>
+
+ <div class="container">
+
+    <h1 class="text-center">Calendario</h1>
 
     {{ form_start(form) }}
         {{ form_widget(form) }}
-        <input type="submit" value="Create" />
     {{ form_end(form) }}
 
-    <ul>
+   {# <ul>
         <li>
             <a href="{{ path('evento_index') }}">Back to the list</a>
         </li>
-    </ul>
+    </ul>#}
 </div>
 {% endblock %}

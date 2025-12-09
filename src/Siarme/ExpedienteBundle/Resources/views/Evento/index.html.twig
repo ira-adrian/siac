@@ -1,33 +1,29 @@
-{# Siarme\ExpedienteBundle\Resources\views\Tramite\index.html.twig #}
 {% extends 'ExpedienteBundle:Default:layout.html.twig' %}
-{% block title %}FERIADOS{% endblock %}
-  {% block header %}
-   {{ include('ExpedienteBundle:Default:_header.html.twig') }}
-  {{ include('ExpedienteBundle:Default:_breadcrumb_principal.html.twig') }}
-{% endblock %}
-        
-      {% block stylesheets %}
-        {{ parent() }}
 
-
-      {% endblock %}
+{% block title %} Calendario
+    {{ app.session.set('modulo', "CALENDARIO") }}
+    {{ app.session.set('route', 'evento_index') }}
+    {{ app.session.set('glyphicon', 'glyphicon glyphicon-calendar') }}
+ {% endblock %} 
 {% block contenido %}
+
  <div class="container">
 
-    <h1>Calendario de Eventos</h1>
+    <h1 class="text-center">Calendario</h1>
         <div id="calendar"></div>
 
-    <h1>Eventos list</h1>
+    <h1 class="text-center">Feriados y Asuetos Provinciales</h1>
+    <div class="text-center"><a class="btn btn-info" href="{{ path('evento_new') }}">Nueva Fecha</a></div>
 
-    <table>
+    <table class="table table-hover">
         <thead>
             <tr>
                 <th>Id</th>
                 <th>Titulo</th>
-                <th>Fechainicio</th>
-                <th>Fechafin</th>
+                <th>Inicio</th>
+                <th>Fin</th>
                 <th>Tipo</th>
-                <th>Actions</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -35,29 +31,18 @@
             <tr>
                 <td><a href="{{ path('evento_show', { 'id': evento.id }) }}">{{ evento.id }}</a></td>
                 <td>{{ evento.titulo }}</td>
-                <td>{% if evento.fechaInicio %}{{ evento.fechaInicio|date('Y-m-d H:i:s') }}{% endif %}</td>
-                <td>{% if evento.fechaFin %}{{ evento.fechaFin|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{% if evento.fechaInicio %}{{ evento.fechaInicio|date('d-m-Y') }}{% endif %}</td>
+                <td>{% if evento.fechaFin %}{{ evento.fechaFin|date('d-m-Y') }}{% endif %}</td>
                 <td>{{ evento.tipo }}</td>
                 <td>
-                    <ul>
-                        <li>
-                            <a href="{{ path('evento_show', { 'id': evento.id }) }}">show</a>
-                        </li>
-                        <li>
-                            <a href="{{ path('evento_edit', { 'id': evento.id }) }}">edit</a>
-                        </li>
-                    </ul>
+                            <a class="btn btn-info" href="{{ path('evento_edit', { 'id': evento.id }) }}">Editar</a>
+                            <a onclick= "return confirm('¿Desea ELIMINAR: {{evento.titulo}}?');" class="btn btn-danger" href="{{ path('evento_eliminar', { 'id': evento.id }) }}">Eliminar</a>
+             
                 </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-
-    <ul>
-        <li>
-            <a href="{{ path('evento_new') }}">Create a new evento</a>
-        </li>
-    </ul>
 </div>
 {% endblock %}
 {% block javascripts %}  
@@ -95,8 +80,10 @@ document.addEventListener('DOMContentLoaded', function() {
             title: item.title,         // Mapea la clave 'title' de la API
             start: item.start,         // Mapea la clave 'start' de la API
             end: item.end,             // Mapea la clave 'end' de la API
+            display: 'background',
+             color: '#ddffe2ff'
             // display: 'list-item', // Campo adicional que puedes usar
-            allDay : false
+            //allDay : false
             // Puedes añadir otras propiedades de FullCalendar aquí (color, url, etc.)
         })));
 
@@ -111,20 +98,18 @@ document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                headerToolbar: {
-                    center: 'title',
-                },
                 locale: 'es',
                 // Usar el array combinado de eventos
                 events: eventosCombinados,
 
-                /** Opcional: Renderizar la descripción en el calendario
+                // Opcional: Renderizar la descripción en el calendario
                 eventContent: function(arg) {
                     let description = arg.event.extendedProps.description || '';
                     return {
-                        html: '<b>' + arg.timeText + '</b> ' + arg.event.title
+                       // html: '<b>' + arg.timeText + '</b> ' + arg.event.title
+                       html: '&nbsp ' + '<strong style="color: black;">'+ arg.event.title + '</strong>'
                     };
-                }*/
+                }
             });
 
             calendar.render();

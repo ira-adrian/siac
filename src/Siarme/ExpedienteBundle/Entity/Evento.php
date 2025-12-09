@@ -4,12 +4,14 @@ namespace Siarme\ExpedienteBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Evento
  *
  * @ORM\Table(name="evento")
  * @ORM\Entity(repositoryClass="Siarme\ExpedienteBundle\Repository\EventoRepository")
+ * @UniqueEntity(fields = { "fechaInicio" },  message="Ya EXISTE la Fecha en el Calendario")
  */
 class Evento
 {

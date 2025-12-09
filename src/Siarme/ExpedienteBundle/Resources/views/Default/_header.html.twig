@@ -58,7 +58,9 @@
     {% if app.user.departamentoRm.slug == "despacho" or app.user.id == 8 or is_granted('ROLE_SUPERVISOR') %}
         <li role="presentation" id="link-3"><a href="{{ path('licencia_index') }}"><span class="glyphicon glyphicon-file"></span> LICENCIAS</a></li>
     {% endif %}
-        <li role="presentation" id="link-3"><a href="{{ path('item_catalogo_index') }}"> <span class="glyphicon glyphicon-search" ></span> CATALOGO COMPRAR</a>
+        <li role="presentation" id="link-3"><a href="{{ path('item_catalogo_index') }}"> <span class="glyphicon glyphicon-search" ></span> CATALOGO</a>
+        
+        <li role="presentation" id="link-3"><a href="{{ path('evento_index') }}"> <span class="glyphicon glyphicon-calendar" ></span> CALENDARIO</a>
       </ul>
       <ul class="nav navbar-nav navbar-right"> 
        {#<li id="alerta2" class="dropdown" >        

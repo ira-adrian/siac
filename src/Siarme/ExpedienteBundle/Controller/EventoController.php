@@ -42,10 +42,25 @@ class EventoController extends Controller
 
         $eventosArray = [];
         foreach ($eventos as $evento) {
+        if ($evento->getFechaFin()){
+    
+            $fecha_actual = $evento->getFechaFin()->format('Y-m-d');
+
+            // 2. Sumar un día usando strtotime()
+            $nueva_fecha_timestamp = strtotime($fecha_actual . " + 1 day");
+
+            // 3. Formatear la nueva fecha
+            $nueva_fecha = date("Y-m-d", $nueva_fecha_timestamp);
+        } else {
+            $nueva_fecha = null;
+        }
+
+
             $eventosArray[] = [
                 'title' => $evento->getTitulo(),
                 'start' => $evento->getFechaInicio()->format('Y-m-d'),
-                'end' => $evento->getFechaFin() ? $evento->getFechaFin()->format('Y-m-d') : null,
+                'end' => $nueva_fecha,
+                //'end' => $evento->getFechaFin() ? $evento->getFechaFin()->format('Y-m-d') : null,
                 //'description' => $evento->getDescripcion(),
                 // Puedes agregar más campos si es necesario
             ];
@@ -69,8 +84,11 @@ class EventoController extends Controller
             $em = $this->getDoctrine()->getManager();
             $em->persist($evento);
             $em->flush();
-
-            return $this->redirectToRoute('evento_show', array('id' => $evento->getId()));
+            $msj =  'Has CREADO un nuevo registro en Calendario';  
+            $this->get('session')->getFlashBag()->add(
+                    'mensaje-success',
+                    $msj);
+            return $this->redirectToRoute('evento_index');
         }
 
         return $this->render('ExpedienteBundle:Evento:new.html.twig', array(
@@ -109,8 +127,11 @@ class EventoController extends Controller
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
             $this->getDoctrine()->getManager()->flush();
-
-            return $this->redirectToRoute('evento_edit', array('id' => $evento->getId()));
+            $msj =  'Has actualizado  el registro del Calendario';  
+            $this->get('session')->getFlashBag()->add(
+                    'mensaje-success',
+                    $msj);
+            return $this->redirectToRoute('evento_index');
         }
 
         return $this->render('ExpedienteBundle:Evento:edit.html.twig', array(
@@ -118,6 +139,24 @@ class EventoController extends Controller
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
         ));
+    }
+
+    /**
+     * Eliminar evento entity.
+     *
+     * @Route("/{id}/eliminar", name="evento_eliminar")
+     * @Method({"GET", "POST"})
+     */
+    public function eliminarAction(Request $request, Evento $evento)
+    {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($evento);
+            $em->flush();
+            $msj =  'Has eliminado el registro del Calendario';  
+            $this->get('session')->getFlashBag()->add(
+                    'mensaje-info',
+                    $msj);
+            return $this->redirectToRoute('evento_index');  
     }
 
     /**

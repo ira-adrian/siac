@@ -23,7 +23,7 @@ class EventoType extends AbstractType
                     'attr' => ['class' => 'form-control'],
                 ])
                 ->add('fechaInicio', DateType::class, ['widget' => 'single_text', 'label'=> 'Fecha de Inicio', 'attr' => ['class' => 'form-control']])
-                ->add('fechaFin', DateType::class, ['widget' => 'single_text', 'label'=> 'Fecha de Inicio', 'attr' => ['class' => 'form-control']])
+                ->add('fechaFin', DateType::class, ['widget' => 'single_text', 'label'=> 'Fecha de Fin', 'attr' => ['class' => 'form-control']])
                 ->add('tipo', ChoiceType::class, array(
                     'choices' => array( "Inamovible"=>'inamovible',"Puente"=>'puente', "Trasladable"=>'trasladable'),
                        'label'  => 'Tipo'

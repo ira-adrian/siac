@@ -38,6 +38,14 @@
           {% elseif agente is defined  %}
                  <li class="active"><span  class="glyphicon glyphicon-user"></span>Nuevo</li> 
           {% endif %} 
+
+{# Breadcrumbs para EVENTO|CALENDARIO #}
+          {% if evento is defined and evento.id is not empty %}
+                  <li class="active"><span  class="glyphicon glyphicon-pencil"></span> <strong>{{evento.titulo }}</strong></li>   
+          {% elseif evento is defined  %}
+                 <li class="active"><span  class="glyphicon glyphicon-pencil"> </span>Nuevo</li> 
+          {% endif %} 
+
 {# Breadcrumbs para ORGANISMO #}
           {% if organismo is defined and organismo.id is not empty %}
                   <li class="active"><span  class="glyphicon glyphicon-home"></span> <strong>{{organismo.codigoGde }}</strong></li>   
