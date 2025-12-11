@@ -10,4 +10,40 @@ namespace Siarme\ExpedienteBundle\Repository;
  */
 class EventoRepository extends \Doctrine\ORM\EntityRepository
 {
+        /**
+     * Encuentra los  TRAMITE de PAGOS se filtra por fecha y no por fechaDesde
+     * 
+     * 
+     */
+  public function findByAnio($anio = null)
+  {
+        if (empty($anio)) {
+            $date = new \Datetime();
+            $anio = $date->format("Y");
+        }
+    
+        $fecha = $anio."/01/01";
+        $fecha = new \DateTime($fecha);
+        $fecha = $fecha->format('Y/m/d');
+
+        $fechaHasta = $anio."/12/31";
+        $fechaHasta = new \DateTime($fechaHasta);
+        $fechaHasta = $fechaHasta->format('Y/m/d');
+
+        $em = $this->getEntityManager();
+
+        $consulta = $em->createQuery(
+                 'SELECT e
+                        FROM ExpedienteBundle:Evento e 
+                        WHERE e.fechaInicio >= :fecha 
+                        AND e.fechaFin <= :fechaHasta
+                        ORDER BY e.fechaInicio DESC
+                        ');
+        $consulta->setParameter('fecha', $fecha)
+                 ->setParameter('fechaHasta', $fechaHasta);
+        
+        $ev = $consulta->getResult();  
+      
+        return $ev;
+    }
 }

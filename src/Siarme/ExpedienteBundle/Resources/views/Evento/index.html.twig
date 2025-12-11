@@ -8,8 +8,18 @@
 {% block contenido %}
 
  <div class="container">
-
-    <h1 class="text-center">Calendario</h1>
+      <ol class="breadcrumb"  style="margin-bottom:1px;"> 
+        {% for year in ( ('now' | date("Y") - 3) .. ('now' | date("Y"))) %} 
+            {% if year != anio %}
+              <li><a href="{{ path('evento_index', { 'anio': year }) }}"> <span class="glyphicon glyphicon-calendar"></span>{{year}}</a></li>
+            {% else %}
+                <li class="active"> 
+                  <span class="glyphicon glyphicon-calendar text-success"></span> <strong>{{year}}</strong>
+                </li>
+            {% endif %}
+        {% endfor %}
+      </ol>
+    <h1 class="text-center">Calendario {{anio}}</h1>
         <div id="calendar"></div>
 
     <h1 class="text-center">Feriados y Asuetos Provinciales</h1>
@@ -18,7 +28,7 @@
     <table class="table table-hover">
         <thead>
             <tr>
-                <th>Id</th>
+                <th>Mes</th>
                 <th>Titulo</th>
                 <th>Inicio</th>
                 <th>Fin</th>
@@ -29,7 +39,7 @@
         <tbody>
         {% for evento in eventos %}
             <tr>
-                <td><a href="{{ path('evento_show', { 'id': evento.id }) }}">{{ evento.id }}</a></td>
+                <td>{% if evento.fechaInicio %}{{ evento.fechaInicio  | localizeddate('medium', 'none', 'es', null, 'MMMM') | title  }}{% endif %}</td>
                 <td>{{ evento.titulo }}</td>
                 <td>{% if evento.fechaInicio %}{{ evento.fechaInicio|date('d-m-Y') }}{% endif %}</td>
                 <td>{% if evento.fechaFin %}{{ evento.fechaFin|date('d-m-Y') }}{% endif %}</td>
@@ -51,7 +61,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   // Promesa para Feriados (ya incluye el mapeo)
-    const feriadosPromise = fetch('https://api.argentinadatos.com/v1/feriados/2025')
+    const feriadosPromise = fetch('https://api.argentinadatos.com/v1/feriados/{{anio}}')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Error al cargar feriados: ' + response.statusText);
@@ -66,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })));
 
     // 2. Promesa para tus eventos de Symfony con CORRECCIÓN de Mapeo
-    const eventosAppPromise = fetch('{{ path('api_eventos') }}')
+    const eventosAppPromise = fetch('{{ path('api_eventos', { 'anio': anio }) }}')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Error al cargar eventos de app: ' + response.statusText);
@@ -75,13 +85,12 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => data.map(item => ({
             // Asegúrate de que las claves de tu API (ej. item.titulo, item.fechaInicio)
-            // se mapeen a las claves de FullCalendar (title, start, end).
-            // Si usaste el controlador anterior, estas claves son correctas:
+            id: item.id,
             title: item.title,         // Mapea la clave 'title' de la API
             start: item.start,         // Mapea la clave 'start' de la API
             end: item.end,             // Mapea la clave 'end' de la API
             display: 'background',
-             color: '#ddffe2ff'
+            color: '#ddffe2ff'
             // display: 'list-item', // Campo adicional que puedes usar
             //allDay : false
             // Puedes añadir otras propiedades de FullCalendar aquí (color, url, etc.)
@@ -98,6 +107,13 @@ document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
+                // Establece la fecha inicial a una del año
+                initialDate: "{{anio}}-{{'now' | date('m')}}-{{'now' | date('d')}}",
+                // Limita el rango de fechas válido al año 2024
+                validRange: {
+                start: '{{anio}}-01-01',
+                end: '{{anio + 1}}-01-01' // La fecha de finalización es exclusiva
+                },
                 locale: 'es',
                 // Usar el array combinado de eventos
                 events: eventosCombinados,
@@ -105,9 +121,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Opcional: Renderizar la descripción en el calendario
                 eventContent: function(arg) {
                     let description = arg.event.extendedProps.description || '';
+                    if (arg.event.id) {
+                        _html= '<br><br><br>' + '* <strong style="color: black;">'+ arg.event.title + '</strong>';
+                    } else {
+                        _html=  '<strong style="color: black;">'+ arg.event.title + '</strong>';
+                    }
                     return {
                        // html: '<b>' + arg.timeText + '</b> ' + arg.event.title
-                       html: '&nbsp ' + '<strong style="color: black;">'+ arg.event.title + '</strong>'
+                        html: _html
                     };
                 }
             });

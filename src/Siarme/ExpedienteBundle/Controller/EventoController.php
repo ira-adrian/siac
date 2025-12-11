@@ -19,25 +19,34 @@ class EventoController extends Controller
     /**
      * Lists all evento entities.
      *
-     * @Route("/", name="evento_index")
+     * @Route("/{anio}", name="evento_index")
      * @Method("GET")
      */
-    public function indexAction()
+    public function indexAction($anio = null)
     {
+        if (empty($anio)) {
+            $date = new \Datetime();
+            $anio = $date->format("Y");
+        }
         $em = $this->getDoctrine()->getManager();
 
-        $eventos = $em->getRepository('ExpedienteBundle:Evento')->findAll();
+        $eventos = $em->getRepository('ExpedienteBundle:Evento')->findByAnio($anio);
 
         return $this->render('ExpedienteBundle:Evento:index.html.twig', array(
             'eventos' => $eventos,
+            'anio'=>$anio,
         ));
     }
 
     /**
-     * @Route("/api/eventos", name="api_eventos")
+     * @Route("/api/eventos/{anio}", name="api_eventos")
      */
-    public function obtenerEventosAction()
+    public function obtenerEventosAction($anio = null)
     {
+        if (empty($anio)) {
+            $date = new \Datetime();
+            $anio = $date->format("Y");
+        }
         $eventos = $this->getDoctrine()->getRepository(Evento::class)->findAll();
 
         $eventosArray = [];
@@ -88,7 +97,8 @@ class EventoController extends Controller
             $this->get('session')->getFlashBag()->add(
                     'mensaje-success',
                     $msj);
-            return $this->redirectToRoute('evento_index');
+            $referer= $request->headers->get('referer');
+            return $this->redirect($referer);
         }
 
         return $this->render('ExpedienteBundle:Evento:new.html.twig', array(
@@ -131,7 +141,8 @@ class EventoController extends Controller
             $this->get('session')->getFlashBag()->add(
                     'mensaje-success',
                     $msj);
-            return $this->redirectToRoute('evento_index');
+            $referer= $request->headers->get('referer');
+            return $this->redirect($referer);
         }
 
         return $this->render('ExpedienteBundle:Evento:edit.html.twig', array(
@@ -156,7 +167,8 @@ class EventoController extends Controller
             $this->get('session')->getFlashBag()->add(
                     'mensaje-info',
                     $msj);
-            return $this->redirectToRoute('evento_index');  
+            $referer= $request->headers->get('referer');
+            return $this->redirect($referer);  
     }
 
     /**
