@@ -48,8 +48,9 @@
                 </td>
                 <td>{{ tramite.plazo }} días</td>
                 <td>{% if fechaNotificaOc.fecha | default(false) %}{{ fechaNotificaOc.fecha | date('d/m/Y') }}{% endif %}</td>
-                <td>{% if fechaNotificaOc.fecha | default(false) %}{{ fechaNotificaOc.fecha | date('Y-m-d') | sumar_dias(tramite.plazo, false) | date('d/m/Y')   }}{% endif %}</td>
-                <td></td>
+                 {% set respuesta = fechaNotificaOc.fecha | date('Y-m-d') | sumar_dias(tramite.plazo, false) %}
+                <td>{% if fechaNotificaOc.fecha | default(false) %}{{ respuesta["fecha"] | date('d/m/Y')   }}{% endif %}</td>
+                <td><small><i>{{respuesta["msj"] | raw }}</i></small></td>
             </tr>
         {% endif %}
     {% endfor %}

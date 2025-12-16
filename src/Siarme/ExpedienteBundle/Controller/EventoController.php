@@ -19,7 +19,7 @@ class EventoController extends Controller
     /**
      * Lists all evento entities.
      *
-     * @Route("/{anio}", name="evento_index")
+     * @Route("/{anio}", name="evento_index", requirements={"anio"="\d+"})
      * @Method("GET")
      */
     public function indexAction($anio = null)
@@ -83,7 +83,7 @@ class EventoController extends Controller
      * @Route("/new", name="evento_new")
      * @Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+        public function newAction(Request $request)
     {
         $evento = new Evento();
         $form = $this->createForm('Siarme\ExpedienteBundle\Form\EventoType', $evento);
@@ -97,8 +97,7 @@ class EventoController extends Controller
             $this->get('session')->getFlashBag()->add(
                     'mensaje-success',
                     $msj);
-            $referer= $request->headers->get('referer');
-            return $this->redirect($referer);
+            return $this->redirectToRoute('evento_index', array('anio' => $evento->getFechaInicio()->format("Y")));
         }
 
         return $this->render('ExpedienteBundle:Evento:new.html.twig', array(
@@ -141,8 +140,8 @@ class EventoController extends Controller
             $this->get('session')->getFlashBag()->add(
                     'mensaje-success',
                     $msj);
-            $referer= $request->headers->get('referer');
-            return $this->redirect($referer);
+
+           return $this->redirectToRoute('evento_index', array('anio' => $evento->getFechaInicio()->format("Y")));
         }
 
         return $this->render('ExpedienteBundle:Evento:edit.html.twig', array(
