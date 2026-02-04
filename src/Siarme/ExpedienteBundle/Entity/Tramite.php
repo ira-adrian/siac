@@ -323,6 +323,18 @@ class Tramite
      */
     private $proceso;
 
+    /**
+     * One Tramite has Many Tramites.
+     * @ORM\OneToMany(targetEntity="Siarme\ExpedienteBundle\Entity\Tramite", mappedBy="pedido", cascade={"persist","remove"})
+     */
+    private $control;
+
+    /**
+     * Many Tramites have One Tramite.
+     * @ORM\ManyToOne(targetEntity="Siarme\ExpedienteBundle\Entity\Tramite", inversedBy="control")
+     */
+    private $pedido;
+
     /** 
      *@ORM\OneToMany(targetEntity="Siarme\GeneralBundle\Entity\ItemSolicitado", mappedBy="tramite", cascade={"persist","remove"})
     */
@@ -332,6 +344,11 @@ class Tramite
      * @ORM\OneToMany(targetEntity="Siarme\ExpedienteBundle\Entity\Planificacion", mappedBy="tramite", cascade={"persist","remove"})
      */
     private $planificacion;
+
+    /** 
+     *@ORM\ManyToMany(targetEntity="Siarme\ExpedienteBundle\Entity\Planificacion", mappedBy="pedidos", cascade={"persist"}) 
+     */
+    private $planificaciones;
 
     /** 
      *@ORM\OneToMany(targetEntity="Siarme\AusentismoBundle\Entity\ItemProcesoAdjudicado", mappedBy="proceso", cascade={"persist","remove"})
@@ -361,6 +378,7 @@ class Tramite
     public function __construct()
     {
         $this->oferta = new ArrayCollection();
+        $this->control = new ArrayCollection();
         $this->itemPedido = new ArrayCollection();
         $this->itemSolicitado = new ArrayCollection();
         $this->itemProceso = new ArrayCollection();
@@ -387,6 +405,7 @@ class Tramite
         $this->pFAntecedente = 3;
         $this->montoAdjudica = 0;
         $this->planificacion = new ArrayCollection();
+        $this->planificaciones = new ArrayCollection();
         $this->itemProcesoAdjudicado = new ArrayCollection();
         $this->itemOfertaAdjudicado = new ArrayCollection();
     }
@@ -1712,7 +1731,6 @@ class Tramite
         return $this->itemOferta;
     }
 
-
     /**
      * Get oferta
      *
@@ -1744,6 +1762,39 @@ class Tramite
     public function getProceso()
     {
         return $this->proceso;
+    }
+
+    /**
+     * Get control
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getControl()
+    {
+        return $this->control;
+    }
+
+    /**
+     * Set pedido
+     *
+     * @param \Siarme\ExpedienteBundle\Entity\Tramite $pedido
+     * @return Tramite
+     */
+    public function setPedido(\Siarme\ExpedienteBundle\Entity\Tramite $pedido)
+    {
+        $this->pedido = $pedido;
+
+        return $this;
+    }
+
+    /**
+     * Get pedido
+     *
+     * @return \Siarme\ExpedienteBundle\Entity\Tramite 
+     */
+    public function getPedido()
+    {
+        return $this->pedido;
     }
 
     /**
@@ -1858,6 +1909,43 @@ class Tramite
         return  $total;
     }
 
+    /**
+     * Add planificaciones
+     *
+     * @param \Siarme\ExpedienteBundle\Entity\Planificacion $planificaciones
+     *
+     * @return DepartamentoRm
+     */
+    public function addPlanificaciones(\Siarme\ExpedienteBundle\Entity\Planificacion $planificaciones)
+    {
+
+        if (!$this->planificaciones->contains($planificaciones)){
+            $this->planificaciones[] = $planificaciones;
+        }
+        return $this;
+    }
+
+    /**
+     * Remove planificaciones
+     *
+     * @param \Siarme\ExpedienteBundle\Entity\Planificacion $planificaciones
+     */
+    public function removePlanificaciones(\Siarme\ExpedienteBundle\Entity\Planificacion $planificaciones)
+    {
+        $this->planificaciones->removeElement($planificaciones);
+        $planificaciones->removeItemOferta($this);
+    }
+
+    /**
+     * Get planificaciones
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPlanificaciones()
+    {
+        return $this->planificaciones;
+    }
+    
     /**
      * Add itemProcesoAdjudicado
      *
