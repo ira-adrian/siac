@@ -51,8 +51,8 @@
     {% set  itemsAdjudicados = itemCatalogo | item_oferta(100) %}
              <!-- Nav tabs -->
             <ul class="nav nav-tabs nav-justified hidden-print" role="tablist">
-                <li role="presentation"  {% if app.user.departamentoRm.slug == "dppr" %} class="active" {% endif %}><a href="#dppr" aria-controls="dppr" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-user"></span> ÍTEM DE NOTA PEDIDO ({{  itemsPedidos | length}}) </a></li>
-                <li role="presentation" {% if app.user.departamentoRm.slug == "dpcbs" %} class="active" {% endif %}><a href="#dpcbs" aria-controls="dpcbs" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-user"></span> ÍTEM OFERTADO ({{  itemsAdjudicados | length}}) </a></li>
+                <li role="presentation"  {% if app.user.departamentoRm.slug == "dppr" %} class="active" {% endif %}><a href="#dppr" aria-controls="dppr" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-tasks"></span> ÍTEM DE NOTA PEDIDO ({{  itemsPedidos | length}}) </a></li>
+                <li role="presentation" {% if app.user.departamentoRm.slug == "dpcbs" %} class="active" {% endif %}><a href="#dpcbs" aria-controls="dpcbs" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-shopping-cart"></span> ÍTEM OFERTADO ({{  itemsAdjudicados | length}}) </a></li>
             </ul>
             <div class="tab-content">
                 <div role="tabpanel" class='tab-pane fade in   {% if app.user.departamentoRm.slug == "dppr" %} active {% endif %}' id="dppr">

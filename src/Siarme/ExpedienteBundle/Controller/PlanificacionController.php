@@ -138,9 +138,16 @@ class PlanificacionController extends Controller
      * @Method("GET")
      */
     public function seleccionarAction(Planificacion $planificacion, $id2, Request $request)
-    {   $em = $this->getDoctrine()->getManager();
+    {   
+        $em = $this->getDoctrine()->getManager();
         $tramite = $em->getRepository('ExpedienteBundle:Tramite')->find($id2);
-        $planificacion->setPedido($tramite);
+
+        if (empty($planificacion->getPedido())) {
+           $planificacion->setPedido($tramite);
+        } else {
+             $planificacion->addPedidos($tramite);
+        }
+
         $em = $this->getDoctrine()->getManager()->flush();
         $referer= $request->headers->get('referer');
         return $this->redirect($referer);
@@ -149,12 +156,22 @@ class PlanificacionController extends Controller
     /**
      * Finds and displays a planificacion entity.
      *
-     * @Route("/{id}/quitar", name="planificacion_quitar")
+     * @Route("/{id}/{id_pedido}/quitar", name="planificacion_quitar")
      * @Method("GET")
      */
-    public function quitarAction(Planificacion $planificacion, Request $request)
+    public function quitarAction(Request $request, Planificacion $planificacion, $id_pedido = null)
     {   
-        $planificacion->setPedido(null);
+        $em = $this->getDoctrine()->getManager();
+        $pedido = $em->getRepository('ExpedienteBundle:Tramite')->find($id_pedido);
+
+        if (empty($planificacion->getPedido())) {
+            $planificacion->removePedidos($pedido);
+        } elseif ($planificacion->getPedido()->getId() == $pedido->getId() ) {
+            $planificacion->setPedido(null);
+        } else {
+             $planificacion->removePedidos($pedido);
+        }
+
         $this->getDoctrine()->getManager()->flush();
         $referer= $request->headers->get('referer');
         return $this->redirect($referer);

@@ -26,9 +26,11 @@
         </thead>
         <tbody>
         {% for itemCatalogo in itemCatalogos %}
+            {% set itemsPedidos = itemCatalogo | item_pedido_por_codigo(1) %}
             <tr>
                 <td>{{ loop.index }}</td>
                 <td style="width: 10%;">
+                    {% if itemsPedidos | length > 0 %} <span class="glyphicon glyphicon-tasks text-success" data-toggle="tooltip" data-placement="top" title='.  El ítem se encuentra en Pedidos'></span> {% endif %}
                     {% if ( is_granted('ROLE_EXTERNO')) %} 
                         {{ itemCatalogo.codigo  | upper | replace({ (find) :'<mark class="text-info" style="padding-right:0px;">'~find~'</mark>' })  | raw  }}
                     {% else %}

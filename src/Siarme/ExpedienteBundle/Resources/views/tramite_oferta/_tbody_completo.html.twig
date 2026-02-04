@@ -15,7 +15,7 @@
              
         </td>
         <td> {{ tramite.cuit  | default("") | mostrar_como_cuil }}</td>
-        <td>${{ tramite.montoOfertado | number_format(2, ',', '.')  }}</td>
+        <td>${{ tramite. | number_format(2, ',', '.')  | default("")   }}</td>
         <td>
             {% if tramite.proceso.adjudicado %}
                 ${{ tramite.montoAdjudicado | number_format(2, ',', '.')  }} 

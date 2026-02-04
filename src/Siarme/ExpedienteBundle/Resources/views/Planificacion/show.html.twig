@@ -62,18 +62,17 @@
             {% set tramite, tipoTramite = planificacion.pedido, planificacion.pedido.tipoTramite | default(false) %}
             {% set conPedidos = false %}
               {% if tipoTramite %}
-              <table class="table table-hover table-bordered">
-                  <thead>
-                     {{ include('ExpedienteBundle:'~ tipoTramite.slug ~':_thead_completo.html.twig') }}  
-                  </thead>
-                  <tbody>
-         
-                      {# filtro los tramites que no tienen expedientes #}
- 
-                     {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_tbody_completo.html.twig') }}    
-
-                  </tbody>
-              </table>
+                <table class="table table-hover table-bordered">
+                    <thead>
+                       {{ include('ExpedienteBundle:'~ tipoTramite.slug ~':_thead_completo.html.twig') }}  
+                    </thead>
+                    <tbody>
+                       {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_tbody_completo.html.twig') }}    
+                       {% for tramite in planificacion.pedidos %}
+                        {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_tbody_completo.html.twig') }}
+                       {% endfor %}
+                    </tbody>
+                </table>
              {% else %}
                  {% set pedidosSinrubro, pedidos, plani = [], planificacion.tramite | pedidos_planificados, 0 %}
                     {% for  plani in pedidos %}
@@ -83,6 +82,8 @@
                             {% set conPedidos = true %}
                         {% endif %}
                     {% endfor %}
+
+
                     {% if not conPedidos %}
                         <span class="label label-default">No se encontraron PEDIDOS para relacionar</span>
                     {% else %}

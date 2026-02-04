@@ -204,8 +204,6 @@
                             </tr>
                         </table>
                  </dd>   
-<!-- Si No Control -->
- {% if tramite.estadoTramite.slug != "control" %} 
                   <dt> Disponibilidad de Crédito Presupuestario {% if ( app.user.departamentoRm == tramite.departamentoRm ) and ( tramite.expediente | default(null) | movimiento_estado(app.user)  or tramite.expediente.id is not defined ) %} |  <a role="button" data-href="{{ path('credito_new', {'id':tramite.id})}}" class="btn-nuevoCredito"> <span  class="glyphicon glyphicon-plus-sign"></span> Nuevo </a>{% endif %} 
                   </dt> 
                   <dd>
@@ -265,7 +263,7 @@
                 </dd>
                 
                 <br> 
- {% endif %}<!-- Si no control -->
+
                 <dt>Tarea&nbsp;&nbsp; 
                     {% if ( app.user.departamentoRm.slug == "dppr") %}
                         {% set mitramite = tramite_usuario(app.user, tramite) %}
@@ -377,54 +375,10 @@
 </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-    <!-- Si no control -->
-    {% if tramite.estadoTramite.slug != "control" %} 
-        {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_panel_body.html.twig') }}
-    {#   {{ render(controller('ExpedienteBundle:Expediente:modalExpedienteNew', {'tramite_id': tramite.id}))}}#}
-    
-    </div>
-    {% endif %} <!-- Si no control -->
+{{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_panel_body.html.twig') }}
+{#    {{ render(controller('ExpedienteBundle:Expediente:modalExpedienteNew', {'tramite_id': tramite.id}))}}#}
+</div>
 
-    <!-- Si  control -->
-    {% if tramite.estadoTramite.slug == "control" %} 
-        <div class="panel panel-default">
-            <div class="panel-heading">
-            <h3 class="panel-title">
-                <span class="glyphicon glyphicon-minus  text-muted"></span> <span class=" {{tramite.tipoTramite.glyphicon}}"></span> <strong>CONTROL ({{tramite.control | length }})</strong>
-                
-            <span class="nav nav-pills pull-right hidden-print"> 
-                <span role="presentation"  class="dropdown overflow" >
-                        <a class="dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-transfer"></span> Nuevo Control<span class="caret"></span></a>
-                        <div class="dropdown-menu dropdown-menu-right" style="width: 400px;" aria-labelledby="dropdownMenuLink">
-                        <div class="list-group-item">
-                                {{ render(controller('ExpedienteBundle:Tramite:controlNew', {'id': tramite.id  }))}}
-                        </div>
-                        </div>
-                </span> 
-            </span>
-        
-            </h3>
-            </div>
-            <div class="panel-body">
-                {% set controles = tramite.control %}
-                {% if controles | length > 0 %}
-                <div class="table-responsive">
-                    <table class="table table-hover table-bordered">
-                        <thead>
-                        {{ include('ExpedienteBundle:'~ controles[0].tipoTramite.slug ~':_thead_completo.html.twig') }}  
-                        </thead>
-                        <tbody>
-                            {# filtro los tramites que no tienen expedientes #}
-                            {% for tramite in controles | reverse  %}
-                            {{ include('ExpedienteBundle:'~ controles[0].tipoTramite.slug ~':_tbody_completo.html.twig') }}    
-                            {% endfor %}
-                        </tbody>
-                    </table> 
-                 </div>    
-                {% endif %}
-            </div>
-        </div>
-    {% endif %} <!-- Si  control -->
  {{ render(controller('ExpedienteBundle:Comentario:index',
             { 'tipoid': tramite.id, 'tipo': constant('TIPO_ENTIDAD', tramite) }
         )) }}

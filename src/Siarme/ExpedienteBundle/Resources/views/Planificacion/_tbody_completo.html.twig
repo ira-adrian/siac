@@ -34,6 +34,17 @@
                     {% endif %} 
                     <br>
                     <span>{{ planificacion.pedido.expediente.numeroGde | default("") }}</span>
+                    
+                {% for pedido in planificacion.pedidos %}
+                    -  <a  data-toggle="tooltip" data-placement="top" title='{{pedido.texto | upper }}'  href="{{ path('tramite_show', { 'id':pedido.id }) }}" target="_blank">{{pedido.ccoo | default('NO-'~ year ~ '-n/d')}}</a>  
+                    {% if proceso  %}
+                       <br/>Llamado: {% set  agenda = agenda_ultima(proceso, "llamado") %}{% if agenda.fecha | default(false)%}{{ agenda.fecha | default("now") | date('d-m-Y') }} (Hace {% set hoy = 'now' | date('Y-m-d')  %} {% set diff = date(date(hoy)).diff( agenda.fecha) %} {{diff.days}} días) {% endif %}
+                    {% endif %} 
+                    <br>
+                    <span>{{pedido.expediente.numeroGde | default("") }}</span>
+
+                {% endfor %}
+
          {% else %} 
             - 
         {% endif %}

@@ -2,6 +2,7 @@
 
 namespace Siarme\ExpedienteBundle\Controller;
 
+use DateTime;
 use Siarme\ExpedienteBundle\Entity\Tramite;
 use Siarme\ExpedienteBundle\Entity\TipoTramite;
 use Siarme\ExpedienteBundle\Entity\Tarea;
@@ -106,8 +107,8 @@ class TramiteController extends Controller
      */
     public function probarCurl(){
        
-        $dateTime ="2025-12-08";
-        $dias = 2;
+        $dateTime ="2025-12-12";
+        $dias = 4;
         
         // 1. Obtengo el año de consulta de $datetime.
         $fecha = new \DateTime($dateTime);
@@ -125,8 +126,78 @@ class TramiteController extends Controller
         $contador = 1;
         // Inicializo el array que contendra los feriado con los que coincide el periodo de plazos.
         $msj = "";
+        //Feriados Nacionales
+        $feriadosN = $this->getFeriados($anio);
+        //Feriados Provinciales
+        $em = $this->getDoctrine()->getManager();
+        $feriadosP = $em->getRepository('ExpedienteBundle:Evento')->findByAnio($anio);
+        $esFeridado = false;
+        $esFeridadoP = false;
         while ($contador <= $diasAumentar) {
-         // 2. Compruebo si la  fecha esta en un feriado nacional
+            // 2. Compruebo si la  fecha esta en un Feriado Nacional
+                if ($feriadosN) {
+                    foreach ($feriadosN as $dato) {
+                        $fecha = $dato['fecha'];
+                        $nombre = $dato['nombre'];
+                        $fechaEnSegundos2 = strtotime($fecha);
+                        if ($fechaEnSegundos == $fechaEnSegundos2) {
+                            $msj .= "- $fecha | $nombre <br>";
+                            $fechaEnSegundos += $dia;
+                            $esFeridado = true;
+                        }   
+                    }
+                } 
+                
+            // 3. Compruebo si la  fecha esta en un feriado Provincial
+            if (!$esFeridado) {
+                // Iterar sobre cada objeto Evento en el array
+                $nombre = "";
+                
+                foreach ($feriadosP as $evento) {
+                    // 1. Obtener las fechas de inicio y fin del evento
+                    $fechaInicio = $evento->getFechaInicio(); // O acceder directamente a la propiedad si no tienes getters
+                    $fechaFin = $evento->getFechaFin();       // O acceder directamente a la propiedad
+                    $start = strtotime($fechaInicio->format('Y-m-d'));
+                    $end = strtotime($fechaFin->format('Y-m-d'));
+
+                    // La fecha a verificar debe ser MAYOR O IGUAL que la fecha de inicio
+                    // Y la fecha a verificar debe ser MENOR O IGUAL que la fecha de fin
+                    if ($fechaEnSegundos >= $start && $fechaEnSegundos <= $end) {
+                        $nombre = $evento->getTitulo();
+                        $esFeridadoP = true;
+                      
+                    } 
+                }
+                if ($esFeridadoP) {  
+                        $fecha = Date('Y-m-d',$fechaEnSegundos);
+                        $msj .= "- $fecha | $nombre <br>";
+                        $fechaEnSegundos += $dia;
+                        $esFeridadoP = false;
+                        $esFeridado = true;
+                }
+            }
+
+            // 4. Compruebo si la fecha esta en un Fin de Semana
+            if (!$esFeridado) {
+                $fechaEnSegundos += $dia;
+                if (date('N',$fechaEnSegundos) == 6 or date('N',$fechaEnSegundos) == 7)  {
+                    
+                } else {
+                  
+                    $contador +=1;  
+                }
+            } 
+           $esFeridado = false;
+        }
+
+        return  date('Y-m-d' , $fechaEnSegundos)." " . $msj . "\n";
+
+    }
+
+
+    public function getFeriados($anio = null)
+        {
+                // 2. Compruebo si la  fecha esta en un feriado nacional
                 // 2.1. Inicializar cURL para hacer la solicitud
                 $url = "https://api.argentinadatos.com/v1/feriados/".$anio;
                 $ch = curl_init($url);
@@ -154,35 +225,11 @@ class TramiteController extends Controller
                 if ($datos === null) {
                     $fecha = null;
                 } elseif (is_array($datos) && count($datos) > 0) {
-                    foreach ($datos as $dato) {
-                        $fecha = $dato['fecha'];
-                        $nombre = $dato['nombre'];
-                        $fechaEnSegundos2 = strtotime($fecha);
-                        if ($fechaEnSegundos == $fechaEnSegundos2) {
-                            $msj .= "$fecha | $nombre <br>";
-                            $fechaEnSegundos += $dia;
-                        }   
-                    }
-                    return "✅ ÉXITO: La fecha del primer feriado es: " . $msj . "\n";
+                    return $datos;
                 } else {
-                    $fecha = null;
+                    return false;
                 }
-                
-            // 3. Compruebo si la  fecha esta en un feriado Provincial
-
-            // 4. Compruebo si la fecha esta en un Fin de Semana
-            if (date('N',$fechaEnSegundos) == 6 or date('N',$fechaEnSegundos) == 7) {
-                $fechaEnSegundos += $dia;
-            } else {
-                $fechaEnSegundos += $dia;
-                $contador +=1;  
-            }   
-
         }
-
-
-    
-    }
 
     /**
      * Lists all tramite entities.
@@ -220,6 +267,44 @@ class TramiteController extends Controller
 
         return $this->render('ExpedienteBundle:Tramite:ofertas_index.html.twig', array(
             'ofertas' => $tramites,
+            'tareas' =>  $tareas,
+            'recordatorios' => $recordatorios,
+            'anio'=>$anio,
+        ));
+    }
+
+    /**
+     * Lists all tramite entities.
+     *
+     * @Route("/control/{anio}", name="tramite_control_index")
+     * @Method("GET")
+     */
+    public function controlIndexAction($anio = null)
+    {
+        if (empty($anio)) {
+            $date = new \Datetime();
+            $anio = $date->format("Y");
+        }
+
+        $em = $this->getDoctrine()->getManager();
+        $usuario = $this->getUser();
+
+        //si es false devuelve aquellos que no estan con expedientes
+        $tareas = $em->getRepository('ExpedienteBundle:Tarea')->findByTramiteUsuario($usuario);
+
+        $tramites = $em->getRepository('ExpedienteBundle:Tramite')->findByDepartamentoRm($usuario->getDepartamentoRm(), $anio, "tramite_pedido");
+        // dump($tramites );
+        // exit();
+        //si es false devuelve aquellos que no estan con recordatorios
+        
+        $recordatorios = $em->getRepository('ExpedienteBundle:Recordatorio')->findByTramiteUsuario($usuario);
+
+        //devuelve aquellos EXPEDIENTE que pertenecen a la reparticion del usuario y no poseen TRAMITE
+        //$expedientesPendientes = $em->getRepository('ExpedienteBundle:Expediente')->findByReparticionPendientes($usuario->getDepartamentoRm());
+
+        return $this->render('ExpedienteBundle:Tramite:controles_index.html.twig', array(
+            'tramites' => $tramites,
+            'control'=> true,
             'tareas' =>  $tareas,
             'recordatorios' => $recordatorios,
             'anio'=>$anio,
@@ -788,6 +873,57 @@ class TramiteController extends Controller
         }
         $referer= $request->headers->get('referer');
         return $this->render('ExpedienteBundle:Tramite:modal_new.html.twig', array(
+            'tramite' => $tramite,
+            'form' => $form->createView(),
+            'referer' => $referer,
+        ));
+    }
+
+    /**
+     * Creates a new tramite entity.
+     *
+     * @Route("/{id}/control/new", name="tramite_control_new")
+     * @Method({"GET", "POST"})
+     */
+    public function controlNewAction(Request $request, Tramite $pedido)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $tramite = new Tramite();
+
+        $tramite->setDepartamentoRm( $this->getUser()->getDepartamentoRm());
+        //$tipoTramite = $em->getRepository('ExpedienteBundle:TipoTramite')->find(1);
+        $tipoTramite = $em->getRepository('ExpedienteBundle:TipoTramite')->findOneBySlug("tramite_control");
+        $tramite->setTipoTramite($tipoTramite);
+        $tramite->setPedido($pedido);
+        $tramite->setExpediente($pedido->getExpediente());
+
+        // ASIGNO NUMERO DE TRAMITE INTERNO
+        $tipoDocumento = $em->getRepository('DocumentoBundle:TipoDocumento')->findOneBySlug($tipoTramite->getSlug());
+        $tramite->setNumeroTramite($tipoDocumento->getNumero());
+               
+        $tramite->setEstadoTramite( $tipoDocumento->getEstadoTramite());
+        $tramite->setEstado($tipoDocumento->getEstadoTramite()->getEstado());
+        
+        $form = $this->createForm('Siarme\ExpedienteBundle\Form\Form_'.$tramite->getTipoTramite()->getSlug().'Type', $tramite);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            //VERIFICO NUMERO Y GUARDO
+            $tramite->setNumeroTramite($tipoDocumento->getNumero());
+            $tipoDocumento->setNumero(1);
+            $em->persist($tramite);
+            $em->flush();
+            
+            $msj= 'Has creado el : '.$tramite->getTipoTramite()."-".$tramite->getNumeroTramite();   
+
+            /** Las acciones pueden ser ['MODIFICADO','CREADO','ELIMINADO', 'VISTO' ]*/
+               $this->historial($tramite->getId(),'CREADO', $msj, $tramite::TIPO_ENTIDAD);
+
+            return $this->redirectToRoute('tramite_show', array('id' => $tramite->getId()));
+        }
+        $referer= $request->headers->get('referer');
+        return $this->render('ExpedienteBundle:tramite_control:modal_new.html.twig', array(
             'tramite' => $tramite,
             'form' => $form->createView(),
             'referer' => $referer,

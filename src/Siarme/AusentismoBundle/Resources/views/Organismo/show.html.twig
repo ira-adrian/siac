@@ -89,7 +89,7 @@
     <div class="panel-heading">
       <h4 class="panel-title text-info">
         <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href='#collapsePago'>
-          <span class="glyphicon glyphicon-minus"></span> <span class="glyphicon glyphicon-list"></span> PAGO ({{ pago | length }})
+          <span class="glyphicon glyphicon-plus text-info"></span> <span class="{{pago[0].tipoTramite.glyphicon}}"></span> PAGO ({{ pago | length }})
         </a>
       </h4>
     </div>
@@ -177,7 +177,7 @@
     <div class="panel-heading">
       <h4 class="panel-title text-info">
         <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href='#collapsePedido'>
-          <span class="glyphicon glyphicon-minus"></span> <span class="glyphicon glyphicon-list"></span> PEDIDOS ({{ pedidos | length }})
+          <span class="glyphicon glyphicon-plus text-info"></span> <span class="{{pedidos[0].tipoTramite.glyphicon}}"></span> PEDIDOS ({{ pedidos | length }})
         </a>
       </h4>
     </div>
@@ -194,13 +194,31 @@
     <div class="panel-heading">
       <h4 class="panel-title text-info">
         <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href='#collapseSolicitud'>
-          <span class="glyphicon glyphicon-plus "></span> <span class="glyphicon glyphicon-list"></span> PEDIDOS DE ACUERDO MARCO ({{ pedidos | length }})
+          <span class="glyphicon glyphicon-plus text-info"></span> <span class="{{pedidos[0].tipoTramite.glyphicon}}"></span> PEDIDOS DE ACUERDO MARCO ({{ pedidos | length }})
         </a>
       </h4>
     </div>
     <div id="collapseSolicitud" class="panel-collapse collapse">
       <div  class="panel-body ">    
         {{ include('ExpedienteBundle:Tramite:_lista_simple.html.twig') }} 
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% set planificaciones = organismo | tramite_por_organismo_slug("tramite_planifica" , anio ) %}
+{% if planificaciones | length > 0  %} 
+  <div class="panel panel-warning">
+    <div class="panel-heading">
+      <h4 class="panel-title text-info">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href='#collapseSolicitud'>
+          <span class="glyphicon glyphicon-plus text-info"></span> <span class="{{planificaciones[0].tipoTramite.glyphicon}}"></span> PLANIFICACION ({{ planificaciones | length }})
+        </a>
+      </h4>
+    </div>
+    <div id="collapseSolicitud" class="panel-collapse collapse">
+      <div  class="panel-body ">    
+       {{ include('ExpedienteBundle:Tramite:_lista_simple.html.twig', {'pedidos': planificaciones}) }} 
       </div>
     </div>
   </div>

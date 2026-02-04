@@ -19,7 +19,7 @@ class EventoController extends Controller
     /**
      * Lists all evento entities.
      *
-     * @Route("/{anio}", name="evento_index")
+     * @Route("/{anio}", name="evento_index", requirements={"anio"="\d+"})
      * @Method("GET")
      */
     public function indexAction($anio = null)

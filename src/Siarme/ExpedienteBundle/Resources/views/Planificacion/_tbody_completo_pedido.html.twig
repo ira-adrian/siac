@@ -15,14 +15,19 @@
                                         </span>
                     {% endif %}
                 </td>
-                <td> <a  href="{{ path('planificacion_quitar', { 'id':planificacion.id }) }}"><span class="glyphicon glyphicon-remove text-danger"></span></a></td>
+                <td> <a  href="{{ path('planificacion_quitar', { 'id':planificacion.id, 'id_pedido':tramite.id }) }}"><span class="glyphicon glyphicon-remove text-danger"></span></a></td>
         {% else %}
                 <td> 
                         {% if not planificacion.pedido %} 
-                                <a  href="{{ path('planificacion_seleccionar', { 'id':planificacion.id, 'id2': tramite.id }) }}">Seleccionar</a> 
+                                
                         {% else %}
-                               <a  data-toggle="tooltip" data-placement="top" title='{{ planificacion.pedido.texto | upper }}'  href="{{ path('tramite_show', { 'id': planificacion.pedido.id }) }}" target="_blank">{{ planificacion.pedido.numeroTramite}} - {{ planificacion.pedido.ccoo | default('NO-'~ year ~ '-n/d')}}</a>
+                                - <a  data-toggle="tooltip" data-placement="top" title='{{ planificacion.pedido.texto | upper }}'  href="{{ path('tramite_show', { 'id': planificacion.pedido.id }) }}" target="_blank">{{ planificacion.pedido.numeroTramite}} - {{ planificacion.pedido.ccoo | default('NO-'~ year ~ '-n/d')}}</a><br>
                         {% endif %}
+                        {% for pedido in planificacion.pedidos %}
+                                - <a  data-toggle="tooltip" data-placement="top" title='{{ pedido.texto | upper }}'  href="{{ path('tramite_show', { 'id': pedido.id }) }}" target="_blank">{{ pedido.numeroTramite}} - {{ pedido.ccoo | default('NO-'~ year ~ '-n/d')}}</a><br>
+
+                        {% endfor %}
+                        <a  href="{{ path('planificacion_seleccionar', { 'id':planificacion.id, 'id2': tramite.id }) }}">Seleccionar</a> 
                 </td>
         {% endif %}
 </tr> 

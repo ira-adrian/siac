@@ -1,0 +1,27 @@
+{#  Siarme\ExpedienteBundle\Resources\views\Tramite\_registro.html.twig#}
+
+<tr>
+{% if tramites is defined or  tareas is defined or realizadas is defined %}
+    <th>Info</th>
+    <th class="hidden">ID</th>
+{% endif %}
+    <th>N°</th>
+    <th>Nota SAF</th>
+    {% if  tramites is defined and tramite.estadoTramite.slug in ["rectificacion", "devuelto"] and notaRectifica %}
+        <th>Nota DPPR</th>
+    {% endif %}
+    <th>Fecha</th>
+    <th>SAF</th>
+    <th>Objeto</th>
+{% if organismo is defined %}<th>Cantidades</th>{% endif %}
+    <th>Credito</th>
+    <th>Presupuesto</th>
+    <th>Estado</th>
+{% if tramites is defined or mis_tramites is defined or realizadas is defined %}
+    <th><span class="glyphicon glyphicon-folder-open text-muted"></span> CCOO DPPR</th>
+    <th>Responsable</th>
+{% endif %} 
+{% if organismo is not defined %}
+    <th></th>
+{% endif %}
+</tr>

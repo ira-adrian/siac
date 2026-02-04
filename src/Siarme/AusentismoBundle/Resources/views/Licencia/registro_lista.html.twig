@@ -28,13 +28,13 @@
                             {% if   licencia.documento.slug != "licencia"  %}  
                                   {{licencia.documento}}
                             {% else %} 
-                                    {{licencia.articulo.codigoArticulo | default("N/D")  }} - {{ licencia.articulo |  default("N/D") }}
+                                   {{ licencia.articulo |  default("N/D") }}
                             {% endif %}    
                             </a>
                   {% else %} 
                                 <span class='{{licencia.documento.tipodocumento.glyphicon}}'> 
                                 </span> 
-                                   {{licencia.articulo.codigoArticulo | default("N/D")  }} -  {{ licencia.articulo |  default("N/D") }}
+                                   {{ licencia.articulo |  default("N/D") }}
                    {% endif %} 
             {% else %}
 

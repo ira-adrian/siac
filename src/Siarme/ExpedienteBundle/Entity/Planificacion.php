@@ -71,6 +71,21 @@ class Planificacion
      */
     private $pedido;
 
+    /** 
+     * 
+     * @ORM\ManyToMany(targetEntity="Siarme\ExpedienteBundle\Entity\Tramite", inversedBy="planificaciones", cascade={"persist"}) 
+     * 
+     */
+    private $pedidos;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->pedidos = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
     /**
      * Get id.
      *
@@ -269,5 +284,42 @@ class Planificacion
     public function getPedido()
     {
         return $this->pedido;
+    }
+
+    /**
+     * Add pedidos
+     *
+     * @param \Siarme\ExpedienteBundle\Entity\Tramite $pedidos
+     *
+     * @return Usuario
+     */
+    public function addPedidos(\Siarme\ExpedienteBundle\Entity\Tramite $pedidos)
+    {
+
+        if (!$this->pedidos->contains($pedidos)){
+            $this->pedidos[] = $pedidos;
+        }
+        return $this;
+    }
+
+    /**
+     * Remove pedidos
+     *
+     * @param \Siarme\ExpedienteBundle\Entity\Tramite $pedidos
+     */
+    public function removePedidos(\Siarme\ExpedienteBundle\Entity\Tramite $pedidos)
+    {
+        $this->pedidos->removeElement($pedidos);
+       // $pedidos->removeUsuarios($this);
+    }
+
+    /**
+     * Get pedidos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPedidos()
+    {
+        return $this->pedidos;
     }
 }
