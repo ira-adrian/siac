@@ -15,7 +15,7 @@ class EventoRepository extends \Doctrine\ORM\EntityRepository
      * 
      * 
      */
-  public function findByAnio($anio = null)
+   public function findByAnio($anio = null)
   {
         if (empty($anio)) {
             $date = new \Datetime();

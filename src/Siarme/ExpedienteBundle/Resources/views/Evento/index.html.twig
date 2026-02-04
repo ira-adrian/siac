@@ -8,8 +8,10 @@
 {% block contenido %}
 
  <div class="container">
+     <h1 class="text-center">Calendario {{anio}}</h1>
       <ol class="breadcrumb"  style="margin-bottom:1px;"> 
-        {% for year in ( ('now' | date("Y") - 3) .. ('now' | date("Y"))) %} 
+
+        {% for year in ( ('now' | date("Y") - 3) .. ('now' | date("Y") + 1)) %} 
             {% if year != anio %}
               <li><a href="{{ path('evento_index', { 'anio': year }) }}"> <span class="glyphicon glyphicon-calendar"></span>{{year}}</a></li>
             {% else %}
@@ -19,7 +21,6 @@
             {% endif %}
         {% endfor %}
       </ol>
-    <h1 class="text-center">Calendario {{anio}}</h1>
         <div id="calendar"></div>
 
     <h1 class="text-center">Feriados y Asuetos Provinciales</h1>
@@ -100,8 +101,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // 3. Usa Promise.all para esperar a que ambas peticiones terminen
     Promise.all([feriadosPromise, eventosAppPromise])
         .then(([feriados, eventosApp]) => {
-            // Combinar los dos arrays de eventos en uno solo
-            const eventosCombinados = feriados.concat(eventosApp);
+            // Combinar los dos arrays de eventos en uno solo Y  pintar de gris los sábados y domingos
+            const eventosCombinados = feriados.concat(eventosApp).concat({
+                          daysOfWeek: [0, 6], // 0 para domingo, 6 para sábado
+                          display: 'background', // En v4 usar rendering: 'background'
+                          color: '#d3d3d3', // Código de color gris
+                          overlap: true
+                        });
 
             // Inicializar y renderizar FullCalendar
             var calendarEl = document.getElementById('calendar');
@@ -117,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 locale: 'es',
                 // Usar el array combinado de eventos
                 events: eventosCombinados,
-
+                        
                 // Opcional: Renderizar la descripción en el calendario
                 eventContent: function(arg) {
                     let description = arg.event.extendedProps.description || '';

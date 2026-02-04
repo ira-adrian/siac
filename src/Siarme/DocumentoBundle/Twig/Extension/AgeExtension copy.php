@@ -61,7 +61,7 @@ class AgeExtension extends Twig_Extension
         $diasAumentar = $dias + 1;
         $dia = 86400;
         //Establezco la zon horaria 
-        //date_default_timezone_set('America/Argentina/Buenos_Aires');
+        date_default_timezone_set('America/Argentina/Buenos_Aires');
 
         $contador = 1;
         // Inicializo el array que contendra los feriado con los que coincide el periodo de plazos.
@@ -72,73 +72,79 @@ class AgeExtension extends Twig_Extension
         //Feriados Provinciales
         $feriadosP = $this->em->getRepository('ExpedienteBundle:Evento')->findByAnio($anio);
 
+        $esFeridado = false;
+        $esFeridadoP = false;
         $eventoAnterior = null;
         while ($contador <= $diasAumentar) {
-            $c = 0;
             // 2. Compruebo si la  fecha esta en un Feriado Nacional
             if ($feriadosN) {
-                foreach ($feriadosN as $dato) {
-                        $fecha =  $dato['fecha'];
-                        $nombre = $dato['nombre'];
-                        $fechaEnSegundos2 = strtotime($fecha);
-                        $fecha = date('d-m-Y', $fechaEnSegundos2);
-                        if ($fechaEnSegundos == $fechaEnSegundos2) {
-                            $msj .= "$fecha: $nombre <br>";
-                            $fechaEnSegundos += $dia;
-                            $c= 1;
-                        }   
+                $feridado =  $this->getesFeriadoNacional($feriadosN, $fechaEnSegundos);
+                if ($feridado['esFeriado']){
+                        $fecha = $feridado['dato']['fecha'];
+                        $nombre = $feridado['dato']['nombre'];
+                        $msj .= "- $fecha | $nombre <br>";
+                        $fechaEnSegundos += $dia;
+                        $esFeridado = true;
                 }
             } 
+                
             // 3. Compruebo si la  fecha esta en un feriado Provincial
-            // Iterar sobre cada objeto Evento en el array
-            $nombre = "";
-            foreach ($feriadosP as $evento) {
-                // 1. Obtener las fechas de inicio y fin del evento
-                $fechaInicio = $evento->getFechaInicio(); // O acceder directamente a la propiedad si no tienes getters
-                $fechaFin = $evento->getFechaFin();       // O acceder directamente a la propiedad
-                $start = strtotime($fechaInicio->format('Y-m-d'));
-                $end = strtotime($fechaFin->format('Y-m-d'));
+            if (!$esFeridado) {
+                // Iterar sobre cada objeto Evento en el array
+                $nombre = "";
+                $eventoP = null;
+                foreach ($feriadosP as $evento) {
+                    // 1. Obtener las fechas de inicio y fin del evento
+                    $fechaInicio = $evento->getFechaInicio(); // O acceder directamente a la propiedad si no tienes getters
+                    $fechaFin = $evento->getFechaFin();       // O acceder directamente a la propiedad
+                    $start = strtotime($fechaInicio->format('Y-m-d'));
+                    $end = strtotime($fechaFin->format('Y-m-d'));
 
-                // La fecha a verificar debe ser MAYOR O IGUAL que la fecha de inicio
-                // Y la fecha a verificar debe ser MENOR O IGUAL que la fecha de fin
-                if ($fechaEnSegundos >= $start && $fechaEnSegundos <= $end) {
-                    $c = 1;
-                    $nombre = $evento->getTitulo();
-                    $fechaInicio = $evento->getFechaInicio()->format('d-m-Y');
-                    $fechaFin = $evento->getFechaFin()->format('d-m-Y'); 
-                    if ($eventoAnterior == null) {  
-                        $msj .= "$fechaInicio - $fechaFin: $nombre <br>";
-                        $fechaEnSegundos += $dia;
-                        $eventoAnterior = $evento;
-                    } elseif ( $eventoAnterior->getId() == $evento->getId() ) {
-                            $fechaEnSegundos += $dia;
-                    } elseif ( $eventoAnterior->getId() != $evento->getId() ) {
-                        $msj .= "$fechaInicio - $fechaFin: $nombre <br>";
-                        $fechaEnSegundos += $dia;
-                        $eventoAnterior = $evento;
+                    // La fecha a verificar debe ser MAYOR O IGUAL que la fecha de inicio
+                    // Y la fecha a verificar debe ser MENOR O IGUAL que la fecha de fin
+                    if ($fechaEnSegundos >= $start && $fechaEnSegundos <= $end) {
+                        $nombre = $evento->getTitulo();
+                        $esFeridadoP = true;
+                        $eventoP = $evento;
                     } 
-                } 
+                }
+                if ($esFeridadoP) {  
+                    if ($eventoAnterior == null) {
+                        $fechaInicio = $eventoP->getFechaInicio()->format('Y-m-d');
+                        $fechaFin = $eventoP->getFechaFin()->format('Y-m-d');   
+                        $msj .= "- $fechaInicio - $fechaFin: $nombre <br>";
+                        $fechaEnSegundos += $dia;
+                        $esFeridadoP = false;
+                        $esFeridado = true;
+                        $eventoAnterior = $eventoP;
+                    } elseif ( $eventoAnterior->getId() != $eventoP->getId() ) {
+                        $fechaInicio = $eventoP->getFechaInicio()->format('Y-m-d');
+                        $fechaFin = $eventoP->getFechaFin()->format('Y-m-d'); 
+                        $msj .= "- $fechaInicio - $fechaFin: $nombre <br>";
+                        $fechaEnSegundos += $dia;
+                        $esFeridadoP = false;
+                        $esFeridado = true;
+                        $eventoAnterior = $eventoP;
+                    } else {
+                        $fechaEnSegundos += $dia;
+                        $esFeridadoP = false;
+                        $esFeridado = true;
+                    }
+                }
             }
 
             // 4. Compruebo si la fecha esta en un Fin de Semana
-            if (date('N',$fechaEnSegundos) == 6)  {
-                $fecha = Date('d-m-Y',$fechaEnSegundos);
-                $msj .= "$fecha: Sabado <br>";
+            if (!$esFeridado) {
                 $fechaEnSegundos += $dia;
-
-            } 
-            if (date('N',$fechaEnSegundos) == 7) {
-                    $fecha = Date('d-m-Y',$fechaEnSegundos);
-                    $msj .= "$fecha: Domingo <br>";
-                    $fechaEnSegundos += $dia;
-                    $c = 1;
-            }
-            //5. Compruebo que la fecha se controlo en 2. 3. y 4.
-            if ($c == 0) {
-                    $fechaEnSegundos += $dia;
+                if (date('N',$fechaEnSegundos) == 6 or date('N',$fechaEnSegundos) == 7)  {
+                    $fecha = Date('Y-m-d',$fechaEnSegundos);
+                    $msj .= "- $fecha: Fin de Semana <br>";
+                } else {
                     $contador +=1;  
+                }
             } 
-            // 6. Verifico que la fecha sea del mismo año.
+           $esFeridado = false;
+
             if ($anio != Date('Y',$fechaEnSegundos)) {
                 //Feriados Nacionales
                 $feriadosN = $this->getFeriados($anio);
@@ -150,7 +156,25 @@ class AgeExtension extends Twig_Extension
        return  ["fecha" => date('Y-m-d' , $fechaEnSegundos -= $dia),"msj"=>$msj ];
     }
 
-      public function getFeriados($anio = null)
+    // Verifica si una fecha en segundos es Feriado
+    public function getesFeriadoNacional($feriadosN, $fechaEnSegundos) {
+            $esFeridado = false;
+            $feriado = null;
+            if (($feriadosN)&&($fechaEnSegundos)) {
+                foreach ($feriadosN as $dato) {
+                    $fecha = $dato['fecha'];
+                    $fechaEnSegundos2 = strtotime($fecha);
+                    if ($fechaEnSegundos == $fechaEnSegundos2) {
+                        $esFeridado = true;
+                        $feriado = $dato;
+                    }   
+                }        
+            } 
+
+            return ['esFeriado'=>$esFeridado, 'dato'=>$feriado];
+    }
+
+    public function getFeriados($anio = null)
         {
                 // 2. Compruebo si la  fecha esta en un feriado nacional
                 // 2.1. Inicializar cURL para hacer la solicitud
@@ -184,7 +208,7 @@ class AgeExtension extends Twig_Extension
                 } else {
                     return false;
                 }
-    }
+             }
     /**
      * @return string
      */
