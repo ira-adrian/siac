@@ -71,6 +71,11 @@
                     {% set proceso = tramite.proceso.tipoTramite~" N° "~tramite.proceso.numeroTramite %}
                     <li><a href="{{ path('tramite_show', { 'id': tramite.proceso.id  }) }}"><span  class='{{ tramite.proceso.tipoTramite.glyphicon}}'></span>{{tramite.proceso.numeroComprar | default(proceso) }}</a></li> 
                   {% endif %} 
+                  {# Breadcrumbs para CONTROl-PEDIDO #}
+                  {% if tramite.pedido.id is defined and tramite.pedido.id is not empty %}
+                    {% set pedido = tramite.pedido.tipoTramite~" N° "~tramite.pedido.numeroTramite %}
+                    <li><a href="{{ path('tramite_show', { 'id': tramite.pedido.id  }) }}"><span  class='{{ tramite.pedido.tipoTramite.glyphicon}}'></span>{{ pedido }}</a></li> 
+                  {% endif %} 
                   {% if   tramite.tipoTramite.slug == "tramite_proceso" %}
                       {% set proceso = tramite.tipoTramite~" N° "~tramite.numeroTramite %}
                       <li class="active"><span  class='{{ tramite.tipoTramite.glyphicon}}'></span>{{tramite.numeroComprar | default(proceso) }}</li>

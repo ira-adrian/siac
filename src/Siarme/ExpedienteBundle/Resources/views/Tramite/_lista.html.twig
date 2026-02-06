@@ -33,10 +33,6 @@
 
         {% for tramite1 in controles | sort((a, b) => a.estadoTramite <=> b.estadoTramite)  %}
             {% set todos = todos | merge([tramite1]) %}
-            {% if tramite1.expediente.id is not defined and (tramite1.estadoTramite.slug not in ["devuelto", "baja"])  %}
-                {% set nuevos = nuevos | merge([tramite1]) %}
-            {% endif %}
-
            {% if loop.first %}
               {% set tramiteAnterior, estadoAnterior, tramitesPorEstado = tramite1, tramite1.estadoTramite, tramitesPorEstado | merge([tramite1]) %}
            {% else %}
@@ -79,7 +75,7 @@
                     {% set estados = estados | merge([{estadoAnterior, tramitesPorEstado}]) %}
                 {% set estadosConTramites = estadosConTramites | merge({ (estadoAnterior.estadoTramite) : tramitesPorEstado} ) %}
     {% endif %}
-
+ 
   <!-- Nav tabs -->
   <ul class="nav nav-tabs nav-justified hidden-print tab-tipoTramite" role="tablist">
      <li role="presentation"  class="tab-todos" ><a href="#todos" aria-controls="todos" role="tab" data-toggle="tab"> Total ({{todos| length}})</a></li>

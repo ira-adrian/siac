@@ -880,7 +880,7 @@ class TramiteController extends Controller
     }
 
     /**
-     * Creates a new tramite entity.
+     * Creates a new tramite control.
      *
      * @Route("/{id}/control/new", name="tramite_control_new")
      * @Method({"GET", "POST"})
@@ -897,6 +897,16 @@ class TramiteController extends Controller
         $tramite->setPedido($pedido);
         $tramite->setExpediente($pedido->getExpediente());
 
+        if  (count($pedido->getControl())==0) {
+            $tramite->setCcoo("* ".$pedido->getCcoo());
+            $tramite->setFechaDestino($pedido->getFechaDestino());
+        }
+        $tramite->setPresupuestoOficial($pedido->getPresupuestoOficial());
+        $tramite->setTrimestre($pedido->getTrimestre());
+        $tramite->setMoneda($pedido->getMoneda());
+        $tramite->setOrganismoOrigen($pedido->getOrganismoOrigen());
+        $tramite->setRubro($pedido->getRubro());
+        $tramite->setTexto($pedido->getTexto());
         // ASIGNO NUMERO DE TRAMITE INTERNO
         $tipoDocumento = $em->getRepository('DocumentoBundle:TipoDocumento')->findOneBySlug($tipoTramite->getSlug());
         $tramite->setNumeroTramite($tipoDocumento->getNumero());
@@ -912,6 +922,7 @@ class TramiteController extends Controller
             //VERIFICO NUMERO Y GUARDO
             $tramite->setNumeroTramite($tipoDocumento->getNumero());
             $tipoDocumento->setNumero(1);
+
             $em->persist($tramite);
             $em->flush();
             

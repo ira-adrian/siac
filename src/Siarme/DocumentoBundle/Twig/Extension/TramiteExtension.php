@@ -419,6 +419,7 @@ class TramiteExtension  extends \Twig_Extension
             /**------------------------------TRAMITE DEL USUARIO---------------------------------*/
             new \Twig_SimpleFunction('tramite_usuario', array($this, 'reporteTramiteUsuario')),
             new \Twig_SimpleFunction('rubro_planificado_trimestre', [$this, 'rubroPlanificadoTrimestre']),
+            new \Twig_SimpleFunction('pedidosPorOrganismoyRubro', array($this, 'reportePedidoPorOrganismoyRubro')),
         );
     }
 
@@ -1002,5 +1003,34 @@ class TramiteExtension  extends \Twig_Extension
               ->setParameter('slug', $slug);
 
         return $query->getResult();     
+    }
+
+    /**
+     * Devuelve los ultimos 3 pedidos a partir de un pedido
+     * @param int       $reparticion_id
+     * @param int       $rubro
+     *
+     * @return string
+     */
+    public function reportePedidoPorOrganismoyRubro($reparticion, $rubro, $pedido)
+    {
+  
+        $dql = 'SELECT t 
+                FROM ExpedienteBundle:Tramite t 
+                JOIN t.tipoTramite tt
+                WHERE t.organismoOrigen = :org
+                AND t.rubro = :rubro
+                AND t.id < :id
+                AND tt.slug = :slug
+                ORDER BY t.id DESC';
+     
+        $query = $this->em->createQuery($dql);
+        $query->setParameter('slug', "tramite_pedido")
+              ->setParameter('id', $pedido->getid())
+              ->setParameter('rubro', $rubro)
+              ->setParameter('org', $reparticion)
+              ;
+        $query->setMaxResults(3);
+        return $query->getResult(); 
     }
 }

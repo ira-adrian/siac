@@ -32,25 +32,25 @@ class Form_tramite_controlType extends AbstractType
           //$builder->add('texto', null, array('label' => 'Objeto: '));
         }
         $builder->add('fechaDestino', DateType::class, ['widget' => 'single_text', 'label'=> 'Fecha','attr' => array('class' => 'form-control')])
-        ->add('trimestre',ChoiceType::class, array(
+       /**  ->add('trimestre',ChoiceType::class, array(
                     'attr' => array('class' => 'form-control'),
                     'choices' => array( '1° Trimestre'=>1, '2° Trimestre'=>2, '3° Trimestre'=>3,'4° Trimestre'=>4),
-                       'label'  => 'Trimestre' ))
+                       'label'  => 'Trimestre' )) */
         //->add('estado')
         // ->add('estadoTramite')
         //->add('price', MoneyType::class, [  'divisor' => 100,]);
         //->add('PresupuestoOficial', NumberType::class, [ 'label' => 'Presupuesto: ' ])
         ->add('PresupuestoOficial', MoneyType::class, array('currency' => 'ARS','label'=> 'Presupuesto Oficial', 'attr' => array('class' => 'currency','type' => 'number','placeholder' => '1002003,17','autocomplete' => 'off')))
-        ->add('moneda',ChoiceType::class, array(
+       /**  ->add('moneda',ChoiceType::class, array(
                             'attr' => array('class' => 'form-control'),
                             'choices' => array( 'PESOS'=>"PESOS", 'DOLARES'=>"DOLARES", 'EUROS'=>"EUROS"),
                             'preferred_choices' => array('PESOS'),
                             ))
         ->add('organismoOrigen', null, array('label' => 'SAF Solicitante: ','attr' => array('required' => 'required', 'class' => 'form-control')))
-        ->add('rubro', null, array('label' => 'Rubro: ', 'attr' => array('required' => 'required', 'class' => 'form-control')));
+        ->add('rubro', null, array('label' => 'Rubro: ', 'attr' => array('required' => 'required', 'class' => 'form-control')))*/;
         //->add('numeroNota', null, array('label' => '* N° Nota de Pedido: '))
         if (!empty($options['data']->getRubro())) {
-        $builder->add('texto', null, array('label' => 'Objeto: '));
+       // $builder->add('texto', null, array('label' => 'Objeto: '));
         }
         
         //->add('texto', TextareaType::class, array('label'=>'Observaciones : ', 'required' => false,'attr' => array('class' => 'form-control')))

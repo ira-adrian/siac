@@ -8,21 +8,15 @@
 {% block contenido %}
   <div id="copy" class="row" style="padding:5px;">
         {% if app.user.departamentoRm.slug != "dppr" %} {% set modulo ="EXPEDIENTES" %}{% else %}{% set modulo ="CCOO-DPPR" %}{% endif %}
-        {% set modulo2 = "TAREAS" %}  
-        {% for tipoTramite in app.user.departamentoRm.tipoTramite %}
-            {% if loop.first %}
-            {% set modulo2 = tipoTramite %}
-            {% endif %}
-        {% endfor %}
-
+        {% set modulo2 = "CONTROL" %}  
         {{ app.session.set('modulo', modulo2) }}
-        {{ app.session.set('glyphicon', 'glyphicon glyphicon-tasks') }}
-        {{ app.session.set('route', 'tramite_reparticion_index') }}    
+        {{ app.session.set('glyphicon', 'glyphicon glyphicon-transfer') }}
+        {{ app.session.set('route', 'tramite_control_index') }}    
 
      <div class="nav nav-tabs nav-justified hidden-print" style="padding-top:5px;">      
         <li role="presentation" ><a href="{{ path('expediente_reparticion_index') }}"> <span class="glyphicon glyphicon-folder-open"></span> {{modulo}}</a></li>
-        <li role="presentation"><a href="{{ path('tramite_reparticion_index') }}"> <span class="glyphicon glyphicon-tasks"></span>{{modulo2}}</a></li>
-        <li role="presentation" class="active"><a href="{{ path('tramite_control_index') }}"> <span class="glyphicon glyphicon-pushpin"></span> CONTROL</a></li>
+        <li role="presentation"><a href="{{ path('tramite_reparticion_index') }}"> <span class="glyphicon glyphicon-tasks"></span>PEDIDO</a></li>
+        <li role="presentation" class="active"><a href="{{ path('tramite_control_index') }}"> <span class="glyphicon glyphicon-transfer"></span> CONTROL</a></li>
         <li role="presentation"><a style="color:#306066;" href="{{ path('general_reparticion_index', {'id': app.user.departamentoRm.id }) }}"><span class="glyphicon glyphicon-folder-open"></span> ACUERDO MARCO</a></li>
         <li role="presentation"><a  href="{{ path('reporte_index', {'id': app.user.departamentoRm.id }) }}"> <span class="glyphicon glyphicon-stats"></span> REPORTE</a></li>
         <li role="presentation"><a href="{{ path('organismo_index', {'id': app.user.departamentoRm.id }) }}"><span class="glyphicon glyphicon-tent" ></span> SAFS</a></li>
@@ -31,7 +25,7 @@
         {% endif %}
         <li role="presentation"><a  href="{{ path('usuario_index', {'id': app.user.departamentoRm.id }) }}"> <span class="glyphicon glyphicon-user"></span> USUARIOS</a></li>
       </div>
-
+ 
       <ol class="breadcrumb"  style="margin-bottom:1px;"> 
         {% for year in ( ('now' | date("Y") - 3) .. ('now' | date("Y"))) %} 
             {% if year != anio %}
