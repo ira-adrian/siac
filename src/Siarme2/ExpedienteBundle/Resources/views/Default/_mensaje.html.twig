@@ -1,0 +1,43 @@
+   {# Siarme\ExpedienteBundle\Resources\views\Default\_mensaje.html.twig #}
+  <div class="row">
+
+    {% for flashMessage in app.session.flashbag.get('mensaje-warning') %}
+        <div class="alert alert-dismissible alert-warning">
+          <button type="button" class="close" data-dismiss="alert">&times; </button>
+
+            <div class="flash-notice text-center">
+                {{ flashMessage | raw }}
+            </div>
+        </div>
+    {% endfor %}
+
+    {% for flashMessage in app.session.flashbag.get('mensaje-success') %}
+        <div class="alert alert-dismissible alert-success ">
+          <button type="button" class="close" data-dismiss="alert">&times; </button>
+
+            <div class="flash-notice text-center">
+               {{ flashMessage | raw }}
+            </div>
+        </div>
+    {% endfor %}
+
+    {% for flashMessage in app.session.flashbag.get('mensaje-info') %}
+        <div class="alert alert-dismissible alert-info">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <div class="flash-notice text-center">
+                {{ flashMessage | raw }}
+            </div>
+        </div>
+     {% endfor %}
+     
+    {% for flashMessage in app.session.flashbag.get('mensaje-danger') %}
+        <div class="alert alert-dismissible alert-danger ">
+          <button type="button" class="close" data-dismiss="alert">&times; </button>
+
+            <div class="flash-notice text-center">
+               {{ flashMessage | raw }}
+            </div>
+        </div>
+    {% endfor %}
+    
+</div>

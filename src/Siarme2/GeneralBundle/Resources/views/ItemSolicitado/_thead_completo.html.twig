@@ -1,0 +1,18 @@
+   {# C:\xampp\htdocs\siac\src\Siarme\AusentismoBundle\Resources\views\itemSolicitado\_thead_completo.html.twig#}
+    <tr>
+        <th>Info</th>
+        <th>N°</th>
+        <th>Codigo</th>
+        <th>Item</th>
+        <th>Unidad</th>
+        {% if  not tramite.estado %}
+            <th>Cantidad <span class="label label-warning">Pedida</span></th>        
+            <th>Cantidad Autorizada</th>
+            <th>Cantidad <span class="label label-default">Disponible</span></th>
+        {% else %}
+            <th>Cantidad Pedida</th>  
+            <th>Cantidad Autorizada</th>
+            <th>Cantidad Disponible</th>
+        {% endif %}
+        <th>Acc.</th>
+    </tr>

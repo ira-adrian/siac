@@ -1,0 +1,15 @@
+    <p style="text-align:center"> 
+        <br>
+        <strong> 
+        {{ documento.nombreDocumento | upper }} 
+        </strong>
+    </p> 
+<p style="margin-left:1cm; margin-right:0cm; text-align:left">
+       <strong>  <small>
+Referencia: {{documento.tramite.expediente | upper}}
+         <br>
+Iniciador: {{documento.tramite.expediente.agente | upper}} 
+        </small></strong>
+</p>
+<p style="margin-left:0cm; margin-right:0cm; text-align:justify; font-family:&quot;Arial&quot;"><span style="font-size:16px">&emsp;&emsp;&emsp; Visto lo solicitado en las actuaciones de referencia rectificar/ratificar los dictaminado en Acta de Junta Medica N°: {{acta.numero | default("N/D")}} - {{acta.anio | default('now' | date('Y') )}} de fecha: {{acta.fechaDocumento|  default( 'now' | date('d-m-Y') )  | date('d-m-Y') }}. Esta Junta Medica considera rectificar/ratificar lo dictaminado informando que:<strong>&emsp; <br>
+&emsp;&emsp;&emsp;</strong></span></p>

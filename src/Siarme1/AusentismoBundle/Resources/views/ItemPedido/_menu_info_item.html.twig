@@ -1,0 +1,319 @@
+{#{% if expediente is defined %}
+<span data-toggle="tooltip" data-placement="top" title='PEDIDO {{ itemPedido.tramite.numeroTramite }} | SAF {{ itemPedido.tramite.organismoOrigen.saf.numeroSaf }}'>
+    {% if itemPedido.tramite.tipoTramite.slug == 'tramite_pedido' %} 
+        <a  href="{{ path('tramite_show', { 'id': itemPedido.tramite.id }) }}"><span>{{ itemPedido.tramite.organismoOrigen.codigoGde}}</span>
+        </a>
+    {% endif %}
+</span>
+{% endif %}
+#}
+{% if expediente is defined %}
+
+        {% set itemsC0 = itemPedido | item_consolida %}
+        {% set itemsC1 = itemPedido | item_consolida(true) %}
+
+    {% if itemsC0 | length > 1 %}
+           {% if itemsC1 | length > 1  %}
+                {% set color, title = "text-success", 'CONSOLIDADOS' %}
+                {% set itemsC = itemsC1 %}
+           {% else %}
+             {% set color, title ="text-muted", 'Sin Consolidar' %}
+             {% set itemsC = itemsC0 %}
+           {% endif %}
+             <span data-toggle="tooltip" data-placement="top" title="{{title}}">
+                <a aria-hidden="true" class="dropdown-toggle overflow  glyphicon glyphicon-compressed {{color}}" data-toggle="dropdown" role="button" aria-expanded="false">{{itemsC | length}}</a>
+                <div  class="dropdown-menu" style="width: 500px;">  
+                     <ul class="list-group">                   
+                            <table id="#" class="table table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th>Pedido</th>
+                                        <th>Fecha</th>
+                                        <th>Cantidad</th>
+                                        <th>P. U.</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in itemsC  %}
+                                        <tr {% if  item.id == itemPedido.id %} style="background-color:rgba(192,192,192,0.3);"  class="text-muted" {% endif %}>
+                                            <td><a  href="{{ path('tramite_show', { 'id': item.tramite.id }) }}" target="_blank">{{ item.tramite.tipoTramite}} {{ item.tramite.numeroTramite }}</a>
+                                            </td>
+                                            <td><a href="{{ path('itempedido_show', { 'id': item.id }) }}" target="_blank"><strong> {{ item.numero }} - {{item.tramite.organismoOrigen.codigoGde}} </strong></a></td>
+                                            <td>{{item.cantidad}}</td>
+                                            <td>$ {{item.precio  | default(0) | number_format(2, ',', '.')}}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>                
+                     </ul>
+                </div>
+               </span>
+    {% endif %}  
+{% else %}
+{% set comentarios = entidad.id | default(null)| Comentario(tipo)  %}
+{% if (comentarios | length > 0 ) %}
+     <span data-toggle="tooltip" data-placement="top" title='Comentario' class='hidden-print'> 
+        <a class="dropdown-toggle glyphicon glyphicon-comment text-info" data-toggle="dropdown" role="button" aria-expanded="false">{{ comentarios | length }}</a>
+        <div  class="dropdown-menu" style="width:400px;">  
+            
+            <ul class="list-group">
+               {% for comentario in comentarios | sort | reverse %}
+                   <li class="list-group-item">
+                              <small>{% if ( app.user.id == comentario.usuario.id) %}
+                              <a data-toggle="tooltip" data-placement="top" title='{{ comentario.usuario}}' class='glyphicon glyphicon-cog glyphicon text-success small'>
+                               </a>  
+                              {% else %}       
+                               <a data-toggle="tooltip" data-placement="top" title='{{ comentario.usuario}}' class='glyphicon glyphicon-cog text-muted'></a> 
+                             {% endif %} <span class="text-muted">  {{ comentario.usuario.usuario}} ha comentado  {% if comentario.fecha %}{{ comentario.fecha|long_time }} ({{ comentario.fecha|date('d-m-Y') }}){% endif %}</span></small> <br> {{ comentario.texto }}
+
+                              {% if ( is_granted('ROLE_ADMIN')) or ( app.user.id == comentario.usuario.id) %}
+                           &emsp;
+                              <a data-href="{{ path('comentario_eliminar', { 'id': comentario.id }) }}" class="btn-eliminar-comentario"><span data-toggle="tooltip" data-placement="top" title='Quitar comentario' class="glyphicon glyphicon-trash" ></span></a>
+                              {% endif %}
+                      </li>
+              {% endfor %}
+          </ul>
+        </div>
+       </span>
+{% endif %}
+{#
+{% if (entidad.detalle is not empty ) %}
+     &nbsp;
+     <span data-toggle="tooltip" data-placement="top" title='Detalle Técnico'> 
+        <a aria-hidden="true" class="dropdown-toggle overflow fa fa-file-text text-info" data-toggle="dropdown" role="button" aria-expanded="false">1</a>
+        <div  class="dropdown-menu" style="width: 400px;">  
+            <ul class="list-group">
+               <li class="list-group-item">
+                        {{entidad.detalle | raw}}
+               </li>
+           </ul>
+        </div>
+       </span>
+{% endif %}
+#}
+
+{% set anio = ('now' | date('Y') - 2) %}
+{% set itemDuplicado, items = itemPedido | item_duplicado, [] %}
+{% for item in itemDuplicado if item.id != itemPedido.id and item.tramite.id != itemPedido.tramite.id and item.tramite.fechaDestino | date("Y") > anio %}
+    {% set items = items | merge([item]) %}
+{% endfor %}
+
+{% set itemDuplicado = items %}
+{% if (itemDuplicado | length > 0 ) %}
+     <span data-toggle="tooltip" data-placement="top" title='Item Repetido'> 
+        <a aria-hidden="true" class="dropdown-toggle overflow  fa fa-clipboard text-info" data-toggle="dropdown" role="button" aria-expanded="false">{{itemDuplicado | length }}</a>
+        <div  class="dropdown-menu" style="width: 500px;">  
+             <ul class="list-group">
+                   
+                    <table id="tablaItemDuplicado" class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Pedido</th>
+                                <th>Fecha</th>
+                                <th>N°</th>
+                                <th>Cantidad</th>
+                                <th>P. U.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in itemDuplicado if item.id != itemPedido.id %}
+                                <tr>
+                                    <td>
+                                        <small><span class="{{item.tramite.estadoTramite.class}}"  data-toggle="tooltip" data-placement="bottom" title='{{item.tramite.estadoTramite}}' >-</span></small>
+                                        <a  href="{{ path('tramite_show', { 'id': item.tramite.id }) }}" target="_blank"> {% if item.tramite.id == itemPedido.tramite.id %}<span class="text-warning">Este</span>{% endif %} {{item.tramite.tipoTramite}} {{ item.tramite.numeroTramite }}</a>
+                                    </td>
+                                    <td>{{item.tramite.fechaDestino | date("d-m-Y") }} <br/>
+                                    {{item.tramite.fechaDestino | long_time }}</td>
+                                    <td><a href="{{ path('itempedido_show', { 'id': item.id }) }}" target="_blank"><strong> {{ item.numero }} </strong></a></td>
+                                    <td>{{item.cantidad}}</td>
+                                    <td>$ {{item.precio  | default(0) | number_format(2, ',', '.')}}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>                
+             </ul>
+        </div>
+       </span>
+{% endif %}
+
+{% set itemDuplicadoPedido = itemPedido | item_duplicado_pedido %}
+{% if (itemDuplicadoPedido | length > 1 ) %}
+     <span data-toggle="tooltip" data-placement="top" title='Item Repetido'> 
+        <a aria-hidden="true" class="dropdown-toggle overflow  fa fa-clipboard text-danger" data-toggle="dropdown" role="button" aria-expanded="false">{{itemDuplicadoPedido | length - 1}}</a>
+        <div  class="dropdown-menu" style="width: 500px;">  
+             <ul class="list-group">
+                   <h4>&nbsp;&nbsp;El Ítem está <strong>REPETIDO </strong> en este PEDIDO </h4>
+                    <table id="tablaItemDuplicado" class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Pedido</th>
+                                <th>Item N°</th>
+                                <th>Cantidad</th>
+                                <th>P. U.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in itemDuplicadoPedido if item.id != itemPedido.id %}
+                                <tr>
+                                    <td>
+                                        <small><span class="{{item.tramite.estadoTramite.class}}"  data-toggle="tooltip" data-placement="bottom" title='{{item.tramite.estadoTramite}}' >-</span></small>
+                                        <a  href="{{ path('tramite_show', { 'id': item.tramite.id }) }}" target="_blank">  {{item.tramite.tipoTramite}} {{ item.tramite.numeroTramite }}</a>
+                                    </td>
+                                    <td><a href="{{ path('itempedido_show', { 'id': item.id }) }}" target="_blank"><strong> {{ item.numero }} </strong></a></td>
+                                    <td>{{item.cantidad}}</td>
+                                    <td>$ {{item.precio  | default(0) | number_format(2, ',', '.')}}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>                
+             </ul>
+        </div>
+       </span>
+{% endif %}
+
+{% set itemAcuerdo = itemPedido | item_acuerdo %}
+{% set items =  [] %}
+{% for item in itemAcuerdo if item.expediente.fechaHasta | date('Y-m-d') >= 'now' | date('Y-m-d') %}
+    {% set items = items | merge([item]) %}
+{% endfor %}
+{% set itemAcuerdo = items %}
+
+{% if (itemAcuerdo | length > 0 ) %}
+     <span data-toggle="tooltip" data-placement="top" title='Item Acuerdo Marco'> 
+        <a aria-hidden="true" class="dropdown-toggle overflow  fa fa-list-alt text-warning" data-toggle="dropdown" role="button" aria-expanded="false">{{itemAcuerdo | length }}</a>
+        <div  class="dropdown-menu" style="width: 550px;">  
+             <ul class="list-group">
+                    {% for item in itemAcuerdo %}
+                     <li class="list-group-item">
+                            
+                            <span class="glyphicon glyphicon-folder-open"></span> <a href="{{ path('expediente_show', { 'id': item.expediente.id | default(1) }) }}"><span id="expediente">{{ item.expediente.numeroGde | default("") }}</span></a>
+                                &nbsp;
+                                {% if item.expediente.fechaHasta | date('Y-m-d')  < 'now' | date('Y-m-d') %}
+                                     <span  class="label label-default"> Finalizado </span> 
+                                {% else %}
+                                     <span  class="label label-success"> Vigente </span>
+                                {% endif %}              
+                            <p>{{ item.expediente.extracto }}</p>
+                        {% set porcentajeAutorizado = ( item.cantidadAutorizada * 100 ) / item.cantidad  %}
+                        {% set porcentajeSolicitado = ( item.cantidadSolicitada * 100 ) / item.cantidad  %}
+                        {% set porcentaje = porcentajeAutorizado |round + porcentajeSolicitado |round %}
+                          
+                            <table id="" class="table table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th>N°</th>
+                                        <th>Codigo</th>
+                                        <th>Acordada</th>
+                                        <th> <span class="label label-success">Autorizada</span></th>
+                                        <th> <span class="label label-warning">Pedida</span></th>
+                                        <th><span class="label label-default">Disponible</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                              
+                                        <tr>
+                                            <td>{{ item.numero }}</td>
+                                            <td><a href="{{ path('itemacuerdomarco_show', { 'id': item.id }) }}" target="_blank"><strong> {{ item.codigo }} </strong></a></td>
+                                            <td>{{item.cantidad}}</td>
+                                            <td>{{item.cantidadAutorizada | number_format(2, ',', '.')}}</td>
+                                            <td>{{item.cantidadSolicitada | number_format(2, ',', '.') }}</td>
+                                            {% if item.cantidadRestante < 0 %}
+                                                <td class="text-danger">{{item.cantidadRestante | number_format(2, ',', '.')}}</td>
+                                            {% else %}
+                                                <td>{{item.cantidadRestante | number_format(2, ',', '.')}}</td>
+                                            {% endif %}
+                                        </tr>
+                                        <tr>
+                                            <td colspan="6">
+                                            {% if porcentaje <= 100 %}
+                                                <div class="progress progress-striped" style="height:20px">
+                                                  <div class="progress-bar progress-bar-success" style="width: {{porcentajeAutorizado |round}}%">
+                                                    {{porcentajeAutorizado |round }}% Autorizada
+                                                  </div>
+                                                  <div class="progress-bar progress-bar-warning active" style="width: {{porcentajeSolicitado |round}}%">
+                                                   {{porcentajeSolicitado |round }}% Pedida
+                                                  </div>  
+                                                </div>
+                                             {% elseif porcentajeAutorizado |round > 100 %}
+                                                <div class="progress progress-striped" style="height:20px">
+                                                     <div class="progress-bar progress-bar-danger active" style="width: {{porcentajeAutorizado |round}}%">
+                                                       {{porcentajeAutorizado |round }}% Autorizada 
+                                                      </div>  
+                                                     <div class="progress-bar progress-bar-warning active" style="width: {{100 - (porcentajeAutorizado |round)}}%">
+                                                       {{porcentajeSolicitado |round }}% Pedida 
+                                                      </div>  
+                                                </div>
+                                             {% else %}
+                                                    <div class="progress progress-striped" style="height:20px">
+                                                      <div class="progress-bar progress-bar-success" style="width: {{porcentajeAutorizado |round}}%">
+                                                        {{porcentajeAutorizado |round }}% Autorizada
+                                                      </div>
+                                                      <div class="progress-bar progress-bar-danger active" style="width: {{100 - (porcentajeAutorizado |round)}}%">
+                                                       {{porcentajeSolicitado |round }}% Pedida 
+                                                      </div>  
+                                                    </div>
+                                                     
+                                            {% endif %}
+                                            </td>
+                                        </tr>
+                                </tbody>
+                            </table>   
+                            </li>
+                        {% endfor %}             
+             </ul>
+        </div>
+       </span>
+{% endif %}
+
+{% set itemsProceso = itemPedido | item_proceso %}
+{% if (itemsProceso | length > 0 ) %}
+     <span data-toggle="tooltip" data-placement="top" title='Item Proceso'> 
+        <a aria-hidden="true" class="dropdown-toggle overflow  glyphicon glyphicon-shopping-cart text-info" data-toggle="dropdown" role="button" aria-expanded="false">{{itemsProceso | length }}</a>
+        <div  class="dropdown-menu" style="width: 700px;">  
+             <ul class="list-group">
+                   
+                    <table id="tablaItemDuplicado" class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Proceso</th>
+                                <th>N°</th>
+                                <th>Código</th>
+                                <th>Cantidad Adjudicado</th>
+                                <th>Monto Adjudicado</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for itemProceso in itemsProceso %}
+                                <tr {% if itemsProceso | length > 1 and itemProceso.cantidad != itemPedido.cantidad  %}  style="background-color:rgba(192,192,192,0.3);"  class="text-muted" {% endif %}>
+                                    <td>
+                                        <a data-toggle="tooltip" data-placement="top" title='{{ itemProceso.proceso.oferente }}' href="{{ path('tramite_show', { 'id': itemProceso.proceso.id }) }}" target="_blank"> {{ itemProceso.proceso.tipoTramite }} {{ itemProceso.proceso.numeroTramite }}</a> <br />
+                                    </td>
+                                    <td><strong> {{ itemProceso.numero }} </strong></td>
+                                    <td><a href="{{ path('itemproceso_show', { 'id': itemProceso.id }) }}" target="_blank">{{ itemProceso.codigo }}</a></td>
+                                    <td>
+                                        {% if itemProceso.cantidadAdjudicada > 0  and itemProceso.proceso.adjudicado %}
+                                            {{ itemProceso.cantidadAdjudicada }}
+                                        {% else %} 
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if itemProceso.montoAdjudicado > 0  and itemProceso.proceso.adjudicado %}
+                                             $ {{ itemProceso.montoAdjudicado  | default(0) | number_format(2, ',', '.')  }}
+                                        {% else %} 
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                       {{ include('AusentismoBundle:ItemProceso:_etiqueta_estado.html.twig') }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>                
+             </ul>
+        </div>
+       </span>
+{% endif %}
+{% endif %}

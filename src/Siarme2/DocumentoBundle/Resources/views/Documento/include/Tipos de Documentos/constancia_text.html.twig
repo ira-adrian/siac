@@ -1,0 +1,7 @@
+﻿ <p style="text-align:center" ><span style="font-size:12pt"> <strong> {{ documento.nombreDocumento | upper }}
+	</strong> </span></p> 
+
+<p style="margin-left:0cm; margin-right:0cm; text-align:justify"><span style="font-size:12pt"><span style="font-family:&quot;Times New Roman&quot;,serif">
+&emsp;&emsp;&emsp;{{appInstitucion}}, hace constar por la presente que el  <strong>  Agente: {{documento.tramite.expediente.agente.apellidoNombre}}, CUIL: {{documento.tramite.expediente.agente.cuil}}</strong>,  se present&oacute; en el d&iacute;a de la fecha a Junta M&eacute;dica en el horario de <strong> {{documento.tramite.expediente.datoAt.hora | date('H:i') }}   a 12:00</strong>, por tramites referidos a su <strong> Expte. {{documento.tramite.expediente | upper}}</strong>.<br>
+&emsp;&emsp;&emsp;Se expide la presente para ser presentada ante las autoridades que la requieran.</span>
+</p>

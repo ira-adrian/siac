@@ -1,0 +1,38 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\_lista.html.twig#}
+         {% if movimientoPendiente is defined and movimientoPendiente is not empty %}
+            {% set expediente = movimientoPendiente.expediente %}
+            <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <span class="glyphicon glyphicon-folder-open text-warning"></span> Expediente N° {{ expediente }} 
+                        | {%  for movimiento in expediente.movimiento %} 
+                          {% if loop.last %} 
+                                {{movimiento.estado | raw }}
+                          {% endif %}
+                        {% endfor %}
+                        <div class="pull-right">
+                         
+                            <a href="#" type="button" data-toggle="modal" data-target="#modalExpedienteSend"> <span class="glyphicon glyphicon-send"></span> ENVIAR </a>&nbsp;&nbsp;&nbsp;
+                          {% if (expediente.tramite | length) == 0  %}
+                          <a href="{{ path('expediente_eliminar', {'id': expediente.id}) }}"> <span class="glyphicon glyphicon-trash text-danger"></span>CANCELAR</a>&nbsp;&nbsp;
+                         {% else %}
+                          <a href="{{ path('expediente_cancelar_enviar')}}"> <span class="glyphicon glyphicon-remove"></span>GUARDAR</a>&nbsp;&nbsp;
+                         {% endif %}
+                       </div>
+                    </div>
+                    <div class="panel-body">
+                       {% if (expediente.tramite | length) != 0  %} 
+                              <table class="table table-hover">
+                                  <tbody>
+                                      {# filtro los tramites que no tienen expedientes #}
+                                  {% for tramite in expediente.tramite %}
+                                      {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_tbody_simple.html.twig') }}   
+                                  {% endfor %}
+                                  </tbody>
+                              </table>
+                      {% endif %}
+
+                    </div>
+            </div>
+            {{ render(controller('ExpedienteBundle:Tramite:modalExpedienteSend', {'expediente_id': expediente.id}))}} 
+        {% endif %}
+

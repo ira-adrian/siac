@@ -1,0 +1,22 @@
+<p class="text-center"> 
+	<br>
+    <strong> 
+  		{{ documento.nombreDocumento | upper }} 
+	</strong>
+	<br> 
+</p> 
+<p class ="text-uppercase text-left"> 
+	<strong><small>
+		Referencia: {{documento.tramite.expediente | upper}}<br>
+		Iniciador: {{documento.tramite.expediente.agente | upper}}  <br>
+		Extracto: {{documento.tramite.expediente.extracto | upper}} <br>
+	</small></strong>
+</p> 
+
+<p class="text-center">
+	&emsp;&emsp;&emsp;Se remiten las actuaciones de referencia a <strong> {{documento.tramite.organismoOrigen | upper}}</strong>, para conocimiento y evaluación de lo Dictaminado por  Médica en <strong>Acta N°:     de Fecha: {{ "now"|date('d-m-Y') }}  del Paciente: {{documento.tramite.expediente.agente}}  , CUIL: {{documento.tramite.expediente.agente.cuil}} </strong>. <br>
+	&emsp;&emsp;&emsp;Son Fojas: <br>
+	&emsp;&emsp;&emsp;Atentamente.- 
+</p>
+<br>
+<br>

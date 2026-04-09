@@ -1,0 +1,49 @@
+{{ form_start(form) }}
+     {{ form_errors(form) }}
+    <div>    
+      
+        {{ form_label(form.texto) }}
+        {{ form_errors(form.texto) }}
+      {% if texto1  is defined %}
+        {{ form_widget(form.texto,  { 'value' : texto1  }) }}
+      {% else %}
+           {{ form_widget(form.texto) }}
+      {% endif %}
+      
+    </div>  
+
+     <table id="tablaLicencia" class="table table-responsive table-hover"  style="margin:0px; background-color:#F5F5F5;">
+        <thead  style="margin:0px;">
+            <th class="text-info" id="titulo_licencia_fecha_desde" colspan="6" style="margin:0px; border: none;">
+            </th>
+        </thead>
+        <tbody class="alert-fechaDesde"  style="margin:0px;"> 
+        </tbody>
+     </table>
+    {{ form_row(form.Licencia.fechaDesde, {'label': 'Fecha Desde:'}) }}
+    {{ form_row(form.Licencia.dias, {'label': 'Dias:'}) }}
+     <table id="tablaLicencia" class="table table-responsive table-hover" style="margin:0px; background-color:#F5F5F5;">
+        <thead  style="margin:0px;" >
+            <th class="text-info" id="titulo_licencia_fecha_hasta" colspan="6" style="margin:0px; border: none;">
+            </th>
+        </thead>
+        <tbody class="alert-fechaHasta"  style="margin:0px;"> 
+        </tbody>
+     </table>
+    {{ form_row(form.Licencia.fechaHasta, {'label': 'Fecha Hasta:'}) }}
+    <table id="tablaLicencia" class="table table-responsive table-hover" style="margin:0px; background-color:#F5F5F5;">
+        <thead  style="margin:0px;" >
+            <th  class="text-info" id="titulo_licencia_periodo" colspan="6" style="margin:0px; border: none;">
+            </th>
+        </thead>
+        <tbody class="alert-periodo"  style="margin:0px;"> 
+        </tbody>
+     </table>
+    {{ form_row(form.Licencia.enfermedad, {'label': 'Codigo de Enfermedad:'}) }}
+    {{ form_row(form.Licencia.articulo, {'label': 'Articulo:'}) }}
+    {{ form_rest(form) }}
+
+    <div class="text-right">
+            <input class="btn btn-danger"  type="submit" value="Guardar" />
+    </div>
+{{ form_end(form) }}

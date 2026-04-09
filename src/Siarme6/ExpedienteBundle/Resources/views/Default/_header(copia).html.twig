@@ -1,0 +1,234 @@
+{# {% set expts_turnos=  app.user.id | Turnos() %} 
+   {% set msjs_compartido = app.user.id | Comparte('MSJ') %}
+ {% set msjs_compartido_total = msjs_compartido | length %} 
+
+ {% set ags_compartido = app.user.id | Comparte('AG') %} 
+ {% set ags_compartido_total = ags_compartido | length %} 
+ {% set expts_compartido = app.user.id | Comparte('EXP') %} 
+ {% set expts_compartido_total = expts_compartido | length  %} 
+ {% set docs_compartido = app.user.id | Comparte('DOC') %} 
+ {% set docs_compartido_total = docs_compartido | length  %}
+{% if find is not defined %}
+ {% set find = null %}
+{% endif %}  
+
+ {% if agentes is defined %}
+        {{ app.session.set('modulo', false) }}
+        {{ app.session.set('route', 'agente_index') }}
+    
+        {- app.session.set('var4', 'data4') }}
+        {{ app.session.get('var4') -} 
+ {% endif %} 
+
+ {% if expedientes is defined %}
+        {{ app.session.set('modulo', 'Expedientes') }}
+        {{ app.session.set('route', 'expediente_index') }}
+ {% endif %} 
+ 
+  {% if usuarios is defined %}
+        {{ app.session.set('modulo', 'Usuarios') }}
+        {{ app.session.set('route', 'usuario_index') }}
+ {% endif %} 
+  {% if licencias is defined %}
+        {{ app.session.set('modulo', 'Licencias') }}
+        {{ app.session.set('route', 'licencia_index') }}
+ {% endif %} 
+
+ {# route se define como agente_index ya que no se hacen busquedas para mensajes, compartidos, turnos, organismos 
+   {% if organismos is defined %}
+        {{ app.session.set('modulo', 'Organismos') }}
+        {{ app.session.set('route', 'agente_index') }}
+ {% endif %} 
+ 
+   {% if compartidos is defined %}
+        {{ app.session.set('modulo', 'Compartidos') }}
+        {{ app.session.set('route', 'agente_index') }}
+ }
+ {% endif %} 
+   {% if mensajes is defined %}
+        {{ app.session.set('modulo', 'Mensajes') }}
+        {{ app.session.set('route', 'agente_index') }}
+ {% endif %} 
+
+  {% if turnos is defined %}
+        {{ app.session.set('modulo', 'Turnos') }}
+        {{ app.session.set('route', 'agente_index') }}
+ {% endif %} 
+
+{% set modulo = app.session.get('modulo') | default(false)  %}
+{% set route = app.session.get('route') %}#}
+<header>  
+  <nav class="navbar-default" style="margin-bottom:1px; padding:1px;"  role="navigation">
+    <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar  bg-primary"></span>
+        <span class="icon-bar  bg-primary"></span>
+        <span class="icon-bar  bg-primary"></span>
+        <span class="icon-bar  bg-primary"></span>
+      </button>
+       <a class="navbar-brand">
+        <span data-toggle="tooltip" data-placement="bottom"  title="SIAC" class="glyphicon glyphicon-shopping-cart"></span>
+      </a>
+
+    </div> 
+
+    <div  class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li role="presentation" id= "link-1"><a class="glyphicon glyphicon-wrench" href="{{ path('mis_tramites_index') }}"> MIS TAREAS {% if movimientoPendiente is defined and movimientoPendiente is not empty  %} <span class=" glyphicon-folder-open text-warning"><small>+</small></span>{% endif %}</a></li>
+        <li role="presentation" id="link-2"><a class="glyphicon glyphicon-calendar" href="{{ path('recordatorios_index') }}"> RECORDATORIOS</a></li>
+        <li role="presentation" id="link-3"><a class="glyphicon glyphicon-ok" href="{{ path('tramites_realizados_index') }}"> REALIZADO</a></li>
+        <li role="presentation" id="link-4"><a class="glyphicon glyphicon-list-alt" href="{{ path('tramite_index') }}"> {{app.user.departamentoRm}}</a></li>
+      </ul>
+    <ul class="nav navbar-nav navbar-right"> 
+
+    {% if movimientoPendiente is defined and movimientoPendiente is not empty and movimientoPendiente.expediente is not empty %}
+      {% set expedienteM =  movimientoPendiente.expediente   %}
+          <li>
+          <a class="dropdown-toggle glyphicon glyphicon-folder-open" data-toggle="dropdown" role="button" aria-expanded="false"><span class="badge ">{{expedienteM.tramite | length}}</span></a>
+             <ul  class="dropdown-menu"  style="width:20em;">  <!-- dropdown-menu -->  
+                      {% for tramite in expedienteM.tramite %}                                  
+                    <li class="list-group" style="margin:0px;" >   <!-- list-group -->  
+                             {{ tramite.tipoTramite }} <kbd> <strong>{{ tramite.numeroTramite }}</strong></kbd> - {{ tramite.estadoTramite | default("N/D") }}&nbsp;|  {{ tramite.trimestre }}° Trimestre  | Fecha: {% if tramite.fecha %}{{ tramite.fecha |date('d-m-Y') }}{% endif %}  
+                        </li> <!-- list-group --> 
+                      {% endfor %}
+              </ul> <!-- dropdown-menu -->  
+           </li>
+    {% endif %}
+       <li id="alerta" class="dropdown" >        
+      {# Aqui se renderiza el menu desplegable completo con "ul" y "li" incluidos#}
+      {{ render(controller('DocumentoBundle:Compartir:alerta' )) }}
+     </li>    
+      <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"> <span class="glyphicon glyphicon-th"></span></a>
+              <ul class="dropdown-menu">
+              <li role="separator" class="divider"></li>
+             <li >
+                   <a href="{{ path('agente_index')  }}"  role="button"> <span class="glyphicon glyphicon-list-alt"> AGENTE</span></a>
+              </li>
+              <li role="separator" class="divider"></li>
+              <li>
+            <a   href="{{ path('licencia_index') }}"> <span class="glyphicon glyphicon-list-alt"> LICENCIA</span></a>
+             </li>   
+             <li role="separator" class="divider"></li>
+              <li >
+                   <a href="{{ path('organismo_index')  }}"  role="button"> <span class="glyphicon glyphicon-list-alt"> ORGANISMO</span></a>
+              </li>
+
+			<li role="separator" class="divider"></li>
+		{#		<li >
+                   <a href="{{ path('snippet_index')  }}"  role="button"> <span class="glyphicon glyphicon-pushpin"> REGISTRO P/ TURNO DE EXPTS.</span></a>
+              </li>
+             <li role="separator" class="divider"></li>#}
+      {% if ( is_granted('ROLE_ADMIN')) %} 
+          <li >
+                   <a href="{{ path('usuario_index')  }}"  role="button"> <span class="glyphicon glyphicon-list-alt"> USUARIOS</span></a>
+              </li>
+             <li role="separator" class="divider"></li>
+            <li>
+            <a   href="{{ path('easyadmin') }}"  target="_blank"> <span class="glyphicon glyphicon-eye-close"> ADMINISTRADOR</span></a>
+             </li>  
+       {% endif %}
+
+            </ul> 
+       </li>
+          <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"> <span class="glyphicon glyphicon-cog"></span></a>
+             
+             <ul class="dropdown-menu">
+               <li class="dropdown-header">
+                     <span class="glyphicon glyphicon-cog"> </span>
+                     Usuario:
+               </li>
+
+               <li><a href="{{ path('usuario_show_perfil', { 'id': app.user.id }) }}" class="bg-danger">{{ app.user.agente }} </a>
+               </li>
+               <li role="separator" class="divider"> 
+               </li>
+       
+               <li class="dropdown-header h5"><span class="glyphicon glyphicon-cog"></span>Cambiar Contraseña:           
+                          <form class="navbar-form"  method="post" action="{{ path('usuario_change_password') }}">
+                            {% set passwordCurrent= app.user.password %}                  
+                              <div class="form-group">
+                                <input class="hidden" style="visibility:hidden" type="password" value="{{ passwordCurrent }}" id="passwordCurrent" required>
+                                <br>
+                               <input type="password" placeholder="Contraseña Actual" id="passwordUser" required>
+                                <br>
+                              <input type="password" name="password" placeholder="Nueva Contraseña" id="password" required>
+                               <br>
+                               <input type="password" placeholder="Repetir Contraseña" id="confirm_password" required>
+                              </div>
+                               <br>
+                             <button type="submit" class="button btn-sm btn-primary">Confirmar</button>
+                          </form>                        
+                 </li>
+                <li role="separator" class="divider"> </li> 
+            </ul> 
+          </li>
+           <li>
+              <a href="{{ path('usuario_logout') }}" >
+                  <span class="glyphicon glyphicon-log-out"></span>
+                  Salir
+              </a>                
+          </li>
+      </ul>
+      </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+</header>
+ 
+<ol class="breadcrumb"  style="margin-bottom:1px;">
+         {% if usuario is defined %}
+           <li><a href="{{ path('agente_show', { 'id': usuario.agente.id }) }}"> <span class="glyphicon glyphicon-cog"></span>{{ usuario }}</a></li>
+           <li class="active"> <span class="glyphicon glyphicon-menu-right"></span> <strong>{{ usuario.usuario }}</strong></li>
+         {% endif %}
+
+{# Breadcrumbs para AGENTE #}
+          {% if agente is defined and agente.id is not empty %}
+                  <li class="active"><span  class="glyphicon glyphicon-user"></span><strong>{{agente.apellidoNombre | title }}</strong></li>   
+          {% elseif agente is defined  %}
+                 <li class="active"><span  class="glyphicon glyphicon-user"></span>Nuevo</li> 
+          {% endif %} 
+
+{# Breadcrumbs para EXPEDIENTE #}
+           {% if expediente is defined and expediente.id is not empty %}
+
+            <li  class="active"> <span  class="glyphicon glyphicon-folder-open"></span>
+             {{ expediente}}
+          </li>     
+           {% elseif expediente is defined %}  
+                <li  class="active"><span  class="glyphicon glyphicon-folder-open"></span>Nuevo</li>
+           {% endif %} 
+
+{# Breadcrumbs para TRAMITE #}
+          {% if tramite.expediente is defined and tramite.expediente.id | default("") is not empty %}
+                  <li> <a  href="{{ path('expediente_show', { 'id': tramite.expediente.id }) }}"> <span class="glyphicon glyphicon-folder-open"></span> 
+                  {{ tramite.expediente }} </a></li>     
+          {% endif %} 
+          {% if tramite is defined and tramite.id is not empty %}
+                  <li class="active"><span  class='{{ tramite.tipoTramite.glyphicon}}'></span><strong> TRAMITE N° {{tramite.numeroTramite }}</strong></li>   
+          {% elseif tramite is defined  %}
+                 <li class="active"><span  class='{{ tramite.tipoTramite.glyphicon}}'></span> Nuevo</li> 
+          {% endif %} 
+
+{# Breadcrumbs para DOCUMENTO #}
+    {% if documento is defined and documento.id is not empty %}
+
+          {% if documento.tramite.expediente is defined and documento.tramite.expediente.id | default("") is not empty %}
+                  <li> <a href="{{ path('mis_expedientes_index')  }}"  role="button"> <span  class="glyphicon glyphicon-folder-open"></span>
+                  {{ documento.tramite.expediente }} </a></li>     
+          {% endif %} 
+
+          {% if documento.tramite is defined and documento.tramite.id is not empty %}
+                <li class="active"><a href="{{ path('tramite_show', { 'id': documento.tramite.id }) }}"> <span  class='{{ documento.tramite.tipoTramite.glyphicon}}'></span><strong> TRAMITE N° {{documento.tramite.numeroTramite }}</strong></a></li>   
+          {% endif %} 
+
+            <li class="active"><span class="glyphicon glyphicon-paperclip"></span> <strong>{{documento}}</strong></li>
+    {% elseif documento is defined %}
+           <li class="active"><span class="glyphicon glyphicon-paperclip"></span>Nuevo</li>
+    {% endif %}    
+</ol>
+ 
+  {{ include('ExpedienteBundle:Tramite:_expediente_enviar.html.twig') }}

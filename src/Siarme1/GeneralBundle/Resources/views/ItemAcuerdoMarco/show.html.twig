@@ -1,0 +1,289 @@
+{% extends 'GeneralBundle:Default:layout.html.twig' %}
+{% block title %} ITEM {{ itemAcuerdo.numero }} {% endblock %}
+{% block contenido %}
+ <div class="container"> 
+<div class="nav nav-pills hidden-print"> 
+
+      <li role="presentation" class="disabled"><a href="#">Menu</a></li>
+{% set solicitudes = itemAcuerdo.expediente | tramite_por_expediente_slug("tramite_solicitud") %}
+{% if ( itemAcuerdo.expediente | default(null) | movimiento_estado(app.user))  and solicitudes | length == 0   %}
+      <li role="presentation"  class="dropdown overflow" >
+            <a class="dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-pencil"></span> Modificar <span class="caret"></span></a>
+            <div class="dropdown-menu" style="width: 400px;" aria-labelledby="dropdownMenuLink">
+              <div class="list-group-item">
+                  {{ render(controller('GeneralBundle:ItemAcuerdoMarco:edit', {'id': itemAcuerdo.id  }))}}
+              </div>
+            </div>
+      </li>
+{% if is_granted("ROLE_ADMIN") %}
+    <li role="presentation" data-toggle="tooltip" data-placement="top" title='Eliminar el Item' >
+                  {{ form_start(delete_form) }}
+                  <input class="btn btn-danger" onclick= "return confirm('¿Desea ELIMINAR elItem?');" type="submit" value="Eliminar"> 
+                  {{ form_end(delete_form) }}   
+    </li> 
+{% endif %}
+{% endif %} 
+    <!-- Menu DERECHO *** IMPRIMIR - COPIAR -->
+    <div class="pull-right">
+            <li  role="presentation">
+                <a href="javascript:if(window.print)window.print()" value="Imprimir" role="button"><!-- Printer-imprime el texto de clase="print" -->
+                <span class="glyphicon glyphicon-print" ></span> Imprimir</a>
+
+                <a class="btn" data-clipboard-target="#copy"><!-- clipboard-copiar texto de id="copy" -->
+                  <span class="glyphicon glyphicon-copy"></span>Copiar</a>
+            </li>
+    </div>
+</div>
+
+<div id="copy" class="panel panel-default print">
+        <style type="text/css" media="print">
+        @media print {
+            a[href]:after {
+                content: none !important;
+            }
+        }
+      </style> 
+  <!-- Default panel contents -->
+  <div class="panel-heading"><span class="fa fa-list-alt"></span> ITEM ACORDADO N° : {{ itemAcuerdo.numero }} | {{ itemAcuerdo.codigo }}
+        {% if itemAcuerdo.expediente.id is defined %}
+                {% if ( itemAcuerdo.expediente |  default(null) | movimiento_estado(app.user))  %}
+
+                         {% if itemAcuerdo.expediente.fechaHasta | date('Y-m-d')  < 'now' | date('Y-m-d') %}
+                                <span  class="label label-default pull-right"> Finalizado </span>
+                            {% else %}
+                                <span  class="label label-success pull-right"> Vigente </span>
+                        {% endif %}
+                {% else %}
+                    <span  class="label label-default pull-right" data-toggle="tooltip" data-placement="bottom" title='Para modificar el ÍTEM debe cambiar el estado de la Nota CCOO que lo contiene'>Enviado</span>
+                {% endif %}
+        {% endif %}
+  </div>
+  <div class="panel-body"> 
+<dl>
+    <dt>Descripción</dt>
+    <dd>{{ itemAcuerdo.item }}</dd>
+    <dt>Unidad de Medida</dt>
+    <dd>{{ itemAcuerdo.unidadMedida }}</dd>
+    <dt>Precio</dt>
+    <dd>$ {{ itemAcuerdo.precio  | default(0) | number_format(2, ',', '.')  }}</dd>
+</dl>
+  </div>
+        {% set porcentajeAutorizado = ( itemAcuerdo.cantidadAutorizada * 100 ) / itemAcuerdo.cantidad  %}
+        {% set porcentajeSolicitado = ( itemAcuerdo.cantidadSolicitada * 100 ) / itemAcuerdo.cantidad  %}
+        {% set porcentaje = porcentajeAutorizado + porcentajeSolicitado %}
+<h4>DETALLE GENERAL DE CANTIDADES</h4>
+<div class="table-responsive">
+  <!-- Table -->
+  <table class="table table-bordered text-center">
+    <thead>
+        <tr>
+            <th class="text-center">Acordada</th>
+            <th class="text-center"> <span class="label label-success">Autorizada</span></th>
+            <th class="text-center"> <span class="label label-warning">Pedida</span></th>
+            <th class="text-center"><span class="label label-default">Disponible</span></th>
+        </tr>
+    </thead>
+    <tbody>
+            <tr>
+                <td>{{itemAcuerdo.cantidad}}</td>
+                <td>{{itemAcuerdo.cantidadAutorizada | number_format(2, ',', '.')}}</td>
+                <td>{{itemAcuerdo.cantidadSolicitada | number_format(2, ',', '.')}}</td>
+                <td>{{itemAcuerdo.cantidadRestante | number_format(2, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td colspan="4"> 
+                    {% if porcentaje <= 100 %}
+                        <div class="progress progress-striped"  style="height:20px">
+                          <div class="progress-bar progress-bar-success" style="width: {{porcentajeAutorizado}}%">
+                            {{porcentajeAutorizado |round }}% Autorizada
+                          </div>
+                          <div class="progress-bar progress-bar-warning active" style="width: {{porcentajeSolicitado}}%">
+                           {{porcentajeSolicitado |round }}% Pedida
+                          </div>  
+                        </div>
+                     {% elseif  porcentajeAutorizado |round > 100 %}
+                                <div class="progress progress-striped"  style="height:20px">
+                                  <div class="progress-bar progress-bar-danger" style="width: {{porcentajeAutorizado}}%">
+                                    {{porcentajeAutorizado |round }}% Autorizada
+                                  </div>
+                                  <div class="progress-bar progress-bar-warning active" style="width: {{porcentajeSolicitado}}%">
+                                   {{porcentajeSolicitado |round }}% Pedida
+                                  </div>  
+                                </div>
+                     {% else %}
+                            <div class="progress progress-striped"  style="height:20px">
+                              <div class="progress-bar progress-bar-success" style="width: {{porcentajeAutorizado}}%">
+                                {{porcentajeAutorizado |round }}% Autorizada
+                              </div>
+                              <div class="progress-bar progress-bar-danger active" style="width: {{100 - (porcentajeAutorizado |round(0, 'ceil'))}}%">
+                               {{porcentajeSolicitado |round }}% Pedida
+                              </div>  
+                            </div>
+                    {% endif %}
+                </td>
+            </tr>
+    </tbody>
+  </table>
+</div>
+<hr>
+        {% set items = itemAcuerdo.itemSolicitado  %}
+                <h4><span class="fa fa-file-powerpoint-o"></span> ÍTEMS SOLICITADOS RELACIONADOS</h4>
+    {% for itemSolicitado in items %}
+             {% set tramite = itemSolicitado.tramite  %}
+              {% if loop.first %}
+              <div class="table-responsive">
+                <table id="#" class="table table-hover text-left">
+                    <thead>
+                       {{ include('GeneralBundle:ItemSolicitado:_thead_completo.html.twig') }}
+                    </thead>
+                     <tbody>
+                {% endif %}
+                      
+                         {{ include('GeneralBundle:ItemSolicitado:_tbody_completo.html.twig') }}
+    {% else %}
+                            <tr> <td colspan="100%"><strong>  No se encontró un ítem relacionado</strong></td> </tr>
+    {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+<hr>
+
+         {% set reporte, saf, nombreSaf, organismo,cantidad, porcentaje = {}, 0, "", "", 0 ,0  %}
+
+        {% set porcentaje, cantidad = ( itemAcuerdo.cantidadRestante * 100 ) / itemAcuerdo.cantidad, itemAcuerdo.cantidadRestante   %}
+        {% set reporte = reporte | merge ([{"nombreSaf":"Disponible", cantidad , porcentaje}]) %}
+    {% for itemSolicitado in items | sort((a, b) => a.tramite.organismoOrigen.saf <=> b.tramite.organismoOrigen.saf) if itemSolicitado.tramite.estado %} 
+        {% if loop.first %}
+            {% set nombreSaf = "SAF " ~ itemSolicitado.tramite.organismoOrigen.saf.numeroSaf %}
+            {% set organismo =  itemSolicitado.tramite.organismoOrigen %}
+            {% set saf, cantidad  = itemSolicitado.tramite.organismoOrigen.saf.numeroSaf , itemSolicitado.cantidadAutorizada %}
+        {% elseif saf == itemSolicitado.tramite.organismoOrigen.saf.numeroSaf   %}
+                {% set cantidad = cantidad + itemSolicitado.cantidadAutorizada  %}
+        {% else %}
+                {% set porcentaje = ( cantidad * 100 ) / itemAcuerdo.cantidad  %}
+                {% set reporte = reporte | merge ([{nombreSaf, organismo, cantidad, porcentaje}]) %}
+
+                {% set nombreSaf = "SAF " ~ itemSolicitado.tramite.organismoOrigen.saf.numeroSaf %}
+                {% set organismo =  itemSolicitado.tramite.organismoOrigen %}
+                {% set saf, nombreSaf, organismo, cantidad  = itemSolicitado.tramite.organismoOrigen.saf.numeroSaf , "SAF " ~ itemSolicitado.tramite.organismoOrigen.saf.numeroSaf, itemSolicitado.tramite.organismoOrigen,itemSolicitado.cantidadAutorizada %}
+        {% endif %}
+    {% endfor %}
+              {% set porcentaje = ( cantidad * 100 ) / itemAcuerdo.cantidad  %}
+              {% set reporte = reporte | merge ([{nombreSaf, organismo, cantidad, porcentaje }]) %}
+    <h4><span class="glyphicon glyphicon-stats"></span> REPORTE: Porcentaje de cantidades con estado <span class="label label-success">Autorizado</span> por SAF</h4>
+
+     <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+
+</div>
+ {{ render(controller('ExpedienteBundle:Comentario:index',
+            { 'tipoid': itemAcuerdo.id, 'tipo': constant('TIPO_ENTIDAD', itemAcuerdo)  })) }}
+
+{{ render(controller('ExpedienteBundle:Comentario:new', { 'tipoid': itemAcuerdo.id, 'tipo': constant('TIPO_ENTIDAD', itemAcuerdo) })) }}
+</div>
+
+{{ app.session.set('reporte', reporte) }}
+{% endblock %}
+
+{% block javascripts %} 
+
+    {{parent()}}
+
+{% set reporte = app.session.get('reporte') %}
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+<script>
+window.onload = function () {
+    var chart = new CanvasJS.Chart("chartContainer", {
+  exportEnabled: true,
+  animationEnabled: true,
+  title:{
+    text: " "
+  },
+  legend:{
+    cursor: "pointer",
+    itemclick: explodePie
+  },
+  data: [{
+    type: "pie",
+    showInLegend: false,
+    toolTipContent: "{name} - {organismo}: <strong>{y}%</strong>",
+    indexLabel: "{name} - {y}%",
+    dataPoints: [
+
+    {# if itemAcuerdo.cantidadRestante > 0 and itemAcuerdo.cantidadAutorizada > 0  %}
+    {% else %}
+                { y: 0, name: "Disponible", exploded: true },
+                { y: 100, name: "n/d",  },
+     {% endif #}
+
+        {% for saf in reporte  %}
+            {% if loop.first %}
+                { y: {{saf.porcentaje | round(0, 'floor')}}, name: '{{saf.nombreSaf}}', exploded: true },
+            {% elseif saf.organismo.organismo is not defined %}
+              { y: 0, name: "n/d",  },
+            {% else %}
+                { y: {{saf.porcentaje | round(0, 'ceil')}}, name: '{{saf.nombreSaf}}', organismo: '{{saf.organismo.organismo}}' },
+            {% endif %}      
+        {% endfor %} 
+
+    ]
+  }]
+});
+chart.render();
+
+function explodePie (e) {
+  if(typeof (e.dataSeries.dataPoints[e.dataPointIndex].exploded) === "undefined" || !e.dataSeries.dataPoints[e.dataPointIndex].exploded) {
+    e.dataSeries.dataPoints[e.dataPointIndex].exploded = true;
+  } else {
+    e.dataSeries.dataPoints[e.dataPointIndex].exploded = false;
+  }
+  e.chart.render();
+
+}
+};
+ 
+</script> 
+     <script> 
+
+     $('.detalle').on('click',function () {
+
+        if($('#detalle').is(':visible')){
+        $('#detalle').fadeOut("fast");
+      }else{
+        $('#detalle').fadeIn("fast");
+      }
+
+     });
+        CKEDITOR.replace('siarme_ausentismobundle_item_detalle_detalle', {  height: 400, 
+         // Configure SCAYT to load on editor startup.
+         scayt_autoStartup: true,
+          autoGrow_onStartup: true,
+        } );
+
+$("#siarme_ausentismobundle_itemAcuerdo_item").change(function() {
+  let str = $(this).val();
+  str = str.trim();
+  $("#siarme_ausentismobundle_itemAcuerdo_item").val(str);
+            });
+$("#siarme_ausentismobundle_itemAcuerdo_codigo").change(function() {
+  let str = $(this).val();
+  str = str.trim();
+  $("#siarme_ausentismobundle_itemAcuerdo_codigo").val(str);
+            });
+$("#siarme_ausentismobundle_itemAcuerdo_precio").change(function() {
+  let str = $(this).val();
+  str = str.replace("$", "");
+  str = str.replace(".", "");
+  str = str.trim();
+  $("#siarme_ausentismobundle_itemAcuerdo_precio").val(str);
+            });
+
+     </script>
+{% endblock %}
+
+{% block footer %}
+<dir class="footer"></dir>
+{% endblock %}
+
+
+

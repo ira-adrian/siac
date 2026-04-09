@@ -346,6 +346,30 @@ class TramiteRepository extends EntityRepository
     }
 
 
+   /**
+     * Encuentra el ultimo tramite del expediente por slug por ejemplo "tramite_proceso"
+     *
+     * 
+     */
+    public function findByTramiteYSlug($expediente, $slug)
+    {
+        $em = $this->getEntityManager();
+
+        $consulta = $em->createQuery(
+                       'SELECT t
+                        FROM ExpedienteBundle:Tramite t 
+                        JOIN  t.tipoTramite tt
+                        JOIN t.expediente e
+                        WHERE e.id= :ex
+                        AND tt.slug = :slug
+                        ORDER BY t.id DESC
+                        ');
+        $consulta->setParameter('ex', $expediente->getId())->setParameter('slug', $slug);
+        $consulta->setMaxResults(1);  
+        $tramite = $consulta->getSingleResult();           
+                 
+        return $tramite;
+    }
     
     public function findTramiteClasificacion($departamento , $clasificacion, $tipoTramite)
     {

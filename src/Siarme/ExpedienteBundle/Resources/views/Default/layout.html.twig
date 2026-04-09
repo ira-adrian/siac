@@ -25,13 +25,13 @@
 {% block title %} Escritorio {% endblock %}
 {% block stylesheets %}   
     <link href="{{ asset('bundles/expediente/plugins/boostrap3/css/bootstrap_cerulean.min.css') }}" type="text/css" rel="stylesheet"> 
-
+    <link href="{{ asset('bundles/expediente/plugins/custom/estilos_personalizados.css') }}?v=1.2" type="text/css" rel="stylesheet"> 
     <link rel="stylesheet" href="{{ asset('bundles/expediente/plugins/font-awesome/css/font-awesome.min.css') }}">  
 
     <link href="{{ asset('bundles/expediente/plugins/datatables/jquery.dataTables.min.css')}}" type="text/css" rel="stylesheet">
     <link href="{{ asset('bundles/expediente/plugins/select2/css/select2.min.css') }}" rel="stylesheet">     
     <link href="{{ asset('bundles/expediente/plugins/dropzone/dist/dropzone.css') }}" rel="stylesheet">
-    <link href="{{ asset('bundles/expediente/plugins/custom/estilos_personalizados.css') }}?v=1.1" type="text/css" rel="stylesheet"> 
+
 {% endblock %}
 
 {% block header %}
@@ -64,18 +64,42 @@
     <script src="{{ asset('bundles/expediente/plugins/ckeditor/ckeditor.js') }}"></script>
     <script src="{{ asset('bundles/expediente/plugins/autosize/autosize.min.js') }}"></script>
     <script src="{{ asset('bundles/expediente/plugins/fullcalendar/index.global.min.js') }}"></script>
+
 <script>
-        $(document).ready(function() {
+$(document).ready(function() {
             
+        $(".btn-estado-ingreso").unbind('click').click( function(){
+           var $href= $(this).attr("data-href");
+           var $etiqueta= $(this).attr("data-etiqueta");
+            $(this).parent().parent().parent().find('.etiqueta-estado-ingreso').html($etiqueta);
+
+            $.ajax({
+                 url: URL+$href,
+                 type: 'POST',
+                 success: function(response){
+
+                    if (response != "ninguno") {
+                        $(".estadoTramite").html("(Evaluación)");
+                        if($('#actualizar-pagina').is(':hidden')){
+                            $('#actualizar-pagina').removeClass("hidden");
+                        }    
+                    }
+                    console.log( response);
+
+                 } 
+            });
+        });
+
         // Inicializa primero
         autosize($('textarea'));
 
         // Luego, fuerza una actualización después de un breve retraso
         setTimeout(function() {
             autosize.update($('textarea'));
-        }, 1);
-
-          $('textarea').attr('autocomplete', 'off');
+        }, 4);
+        
+        $('textarea').attr('autocomplete', 'off');
+          
           // Al mostrar cualquier modal, re-aplica autosize solo a los textareas visibles
           $('.modal').on('shown.bs.modal', function () {
             autosize.update($(this).find('textarea'));

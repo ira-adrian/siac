@@ -1,0 +1,272 @@
+{# Siarme\AusentismoBundle\Resources\views\Licencia\index.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} LICENCIA{% endblock %}
+
+{% block contenido %}
+{% block mensaje %}
+ {{ include('ExpedienteBundle:Default:_mensaje.html.twig') }}
+{% endblock %}
+
+        {{ app.session.set('modulo', "LICENCIAS") }}
+        {{ app.session.set('glyphicon', 'glyphicon glyphicon-file') }}
+        {{ app.session.set('route', 'licencia_index') }}    
+        
+<div class="container">
+ <ul class="nav nav-pills hidden-print">
+      <li role="presentation" class="disabled"><a href="#">Menu</a></li>
+      <li><a  class="btn btn-sm btn-primary" data-toggle="tooltip" data-placement="top" title="Muestra TODOS los datos del Agente" href="{{ path('documento_new', { 'tramite_id': 0, 'slug': "licencia" }) }}"> Nueva Licencia</a></li>
+      {% if is_granted("ROLE_ADMIN") %}
+    <li>
+      <a href="{{ path('agente_new') }}"  role="button"><span class="glyphicon glyphicon-user"></span>  Nuevo Empleado</a>   
+    </li>  
+
+    {% endif %}
+        <!-- Menu DERECHO *** IMPRIMIR - COPIAR -->
+            <div class="pull-right">
+                    <li  role="presentation">
+                      <a id="printer"  value="Imprimir" role="button"><!-- Printer-imprime el texto de clase="print" -->
+                        <span class="glyphicon glyphicon-print"></span> Imprimir</a>
+
+                        <a class="btn" data-clipboard-target="#copy"><!-- clipboard-copiar texto de id="copy" -->
+                          <span class="glyphicon glyphicon-copy"></span>Copiar</a>
+                    </li>
+            </div>
+</ul>
+
+      <ol class="breadcrumb"  style="margin-bottom:1px;"> 
+        {% for year in ( ('now' | date("Y") - 2) .. ('now' | date("Y"))) %} 
+            {% if year != anio %}
+              <li><a href="{{ path('licencia_index', { 'anio': year }) }}"> <span class="glyphicon glyphicon-calendar"></span>{{year}}</a></li>
+            {% else %}
+                <li class="active"> 
+                  <span class="glyphicon glyphicon-calendar text-success"></span> <strong>{{year}}</strong>
+                </li>
+            {% endif %}
+        {% endfor %}
+      </ol>
+  <ul class="nav nav-tabs nav-justified hidden-print " role="tablist">
+        <li role="presentation"  class="active"><a href="#agentes" aria-controls="agentes" role="tab" data-toggle="tab"> <span class="glyphicon glyphicon-user"></span> EMPLEADOS </a></li>
+        <li role="presentation"><a href="#licencias" aria-controls="licencias" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-file"></span>LICENCIAS </a></li>
+        <li role="presentation"><a href="#vigentes" aria-controls="vigentes" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-file"></span> VIGENTES </a></li>
+        <li role="presentation"><a href="#permisos" aria-controls="permisos" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-file"></span> PERMISOS </a></li>
+  </ul>
+  
+<div class="tab-content print" id="copy">
+   <div role="tabpanel" class="tab-pane fade in active table-responsive" id="agentes">
+            <table id="tablaAgente" class="table  table-hover">
+                <thead>
+                    <tr>
+                        <th>Lic.</th>
+                        <th>Apellido y Nombre</th>
+                        <th>DNI</th>
+                        <th>Edad</th>
+                        <th>Domicilio</th>
+                        <th>Tel. Movil</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% set licVigentes, licTotal = [], []  %}
+                {% for agente in pagination if agente.usuario.esActivo | default(false)%}
+                    <tr>
+                        <td>     
+                            {% set conlic = false %}          
+                            {% for licencia in agente.licencia if licencia.fechaDesde | date('Y') == anio %} 
+                                {% set licTotal =  licTotal | merge([licencia]) %}
+                                {% set conlic = true %} 
+                                {% if licencia.vigente %}    
+                                    {% set licVigentes = licVigentes | merge([licencia]) %}
+                                {% endif %} 
+                            {% endfor %}
+                            {% if conlic %}
+                                  <span  data-toggle="tooltip" data-placement="top" title="Licencias">
+                                    <button class="btn btn-primary btn-xs glyphicon glyphicon-paperclip" data-toggle="collapse" data-target=".l-{{agente.id}}" aria-expanded="false" id="l-{{agente.id}}"> 
+                                    <span class="caret"></span>
+                                            
+                                     </button>
+                                  </span>
+
+                             {% else %}
+                                    <span class="glyphicon glyphicon-exclamation-sign"></span> 
+                             {% endif %}
+                        </td>
+                        <td><a data-toggle="tooltip" data-placement="top" title="Muestra TODOS los datos del Agente" href="{{ path('agente_show', { 'id': agente.id }) }}">{{ agente.apellidoNombre }}</a></td>
+                        <td>{{ agente.dni }}</td>
+                        <td>{% if agente.fechaNacimiento %}{{ agente.fechaNacimiento| age }}{% endif %}</td>
+                
+                        <td>{{ agente.domicilio }}</td>
+
+                        <td>{{ agente.telefonoMovil }}</td>
+                        <td>
+                            {% if app.user.departamentoRm.slug == "despacho" %}
+                             <a  class="btn btn-sm btn-primary" data-toggle="tooltip" data-placement="top" title="Muestra TODOS los datos del Agente" href="{{ path('documento_new', { 'tramite_id': agente.id, 'slug': "licencia" }) }}"> Nueva Licencia</a>
+                            {#<button type="button" class="btn btn-sm btn-primary btn-nuevalicencia" data-toggle="modal" data-target="#myModal" data-agente="{{ agente.apellidoNombre }}" data-href="{{ path('licencia_modal_new', { 'id': agente.id }) }}"> Nueva Licencia</button>#}
+                            {% endif %}
+                        </td>
+                    </tr>
+                        <tr  class="conteiner collapse out budgets l-{{agente.id}}" >
+                               <td></td>
+                               <td  colspan="8">
+                                     {{ render(controller('AusentismoBundle:Licencia:lista', { 'agenteId': agente.id, 'anio':anio} )) }}
+                                </td>
+                        </tr>
+
+                {% endfor %}
+                </tbody>
+            </table>
+
+    </div>
+    
+    <div role="tabpanel" class="tab-pane fade" id="licencias">
+        {#<h3>Licencias Año: {{anio}}</h3>#} <br>
+        {% set licencias = {} %}
+        {% for licencia in licTotal if licencia.articulo.codigoArticulo != "03" %}   
+           {% set licencias = licencias | merge([licencia]) %}
+        {% endfor %}
+        {% set pagination = licencias %}
+        {% set pagination, licmes, mesA, active, mesactivo = licencias, {}, "", false, "now" | date("d-m-Y") | localizeddate('none', 'none', 'es', null, "MMMM") %}
+        <ul class="nav nav-tabs" role="tablist">
+              {% for lic in licencias | sort((a, b) => a.fechaDesde <=> b.fechaDesde) %}
+                  {% if loop.first %}
+                        {% set lic1 = lic %}
+                        {% set mesA = lic.fechaDesde |localizeddate('none', 'none', 'es', null, "MMMM") %}
+      
+                        {% set active = true %}
+                  {% endif %}
+                  {% if mesA == lic.fechaDesde |localizeddate('none', 'none', 'es', null, "MMMM") %}
+                        
+                  {% else %}
+                        <li role="presentation" {% if mesactivo == mesA %} class="active" {% endif %} ><a href="#{{mesA}}" aria-controls="{{mesA}}" role="tab" data-toggle="tab"> {{mesA | upper}} </a></li>
+                        {% set mesA = lic.fechaDesde |localizeddate('none', 'none', 'es', null, "MMMM") %}
+                        {% set licmes =  {} %}
+                       
+                         {% set active = false %}
+                  {% endif %}
+              {% endfor %}
+              <li role="presentation" {% if mesactivo == mesA %}class="active" {% endif %}><a href="#{{mesA}}" aria-controls="{{mesA}}" role="tab" data-toggle="tab"> {{mesA | upper}} </a></li>
+                        
+        </ul>
+        <div class="tab-content">
+        {% set mesA = "" %}
+          {% for lic in licencias | sort((a, b) => a.fechaDesde <=> b.fechaDesde) %}
+                {% if loop.first %}
+                      {% set lic1 = lic %}
+                      {% set mesA = lic.fechaDesde |localizeddate('none', 'none', 'es', null, "MMMM") %}
+                      {% set licmes = licmes | merge([lic]) %}
+                      {% set active = true %}
+                {% endif %}
+                {% if mesA == lic.fechaDesde |localizeddate('none', 'none', 'es', null, "MMMM") %}
+                      {% set licmes = licmes | merge([lic]) %}
+                {% else %}
+                      <div role="tabpanel" class="tab-pane fade {% if mesactivo == mesA %} in active {% endif %}" id="{{mesA}}">
+                            {% set pagination = licmes %}
+                            {{ include('AusentismoBundle:Licencia:lista.html.twig') }}
+                      </div>  
+                      {% set mesA = lic.fechaDesde |localizeddate('none', 'none', 'es', null, "MMMM") %}
+                      {% set licmes =  {} %}
+                      {% set licmes = licmes | merge([lic]) %}
+                        {% set active = false %}
+                {% endif %}
+            {% endfor %}
+                <div role="tabpanel" class="tab-pane fade {% if mesactivo == mesA %} in active {% endif %}" id="{{mesA}}">
+                            {% set pagination = licmes %}
+                            {{ include('AusentismoBundle:Licencia:lista.html.twig') }}
+                </div>  
+        </div>
+    </div>
+    <div role="tabpanel" class="tab-pane fade" id="vigentes">
+        {% set pagination = licVigentes %}
+       {# <h3>Licencias Vigentes</h3>#}  <br>
+        {{ include('AusentismoBundle:Licencia:lista.html.twig') }}
+    </div>
+    <div role="tabpanel" class="tab-pane fade" id="permisos">
+        {% set permisos = {} %}
+        {% for licencia in licTotal if licencia.articulo.codigoArticulo == "03" %}   
+           {% set permisos = permisos | merge([licencia]) %}
+        {% endfor %}
+        {% set pagination = permisos %}
+        {% set pagination, licmes, mesA, active, mesactivo = permisos, {}, "", false, "now" | date("d-m-Y") | localizeddate('none', 'none', 'es', null, "MMMM") %}
+        <ul class="nav nav-tabs" role="tablist">
+           {# <h3>Permisos de Salida: {{anio}}</h3>#} <br>
+              {% for lic in permisos | sort((a, b) => a.fechaDesde <=> b.fechaDesde) %}
+                  {% if loop.first %}
+                        {% set lic1 = lic %}
+                        {% set mesA = lic.fechaDesde |localizeddate('none', 'none', 'es', null, "MMMM") %}
+      
+                        {% set active = true %}
+                  {% endif %}
+                  {% if mesA == lic.fechaDesde |localizeddate('none', 'none', 'es', null, "MMMM") %}
+                        
+                  {% else %}
+                        <li role="presentation" {% if mesactivo == mesA %} class="active" {% endif %} ><a href="#p{{mesA}}" aria-controls="p{{mesA}}" role="tab" data-toggle="tab"> {{mesA | upper}} </a></li>
+                        {% set mesA = lic.fechaDesde |localizeddate('none', 'none', 'es', null, "MMMM") %}
+                        {% set licmes =  {} %}
+                       
+                         {% set active = false %}
+                  {% endif %}
+              {% endfor %}
+              <li role="presentation" {% if mesactivo == mesA %}class="active" {% endif %}><a href="#p{{mesA}}" aria-controls="p{{mesA}}" role="tab" data-toggle="tab"> {{mesA | upper}} </a></li>
+                        
+        </ul>
+        <div class="tab-content">
+        {% set mesA = "" %}
+          {% for lic in permisos | sort((a, b) => a.fechaDesde <=> b.fechaDesde) %}
+                {% if loop.first %}
+                      {% set lic1 = lic %}
+                      {% set mesA = lic.fechaDesde |localizeddate('none', 'none', 'es', null, "MMMM") %}
+                      {% set licmes = licmes | merge([lic]) %}
+                      {% set active = true %}
+                {% endif %}
+                {% if mesA == lic.fechaDesde |localizeddate('none', 'none', 'es', null, "MMMM") %}
+                      {% set licmes = licmes | merge([lic]) %}
+                {% else %}
+                      <div role="tabpanel" class="tab-pane fade {% if mesactivo == mesA %} in active {% endif %}" id="p{{mesA}}">
+                            {% set pagination = licmes %}
+                            {{ include('AusentismoBundle:Licencia:lista.html.twig') }}
+                      </div>  
+                      {% set mesA = lic.fechaDesde |localizeddate('none', 'none', 'es', null, "MMMM") %}
+                      {% set licmes =  {} %}
+                      {% set licmes = licmes | merge([lic]) %}
+                        {% set active = false %}
+                {% endif %}
+            {% endfor %}
+                <div role="tabpanel" class="tab-pane fade {% if mesactivo == mesA %} in active {% endif %}" id="p{{mesA}}">
+                            {% set pagination = licmes %}
+                            {{ include('AusentismoBundle:Licencia:lista.html.twig') }}
+                </div>  
+        </div>
+    </div>
+</div>
+          
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Seleccionar el Tipo de Licencia para 
+            <br/> <span id="modal-nombre"></span></h4>
+      </div>
+      <div id="modal-body-licencia" class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+{% endblock %}
+{% block javascripts %}  
+{{ parent() }}
+  <script> 
+
+  $(".btn-nuevalicencia").unbind('click').click( function(){
+     var $href= URL + $(this).attr("data-href");
+     var $agente= $(this).attr("data-agente");
+      $("#modal-nombre").append($agente);
+      $("#modal-body-licencia").load($href);
+    });
+</script> <!-- DataTables  -->
+{% endblock %}

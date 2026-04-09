@@ -1,0 +1,10 @@
+<p style="margin-left:4cm; margin-right:0cm; text-align:left">
+    <strong>
+    {{ documento.nombreDocumento | upper }}    N°: 0{{ documento.numero }} - {{ documento.anio }}<br>
+  		<small>
+  	Ref.:{{documento.tramite.expediente.extracto | upper}} </small></strong> 
+</p> 
+ {{documento.tramite.organismoOrigen.textoPliego | upper}}
+  <p style="text-align:justify"><span style="font-size:14px">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;Se remiten las actuaciones de referencia a <strong> {{documento.tramite.organismoOrigen | upper}}</strong>, para conocimiento y evaluación de lo Dictaminado por  Médica en <strong>Acta N°:     de Fecha: {{ "now"|date('d-m-Y') }}  del Paciente: {{documento.tramite.expediente.agente.apellidoNombre}}  , CUIL: {{documento.tramite.expediente.agente.cuil}}</strong>.<br>
+	&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;Atentamente.- 
+</p>

@@ -1,0 +1,239 @@
+<?php
+
+namespace Siarme\AusentismoBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+
+/**
+ * Organismo
+ *
+ * @ORM\Table(name="organismo")
+ * @ORM\Entity(repositoryClass="Siarme\ExpedienteBundle\Repository\OrganismoRepository")
+ */
+class Organismo
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="organismo", type="string", length=255)
+     */
+    private $organismo;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="responsable", type="text", length=800, nullable=true)
+     */
+    private $responsable;
+
+     /**
+     * @var string
+     *
+     * @ORM\Column(name="clasificacion", type="string", length=25, nullable=true)
+     */
+    private $clasificacion;
+
+    /** 
+     * @ORM\ManyToOne(targetEntity="Siarme\AusentismoBundle\Entity\Ministerio",inversedBy="organismo") 
+     * @ORM\JoinColumn(name="ministerio_id", referencedColumnName="id")
+     */
+    private $ministerio;
+
+    /** 
+     * @ORM\ManyToOne(targetEntity="Siarme\AusentismoBundle\Entity\Secretaria",inversedBy="organismo") 
+     * @ORM\JoinColumn(name="secretaria_id", referencedColumnName="id")
+     */
+    private $secretaria;
+
+    /** 
+    * @ORM\ManyToOne(targetEntity="Siarme\AusentismoBundle\Entity\Localidad", inversedBy="organismo") 
+    * @ORM\JoinColumn(name="localidad_id", referencedColumnName="id")
+    */
+    private $localidad;
+
+    /**
+     * One Organismo has Many Cargo.
+     * @ORM\OneToMany(targetEntity="Siarme\AusentismoBundle\Entity\Cargo", mappedBy="organismo")
+     */
+    private $cargo;
+
+    /*
+    * ToString
+    */
+    public function __toString()
+    {
+     return   $this->getOrganismo();
+    }
+    
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+         $this->cargo = new ArrayCollection();
+         $this->clasificacion = "EDUCACION";
+    }
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set organismo
+     *
+     * @param string $organismo
+     *
+     * @return Organismo
+     */
+    public function setOrganismo($organismo)
+    {
+        $this->organismo = $organismo;
+
+        return $this;
+    }
+
+    /**
+     * Get organismo
+     *
+     * @return string
+     */
+    public function getOrganismo()
+    {
+        return $this->organismo;
+    }
+
+    /**
+     * Set responsable
+     *
+     * @param string $responsable
+     *
+     * @return Organismo
+     */
+    public function setResponsable($responsable)
+    {
+        $this->responsable = $responsable;
+
+        return $this;
+    }
+
+    /**
+     * Get responsable
+     *
+     * @return string
+     */
+    public function getResponsable()
+    {
+        return $this->responsable;
+    }
+
+    /**
+     * Set clasificacion
+     *
+     * @param string $clasificacion
+     *
+     * @return Organismo
+     */
+    public function setClasificacion($clasificacion)
+    {
+        $this->clasificacion = $clasificacion;
+
+        return $this;
+    }
+
+    /**
+     * Get clasificacion
+     *
+     * @return string
+     */
+    public function getClasificacion()
+    {
+        return $this->clasificacion;
+    }
+
+    /**
+     * Set ministerio
+     *
+     * @param \Siarme\AusentismoBundle\Entity\Ministerio $ministerio
+     *
+     * @return Organismo
+     */
+    public function setMinisterio(\Siarme\AusentismoBundle\Entity\Ministerio $ministerio = null)
+    {
+        $this->ministerio = $ministerio;
+
+        return $this;
+    }
+
+    /**
+     * Get ministerio
+     *
+     * @return \Siarme\AusentismoBundle\Entity\Ministerio
+     */
+    public function getMinisterio()
+    {
+        return $this->ministerio;
+    }
+
+    /**
+     * Set secretaria
+     *
+     * @param \Siarme\AusentismoBundle\Entity\Secretaria $secretaria
+     *
+     * @return Organismo
+     */
+    public function setSecretaria(\Siarme\AusentismoBundle\Entity\Secretaria $secretaria = null)
+    {
+        $this->secretaria = $secretaria;
+
+        return $this;
+    }
+
+    /**
+     * Get secretaria
+     *
+     * @return \Siarme\AusentismoBundle\Entity\Secretaria
+     */
+    public function getSecretaria()
+    {
+        return $this->secretaria;
+    }
+
+    /**
+     * Set localidad
+     *
+     * @param \Siarme\AusentismoBundle\Entity\Localidad $localidad
+     *
+     * @return Organismo
+     */
+    public function setLocalidad(\Siarme\AusentismoBundle\Entity\Localidad $localidad = null)
+    {
+        $this->localidad = $localidad;
+
+        return $this;
+    }
+
+    /**
+     * Get localidad
+     *
+     * @return \Siarme\AusentismoBundle\Entity\Localidad
+     */
+    public function getLocalidad()
+    {
+        return $this->localidad;
+    }
+}

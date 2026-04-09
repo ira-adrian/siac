@@ -1,0 +1,60 @@
+<?php
+
+namespace Siarme\AusentismoBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Enfermedad
+ *
+ * @ORM\Table(name="enfermedad")
+ * @ORM\Entity(repositoryClass="Siarme\AusentismoBundle\Repository\EnfermedadRepository")
+ */
+class Enfermedad
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="codigoEnfermedad", type="string", length=4, unique=true)
+     */
+    private $codigoEnfermedad;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="enfermedad", type="string", length=150)
+     */
+    private $enfermedad;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="grupo", type="string", length=2)
+     */
+    private $grupo;
+
+    /** 
+     *@ORM\OneToMany(targetEntity="Siarme\AusentismoBundle\Entity\Licencia", mappedBy="enfermedad") 
+     */
+    private $licencia;
+
+    /** 
+     * @ORM\ManyToOne(targetEntity="Siarme\AusentismoBundle\Entity\GrupoEnfermedad",inversedBy="enfermedad") 
+     * @ORM\JoinColumn(name="grupo_enfermedad_id", referencedColumnName="id")
+     */
+    private $grupoEnfermedad;
+
+     public function __toString()
+    {
+         return $this->getCodigoEnfermedad().' - '.$this->getEnfermedad();
+    }
+}

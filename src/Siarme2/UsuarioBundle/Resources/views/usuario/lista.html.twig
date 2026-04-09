@@ -1,0 +1,74 @@
+<table  class="table  table-hover tablaAgente text-uppercase">
+    <thead>
+        <tr>
+            <th>Apellido y Nombre</th>
+            <th>DNI</th>
+            <th>Usuario</th>
+            <th>Reparticion</th>
+            <th>Email</th>
+            <th>Telefono</th>
+            <th>Estado</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for agente in usuarios if agente.usuario.departamentoRm.slug | default( "-") == appDpto or "todo" == appDpto %}
+        <tr>
+            <td><a data-toggle="tooltip" data-placement="top" title="Muestra TODOS los datos del Agente" href="{{ path('agente_show', { 'id': agente.id }) }}" target="_blank">{{ agente.apellidoNombre }} </a></td>
+            <td>{{ agente.dni }}</td>
+            <td> 
+                {% if agente.usuario.id is defined %}
+                        <a data-toggle="tooltip" data-placement="top" title="Ver Perfil"  href="{{ path('usuario_show', { 'id': agente.usuario.id }) }}" target="_blank">{{ agente.usuario.usuario | default( "-") }}</a>
+                        <br>
+                        <small>Rol: <i>{{ agente.usuario.rol | default( "-") }}</i></small>
+                {% else %}
+                    -
+                {% endif %}
+
+            </td>
+
+            <td>{{ agente.usuario.departamentoRm | default( "-") }}</td>
+            <td>{{ agente.email }}</td>
+            <td>{{ agente.telefonoMovil }}</td>
+            <td>
+                {% set licVigentes , licVig = false , [] %} 
+                {% for licencia in agente.licencia if licencia.fechaDesde | date('Y') == 'now'| date('Y') %} 
+                        {% if licencia.vigente %}    
+                            {% set licVigentes = true %}
+                            {% set licVig = licencia %}
+                        {% endif %} 
+                {% endfor %}
+                {% if agente.usuario.esActivo is defined %}
+                    {% if not agente.usuario.esActivo %}
+                        <span class="label label-default">Inactivo</span>
+                        {#<span class="glyphicon glyphicon-check text-success"></span>#}
+                    {% endif %}
+                {% else %}
+                    <span class="label label-danger">---</span>
+                {% endif %}
+                {% if licVigentes and licVig.articulo.codigoArticulo | default(0) == "03" %}
+                  <span class="label label-warning"> 
+                        Con Permiso
+                  </span>
+                {% elseif licVigentes %}
+                    <span class="label label-info"> 
+                        Con Licencia
+                    </span>
+                {% endif %}
+
+            </td>
+            <td>
+                {% if app.user.departamentoRm.slug == "despacho" %}
+                    <a  class="btn btn-sm btn-primary" data-toggle="tooltip" data-placement="top" title="Muestra TODOS los datos del Agente" href="{{ path('documento_new', { 'tramite_id': agente.id, 'slug': "licencia" }) }}">Nueva Licencia</a>
+                {% endif %}                     
+                 {% if app.user.departamentoRm.slug == "info"  %}
+                    {% if agente.usuario.id is not defined %}
+                        <a  class="text-danger" data-toggle="tooltip" data-placement="top" title="CREAR nuevo Usuario" href="{{ path('usuario_new', { 'id': agente.id }) }}"> 
+                        <span class="glyphicon glyphicon-plus-sign"></span>Crear Usuario</a>
+                    {% endif %}
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

@@ -1,0 +1,8 @@
+
+	{{ form_start(form,  {'action': path('recordatorio_tramite_new',{'id': recordatorio.tramite.id}), 'method': 'POST'}) }}
+        {{ form_widget(form) }}
+            <div class="text-right">
+              <input class="btn btn-danger" type="submit" value="GUARDAR" />
+            </div>
+    {{ form_end(form) }}
+

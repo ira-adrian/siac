@@ -1,0 +1,25 @@
+{# Siarme/ExpedienteBundle/Resources/views/Default/informe_tramite.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout_informe_show.html.twig' %}
+{% block cuerpo %}
+          <h5 class="text-center"> Informe de la cantidad de TRAMITES </h5>
+          <h5 class="text-center">Desde la Fecha: <strong>{{ fechaDesde| date("m/d/Y") }}</strong> Hasta la Fecha: <strong>{{fechaHasta | date("m/d/Y")}}</strong> </h5>
+        <div class="panel-body">
+        <div class="conteiner-fluid">
+            {% for clasificacion in clasificaciones %}
+              <div class="col-md-4">
+                    <dl>
+                      <dt> {{clasificacion}}  expedientes: <span class="badge alert-info">{{ informe[clasificacion.clasificacion][clasificacion.clasificacion] }}</span>
+                      </dt>
+                       Cantidad de Tramites Realizados:
+                      {% for  expediente in tipoTramites %}        
+                      {% set cant = informe[clasificacion.clasificacion][expediente.tipoTramite]  %}
+                      {% if (cant > 0)%}
+                       <dd>{{ expediente.tipoTramite }} <span class="badge"> {{ informe[clasificacion.clasificacion][expediente.tipoTramite] }}  </span></dd>
+                      {% endif %}
+                      {% endfor %}
+                    </dl>
+              </div>
+            {% endfor %}             
+        </div>
+        </div>
+{% endblock %}

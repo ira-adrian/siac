@@ -1,0 +1,24 @@
+{# Siarme/ExpedienteBundle/Resources/views/Default/informe_new.html.twig#}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} INFORME{% endblock %}
+{% block menu_li %}
+    <li>
+        <a  href="{{ path('expediente_reparticion_index') }}"> <span class="glyphicon glyphicon-list-alt"> Lista </span></a>
+    </li> 
+{% endblock %}
+{% block main %}
+    <div id="print"  class="panel panel-default print">
+        <div class="panel-heading text-center">  
+            <h3> GENERAR INFORME </h3>
+        </div>
+         <div class="panel-body">
+            {{ form_start(form) }}
+                {{ form_widget(form) }}
+
+            <div class="text-right">
+                <input class="btn btn-danger" type="submit" value="GENERAR" />
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>  
+{% endblock %}

@@ -1,0 +1,113 @@
+<?php
+
+namespace Siarme\ExpedienteBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * TipoTramite
+ *
+ * @ORM\Table(name="tipo_tramite")
+ * @ORM\Entity(repositoryClass="Siarme\ExpedienteBundle\Entity\TipoTramiteRepository")
+ */
+class TipoTramite
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="tipoTramite", type="string", length=255)
+     */
+    private $tipoTramite;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Siarme\ExpedienteBundle\Entity\Tramite", mappedBy="tipoTramite")
+     */
+    private $tramite;
+
+     public function __toString()
+    {
+        return  $this->getTipoTramite();
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->tramite = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Get id
+     *
+     * @return integer 
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set tipoTramite
+     *
+     * @param string $tipoTramite
+     * @return TipoTramite
+     */
+    public function setTipoTramite($tipoTramite)
+    {
+        $this->tipoTramite = $tipoTramite;
+
+        return $this;
+    }
+
+    /**
+     * Get tipoTramite
+     *
+     * @return string 
+     */
+    public function getTipoTramite()
+    {
+        return $this->tipoTramite;
+    }
+
+    /**
+     * Add tramite
+     *
+     * @param \Siarme\ExpedienteBundle\Entity\Tramite $tramite
+     * @return TipoTramite
+     */
+    public function addTramite(\Siarme\ExpedienteBundle\Entity\Tramite $tramite)
+    {
+        $this->tramite[] = $tramite;
+
+        return $this;
+    }
+
+    /**
+     * Remove tramite
+     *
+     * @param \Siarme\ExpedienteBundle\Entity\Tramite $tramite
+     */
+    public function removeTramite(\Siarme\ExpedienteBundle\Entity\Tramite $tramite)
+    {
+        $this->tramite->removeElement($tramite);
+    }
+
+    /**
+     * Get tramite
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getTramite()
+    {
+        return  $this->tramite;
+    }
+}

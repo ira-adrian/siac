@@ -1,0 +1,27 @@
+{# Siarme/AusentismoBundle/Resources/views/Agente/index.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} AGENTE{% endblock %}
+
+{% block main %}
+
+    <div class="panel panel-default">
+      <!-- Default panel contents -->
+      <div class="panel-heading">
+            &nbsp;&nbsp;MODIFICAR {{ tramite.tipoTramite}} <strong>{{ tramite.numeroTramite }}</strong> &nbsp;|  {{ tramite.trimestre }}° Trimestre  | Fecha: {% if tramite.fechaDestino %}{{ tramite.fechaDestino|date('d-m-Y') }}{% endif %} 
+      </div>
+
+        <div class="panel panel-body">
+            {{ form_start(edit_form) }}
+            {{ form_widget(edit_form) }}
+            <div class="text-right">
+               <a  class="btn btn-primary" href="{{ referer }}"> CANCELAR </span></a>
+              <input class="btn btn-danger" onclick= "return confirm('¿Desea GUARDAR?');" type="submit" value="GUARDAR" />
+            </div>
+            {{ form_end(edit_form) }}
+        </div>
+    </div>
+
+{% endblock %}
+{% block footer %}
+<dir class="footer"></dir>
+{% endblock %}

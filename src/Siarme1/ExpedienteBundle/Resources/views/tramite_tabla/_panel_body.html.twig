@@ -1,0 +1,43 @@
+{# Siarme/AusentismoBundle/Resources/views/Agente/index.html.twig #}
+<div class="panel-group" id="accordion">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+          <span class="glyphicon glyphicon-minus"></span> <span class="glyphicon glyphicon-file"></span>DOCUMENTOS ({{tramite.documento | length}})
+        </a>
+
+            &nbsp;&nbsp;&nbsp;<span role="presentation"  class="dropdown overflow hidden-print"    
+                  {% if tramite.documento | length == 0 %}  tabindex="0" data-placement="top" id="popover-nuevo" data-toggle="popover" data-trigger="show" title="Nuevo Documento" data-content="Has click y selecciona el documento a crear"             {% endif %}>
+                <a class="dropdown-toggle" href="#" role="presentation" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span style="font-size:18px;" class='glyphicon glyphicon-plus-sign'></span> Nuevo Documento<span class="caret"></span></a>
+                <div class="dropdown-menu" style="width: 400px;" aria-labelledby="dropdownMenuLink">
+                  <ul class="list-inline text-center"> 
+
+                    {% for tipo in tramite.tipoTramite.tipoDocumento if (tipo.visible) %}   
+                      <li>                           
+                        <a  href="{{ path( 'documento_new' , {'tramite_id': tramite.id, 'slug': tipo.slug  } ) }}" role="button"><span style="font-size:20px; margin:2px;"  class= '{{ tipo.glyphicon}}'></span>
+                        </br> 
+                        {{ tipo.nombredocumento }}</a> 
+                        {# if tipo.esArchivo %}<span class='text-success'><strong>I</strong></span> {% else %}<span class='text-success'><strong>L</strong></span>{% endif #}
+                      </li>  
+                    {% endfor %}
+                  </ul>
+                </div>
+           </span>
+
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse in">
+      <div  class="panel-body ">
+         <ul id="documentos" class="list-inline text-center text-info"> 
+                  {% for documento in tramite.documento | reverse %}  
+                    {{ include('DocumentoBundle:Documento:_lista_documento.html.twig') }}
+                  {% endfor %}
+          </ul> 
+         {{ render(controller('DocumentoBundle:Documento:uploadsModal', {'tramite_id': tramite.id, 'slug': 'archivo' }))}}
+      </div>
+    </div>
+  </div>
+</div>
+
+

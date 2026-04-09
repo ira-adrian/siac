@@ -1,0 +1,22 @@
+{# Siarme\AusentismoBundle\Resources\views\Itempedido\_tbody_adjudicado.html.twig #}
+{% if itemOfertaAdjudicado.numero is defined %}
+<tr>
+    <td style="width: 10%;">     
+        <div class="dropdown text-left" style="margin:0px;"> 
+                    {% include 'AusentismoBundle:ItemOferta:_menu_info_item.html.twig' with {'entidad': itemOfertaAdjudicado.itemOferta, 'tipo':constant('TIPO_ENTIDAD', itemOfertaAdjudicado.itemOferta ), 'itemOferta': itemOfertaAdjudicado.itemOferta, } only %}
+        </div>
+    </td>
+    <td>{{ itemOfertaAdjudicado.numero }} </td>
+    {# <td>{% if itemOfertaAdjudicado.fecha %}{{ itemOfertaAdjudicado.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>#}
+    <td><a data-toggle="tooltip" data-placement="top" title='Ver ítem' href="{{ path('itemoferta_show', { 'id': itemOfertaAdjudicado.itemOferta.id }) }}" target="_blank">{{ itemOfertaAdjudicado.itemOferta.codigo }}</a></td>
+    <td style="width: 43%;"><small>{{ itemOfertaAdjudicado.itemOferta.item }}</small></td>
+        <td> ${{ itemOfertaAdjudicado.precio | default(0) | number_format(2, ',', '.')  }} </td>
+        <td> <strong>{{ itemOfertaAdjudicado.cantidad | default('-')}}</strong> </td>
+        <td class="montoAdjudicado"><strong>${{ (itemOfertaAdjudicado.precio * itemOfertaAdjudicado.cantidad) | default(0) | number_format(2, ',', '.')  }}</strong></td>
+
+    <td style="width: 12%;" class="estado">
+                    <div class="text-success"><span class="glyphicon glyphicon-check" aria-hidden="true"></span><span class="estadoAdjudicado">Preadjudicado</span></div>                  
+    
+    </td>
+</tr>
+{% endif %}

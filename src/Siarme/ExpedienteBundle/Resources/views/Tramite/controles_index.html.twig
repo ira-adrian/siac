@@ -8,7 +8,7 @@
 {% block contenido %}
   <div id="copy" class="row" style="padding:5px;">
         {% if app.user.departamentoRm.slug != "dppr" %} {% set modulo ="EXPEDIENTES" %}{% else %}{% set modulo ="CCOO-DPPR" %}{% endif %}
-        {% set modulo2 = "CONTROL" %}  
+        {% set modulo2 = "INGRESOS" %}  
         {{ app.session.set('modulo', modulo2) }}
         {{ app.session.set('glyphicon', 'glyphicon glyphicon-transfer') }}
         {{ app.session.set('route', 'tramite_control_index') }}    
@@ -16,7 +16,9 @@
      <div class="nav nav-tabs nav-justified hidden-print" style="padding-top:5px;">      
         <li role="presentation" ><a href="{{ path('expediente_reparticion_index') }}"> <span class="glyphicon glyphicon-folder-open"></span> {{modulo}}</a></li>
         <li role="presentation"><a href="{{ path('tramite_reparticion_index') }}"> <span class="glyphicon glyphicon-tasks"></span>PEDIDO</a></li>
-        <li role="presentation" class="active"><a href="{{ path('tramite_control_index') }}"> <span class="glyphicon glyphicon-transfer"></span> CONTROL</a></li>
+
+        <li role="presentation" class="active"><a href="{{ path('tramite_control_index') }}"> <span class="glyphicon glyphicon-transfer"></span> INGRESOS</a></li>
+
         <li role="presentation"><a style="color:#306066;" href="{{ path('general_reparticion_index', {'id': app.user.departamentoRm.id }) }}"><span class="glyphicon glyphicon-folder-open"></span> ACUERDO MARCO</a></li>
         <li role="presentation"><a  href="{{ path('reporte_index', {'id': app.user.departamentoRm.id }) }}"> <span class="glyphicon glyphicon-stats"></span> REPORTE</a></li>
         <li role="presentation"><a href="{{ path('organismo_index', {'id': app.user.departamentoRm.id }) }}"><span class="glyphicon glyphicon-tent" ></span> SAFS</a></li>
@@ -37,8 +39,46 @@
             {% endif %}
         {% endfor %}
       </ol>
-        {{ include('ExpedienteBundle:Tramite:_lista.html.twig') }}  
+        {% set controles = {} %}
+        {% if is_granted('ROLE_SUPERVISOR')  and ( app.user.id == 1 or app.user.id == 3)%}
+          {% for tramite1 in tramites | reverse if tramite1.control is not empty and not tramite1.estado %}
+              {% if loop.first %}
+               <table id="" style="width:100%" class="tablaSinOrdenar table table-responsive table-hover">
+                   <thead>
+                     {{ include('ExpedienteBundle:'~ tramite1.control[0].tipoTramite.slug ~':_thead_completo.html.twig') }}         
+                  </thead>
+                <tbody>
+             {% endif %}
+                  {% set ingresos = tramite1.control  %}
+                    {% for tramite in ingresos %}
+                      {% if loop.first %}{% set appFirst = true %} {% else %}{% set appFirst = false %} {% endif %} 
+                        {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_tbody_completo.html.twig') }}
+                    {% endfor %}
+          {% endfor %}
+                   </tbody>
+                </table>
+        {% else %}
+              {% set appFirst = true %}
+              {% for tramite1 in tramites  | reverse  if tramite1.control is not empty and tramite1.estadoTramite.slug == "ingresado"  %}
+                  {% set ingresos = tramite1.control  %}
+                  {% set controles = controles | merge([ingresos[0]])  %} 
+              {% endfor %}
+              {% for tramite in controles %}
+                          {% if loop.first %}
+                             <table id="" style="width:100%" class="tablaSinOrdenar table table-responsive table-hover">
+                                 <thead>
+                                   {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_thead_completo.html.twig') }}         
+                                </thead>
+                              <tbody>
+                           {% endif %}
+                                  {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_tbody_completo.html.twig') }} 
+                {% endfor %}
+                            </tbody>
+                        </table>
+        {% endif %}
+
 </div>
+
 {% endblock %}
 {% block javascripts %}  
 {{ parent() }}

@@ -2,7 +2,6 @@
 
 namespace Siarme\ExpedienteBundle\Controller;
 
-use DateTime;
 use Siarme\ExpedienteBundle\Entity\Tramite;
 use Siarme\ExpedienteBundle\Entity\TipoTramite;
 use Siarme\ExpedienteBundle\Entity\Tarea;
@@ -17,7 +16,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Twilio\Rest\Client;
-
+use Symfony\Component\HttpFoundation\JsonResponse;
 /**
  * Tramite controller.
  *
@@ -100,137 +99,33 @@ class TramiteController extends Controller
     }
 
     /**
-     * Lists all tramite entities.
+     * devuelve  todos los items con calidad copiadad de otro proceso.
      *
-     * @Route("/curl", name="tramite_curl")
+     * @Route("/{id1}/{id2}/calidad-copiar", name="item_oferta_calidad_copiar")
      * @Method("GET")
      */
-    public function probarCurl(){
-       
-        $dateTime ="2025-12-12";
-        $dias = 4;
-        
-        // 1. Obtengo el año de consulta de $datetime.
-        $fecha = new \DateTime($dateTime);
-        $anio = $fecha->format("Y");
+    public function calidadCopiarAction($id1, $id2)
+    {   
+       $em = $this->getDoctrine()->getManager();
+       $tramiteOrigen = $em->getRepository('ExpedienteBundle:Tramite')->find($id1);
+       $tramiteDestino = $em->getRepository('ExpedienteBundle:Tramite')->find($id2);
+      if (($tramiteOrigen->getTipoTramite()->getSlug() == "tramite_proceso"  ) and ( $tramiteDestino->getTipoTramite()->getSlug() == "tramite_proceso" )) {
+     
+           $itemsOrigen = $tramiteOrigen->getItemOfertas();
 
-        // Convierto a segundos $datetime. 
-        $fechaInicial = date($dateTime);
-        $fechaEnSegundos = strtotime($fechaInicial);
-
-        $diasAumentar = $dias;
-        $dia = 86400;
-        //Establezco la zon horaria 
-        //date_default_timezone_set('America/Argentina/Buenos_Aires');
-
-        $contador = 1;
-        // Inicializo el array que contendra los feriado con los que coincide el periodo de plazos.
-        $msj = "";
-        //Feriados Nacionales
-        $feriadosN = $this->getFeriados($anio);
-        //Feriados Provinciales
-        $em = $this->getDoctrine()->getManager();
-        $feriadosP = $em->getRepository('ExpedienteBundle:Evento')->findByAnio($anio);
-        $esFeridado = false;
-        $esFeridadoP = false;
-        while ($contador <= $diasAumentar) {
-            // 2. Compruebo si la  fecha esta en un Feriado Nacional
-                if ($feriadosN) {
-                    foreach ($feriadosN as $dato) {
-                        $fecha = $dato['fecha'];
-                        $nombre = $dato['nombre'];
-                        $fechaEnSegundos2 = strtotime($fecha);
-                        if ($fechaEnSegundos == $fechaEnSegundos2) {
-                            $msj .= "- $fecha | $nombre <br>";
-                            $fechaEnSegundos += $dia;
-                            $esFeridado = true;
-                        }   
-                    }
-                } 
-                
-            // 3. Compruebo si la  fecha esta en un feriado Provincial
-            if (!$esFeridado) {
-                // Iterar sobre cada objeto Evento en el array
-                $nombre = "";
-                
-                foreach ($feriadosP as $evento) {
-                    // 1. Obtener las fechas de inicio y fin del evento
-                    $fechaInicio = $evento->getFechaInicio(); // O acceder directamente a la propiedad si no tienes getters
-                    $fechaFin = $evento->getFechaFin();       // O acceder directamente a la propiedad
-                    $start = strtotime($fechaInicio->format('Y-m-d'));
-                    $end = strtotime($fechaFin->format('Y-m-d'));
-
-                    // La fecha a verificar debe ser MAYOR O IGUAL que la fecha de inicio
-                    // Y la fecha a verificar debe ser MENOR O IGUAL que la fecha de fin
-                    if ($fechaEnSegundos >= $start && $fechaEnSegundos <= $end) {
-                        $nombre = $evento->getTitulo();
-                        $esFeridadoP = true;
-                      
-                    } 
-                }
-                if ($esFeridadoP) {  
-                        $fecha = Date('Y-m-d',$fechaEnSegundos);
-                        $msj .= "- $fecha | $nombre <br>";
-                        $fechaEnSegundos += $dia;
-                        $esFeridadoP = false;
-                        $esFeridado = true;
-                }
-            }
-
-            // 4. Compruebo si la fecha esta en un Fin de Semana
-            if (!$esFeridado) {
-                $fechaEnSegundos += $dia;
-                if (date('N',$fechaEnSegundos) == 6 or date('N',$fechaEnSegundos) == 7)  {
-                    
-                } else {
-                  
-                    $contador +=1;  
-                }
-            } 
-           $esFeridado = false;
-        }
-
-        return  date('Y-m-d' , $fechaEnSegundos)." " . $msj . "\n";
+           $itemsDestino = $tramiteDestino->getItemOfertas();
+           $itemOrigen = null;
+           $i =0;
+           foreach ($itemsOrigen as $itemOrigen) {
+                $itemsDestino[$i]->setCalidad($itemOrigen->getCalidad());
+               $i++;
+           }
+           $em->flush();
+       }
+       return $this->redirectToRoute('tramite_show', array('id' => $tramiteDestino->getId()));
 
     }
-
-
-    public function getFeriados($anio = null)
-        {
-                // 2. Compruebo si la  fecha esta en un feriado nacional
-                // 2.1. Inicializar cURL para hacer la solicitud
-                $url = "https://api.argentinadatos.com/v1/feriados/".$anio;
-                $ch = curl_init($url);
-
-                // 2.2. Configurar cURL para devolver la respuesta como una cadena
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                // **IMPORTANTE:** Configuración extra para manejo de errores (opcional pero recomendado)
-                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Seguir redirecciones
-                curl_setopt($ch, CURLOPT_TIMEOUT, 60);          // Establecer tiempo límite
-
-                // 2.3. Ejecutar la solicitud y guardar la respuesta JSON
-                $response = curl_exec($ch);
-
-                // 2.4. Diagnóstico de Errores de cURL
-                if (curl_errno($ch)) {
-                    $fecha = null;
-                }
-                // 2.5. Cerrar la sesión cURL
-                curl_close($ch);
-
-                // 2.6. Decodificar la respuesta JSON
-                $datos = json_decode($response, true);
-
-                // 2.7. Verificar la decodificación y el contenido
-                if ($datos === null) {
-                    $fecha = null;
-                } elseif (is_array($datos) && count($datos) > 0) {
-                    return $datos;
-                } else {
-                    return false;
-                }
-        }
-
+    
     /**
      * Lists all tramite entities.
      *
@@ -267,44 +162,6 @@ class TramiteController extends Controller
 
         return $this->render('ExpedienteBundle:Tramite:ofertas_index.html.twig', array(
             'ofertas' => $tramites,
-            'tareas' =>  $tareas,
-            'recordatorios' => $recordatorios,
-            'anio'=>$anio,
-        ));
-    }
-
-    /**
-     * Lists all tramite entities.
-     *
-     * @Route("/control/{anio}", name="tramite_control_index")
-     * @Method("GET")
-     */
-    public function controlIndexAction($anio = null)
-    {
-        if (empty($anio)) {
-            $date = new \Datetime();
-            $anio = $date->format("Y");
-        }
-
-        $em = $this->getDoctrine()->getManager();
-        $usuario = $this->getUser();
-
-        //si es false devuelve aquellos que no estan con expedientes
-        $tareas = $em->getRepository('ExpedienteBundle:Tarea')->findByTramiteUsuario($usuario);
-
-        $tramites = $em->getRepository('ExpedienteBundle:Tramite')->findByDepartamentoRm($usuario->getDepartamentoRm(), $anio, "tramite_pedido");
-        // dump($tramites );
-        // exit();
-        //si es false devuelve aquellos que no estan con recordatorios
-        
-        $recordatorios = $em->getRepository('ExpedienteBundle:Recordatorio')->findByTramiteUsuario($usuario);
-
-        //devuelve aquellos EXPEDIENTE que pertenecen a la reparticion del usuario y no poseen TRAMITE
-        //$expedientesPendientes = $em->getRepository('ExpedienteBundle:Expediente')->findByReparticionPendientes($usuario->getDepartamentoRm());
-
-        return $this->render('ExpedienteBundle:Tramite:controles_index.html.twig', array(
-            'tramites' => $tramites,
-            'control'=> true,
             'tareas' =>  $tareas,
             'recordatorios' => $recordatorios,
             'anio'=>$anio,
@@ -396,6 +253,43 @@ class TramiteController extends Controller
         ));
     }
 
+   /**
+     * Lists all tramite entities.
+     *
+     * @Route("/control/{anio}", name="tramite_control_index")
+     * @Method("GET")
+     */
+    public function controlIndexAction($anio = null)
+    {
+        if (empty($anio)) {
+            $date = new \Datetime();
+            $anio = $date->format("Y");
+        }
+
+        $em = $this->getDoctrine()->getManager();
+        $usuario = $this->getUser();
+
+        //si es false devuelve aquellos que no estan con expedientes
+        $tareas = $em->getRepository('ExpedienteBundle:Tarea')->findByTramiteUsuario($usuario);
+
+        $tramites = $em->getRepository('ExpedienteBundle:Tramite')->findByDepartamentoRm($usuario->getDepartamentoRm(), $anio, "tramite_pedido");
+        // dump($tramites );
+        // exit();
+        //si es false devuelve aquellos que no estan con recordatorios
+        
+        $recordatorios = $em->getRepository('ExpedienteBundle:Recordatorio')->findByTramiteUsuario($usuario);
+
+        //devuelve aquellos EXPEDIENTE que pertenecen a la reparticion del usuario y no poseen TRAMITE
+        //$expedientesPendientes = $em->getRepository('ExpedienteBundle:Expediente')->findByReparticionPendientes($usuario->getDepartamentoRm());
+
+        return $this->render('ExpedienteBundle:Tramite:controles_index.html.twig', array(
+            'tramites' => $tramites,
+            'control'=> true,
+            'tareas' =>  $tareas,
+            'recordatorios' => $recordatorios,
+            'anio'=>$anio,
+        ));
+    }
     /**
      * Lists all tramite entities.
      *
@@ -898,7 +792,7 @@ class TramiteController extends Controller
         $tramite->setExpediente($pedido->getExpediente());
 
         if  (count($pedido->getControl())==0) {
-            $tramite->setCcoo("* ".$pedido->getCcoo());
+            $tramite->setCcoo($pedido->getCcoo()." (*)");
             $tramite->setFechaDestino($pedido->getFechaDestino());
         }
         $tramite->setPresupuestoOficial($pedido->getPresupuestoOficial());
@@ -931,7 +825,27 @@ class TramiteController extends Controller
             /** Las acciones pueden ser ['MODIFICADO','CREADO','ELIMINADO', 'VISTO' ]*/
                $this->historial($tramite->getId(),'CREADO', $msj, $tramite::TIPO_ENTIDAD);
 
-            return $this->redirectToRoute('tramite_show', array('id' => $tramite->getId()));
+            //recupero las pagina anterior             
+            $referer= $request->headers->get('referer');
+            return $this->redirect($referer);
+        } elseif ($form->isSubmitted()){
+            $msj= 'No se guardaron los cambios,';         
+            $this->get('session')->getFlashBag()->add(
+                    'mensaje-warning',
+                    $msj);
+            $errors = $this->get('validator')->validate($tramite);
+            // iterate on it
+            foreach( $errors as $error ){
+                // Do stuff with:
+                //   $error->getPropertyPath() : the field that caused the error
+                $msj="Verifique el campo  ".$error->getPropertyPath()." ERROR: ".$error->getMessage();
+                $this->get('session')->getFlashBag()->add(
+                    'mensaje-danger',
+                    $msj);
+            }
+            //recupero las pagina anterior             
+            $referer= $request->headers->get('referer');
+            return $this->redirect($referer);
         }
         $referer= $request->headers->get('referer');
         return $this->render('ExpedienteBundle:tramite_control:modal_new.html.twig', array(
@@ -940,7 +854,7 @@ class TramiteController extends Controller
             'referer' => $referer,
         ));
     }
-
+    
     /**
      * Finds and displays a tramite entity.
      *
@@ -1562,18 +1476,24 @@ class TramiteController extends Controller
         $tramite->setEstado($estado->getEstado());
         $em->persist($estado);
         $em->flush();
+
+        if (($tramite->getTipoTramite()->getSlug() == "tramite_control" ) and ( $estado->getSlug() == "asignado")) {
+            $pedido = $tramite->getPedido();
+            $estado = $em->getRepository('ExpedienteBundle:EstadoTramite')->find(11);
+            $pedido->setEstadoTramite($estado);
+            $em->flush();
+        }  
+        
         if ($tramite->getTipoTramite()->getSlug() == "tramite_pedido" || $tramite->getTipoTramite()->getSlug() == "tramite_solicitud") {
             $msj= "Has cambiado el ESTADO de: ".$tramite->getTipoTramite()." ".$tramite->getNumeroTramite()." | ".$tramite->getCcoo().' | <span class="'.$tramite->getEstadoTramite()->getClass().'">'.$tramite->getEstadoTramite()."</span>";
             /** Las acciones pueden ser ['MODIFICADO','CREADO','ELIMINADO', 'VISTO', 'ESTADO' ]*/
             $this->historial($tramite->getId(),'ESTADO', $msj, $tramite::TIPO_ENTIDAD);
         } 
-
         if ( in_array($tramite->getTipoTramite()->getSlug(), ["tramite_despacho", "tramite_pago", "tramite_legal", "tramite_multa"])) {
             $msj= "Has cambiado el ESTADO de: ".$tramite->getTipoTramite()." ".$tramite->getNumeroTramite()." | ".$tramite->getTexto().' | <span class="'.$tramite->getEstadoTramite()->getClass().'">'.$tramite->getEstadoTramite()."</span>";
             /** Las acciones pueden ser ['MODIFICADO','CREADO','ELIMINADO', 'VISTO', 'ESTADO' ]*/
             $this->historial($tramite->getId(),'ESTADO', $msj, $tramite::TIPO_ENTIDAD);
         }  
-
         if ($tramite->getTipoTramite()->getSlug() == "tramite_proceso") {
             if ($estado->getEstado()) {
                $tramite->setAdjudicado(true);
@@ -1640,11 +1560,36 @@ class TramiteController extends Controller
                 }
                 $i++;
             }
-        }
-
+        } 
+        
        //recupero las pagina anterior 
         $referer= $request->headers->get('referer');
         return $this->redirect($referer);
+    }
+
+    /**
+     * Cambia de estado de itemOferta entity.
+     *
+     * @Route("/{id}/{slug}/color", name="tramite_cambiar_color")
+     * @Method("POST")
+     */
+    public function cambiarColorAction(Request $request, Tramite $tramite, $slug = "ninguno")
+    { 
+        $msj = new JsonResponse(false);
+
+        if ($tramite->getColor() != $slug) {
+            if ($slug == "ninguno") {
+                $tramite->setColor(null);
+            } else {
+                $tramite->setColor($slug);
+            }
+            
+            $em = $this->getDoctrine()->getManager();
+            $em->flush();
+            $msj = new JsonResponse(true);
+        }
+
+       return $msj;
     }
 
     /**
@@ -1790,7 +1735,7 @@ class TramiteController extends Controller
             $em->persist($historial);
             $em->flush();
     }
-
+    
      public function sendSms($telefono, $messageBody)
     {
         // Tu Account SID y Auth Token de Twilio
@@ -1826,27 +1771,27 @@ class TramiteController extends Controller
         }
     }
 
-    /**
-     * Creates a form to delete a tramite entity.
-     *
-     */    
-function toCamelCase($string, $capitalizeFirstCharacter = false) 
-    {
-
-        $str = str_replace('-', '', ucwords($string, '-'));
-
-        if (!$capitalizeFirstCharacter) {
-            $str = lcfirst($str);
-        }
-
-        return $str;
-    }
+        /**
+         * Creates a form to delete a tramite entity.
+         *
+         */    
+    function toCamelCase($string, $capitalizeFirstCharacter = false) 
+        {
     
-public function limpiarMoneda($s) 
-    { 
-        //Quitando Caracteres Especiales 
-        $s= str_replace('$', '', $s); 
-        $s= str_replace(',', '', $s);  
-        return $s; 
-    }
+            $str = str_replace('-', '', ucwords($string, '-'));
+    
+            if (!$capitalizeFirstCharacter) {
+                $str = lcfirst($str);
+            }
+    
+            return $str;
+        }
+        
+    public function limpiarMoneda($s) 
+        { 
+            //Quitando Caracteres Especiales 
+            $s= str_replace('$', '', $s); 
+            $s= str_replace(',', '', $s);  
+            return $s; 
+        }
 }

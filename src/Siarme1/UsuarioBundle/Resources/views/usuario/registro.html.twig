@@ -1,0 +1,17 @@
+{# app/Resources/views/usuario/registro.html.twig #}
+{% extends '::intranet.html.twig' %}
+{% block stylesheets %}  
+     <link href="{{ asset('bundles/expediente/plugins/boostrap3/css/bootstrap_yeti.min.css') }}" type="text/css" rel="stylesheet">
+{% endblock %} 
+{% block title %}Regístrate gratis como usuario{% endblock %}
+
+{% block sidebar %}	{% endblock %}
+{% block main %}
+	{{ parent()}}
+   <div class="col-md-2"></div>
+   <div class="col-md-8">
+	<h1>{{ block('title') }}</h1>
+{#{% form_theme form 'bootstrap_3_layout.html.twig' %}#}
+	{{ form(formulario) }}
+ </div>
+{% endblock %}

@@ -87,6 +87,21 @@ class RecordatorioController extends Controller
                 $slug = "informe-plazosoferta";
                 return $this->redirectToRoute('documento_new', array('tramite_id' => $tramite->getId(), 'slug' => $slug));
             }
+            
+            if ($tramite->getTipoTramite()->getSlug() == "tramite_despacho") {
+                $proceso = $em->getRepository('ExpedienteBundle:Tramite')->findByTramiteYSlug($recordatorio->getTramite()->getExpediente(), "tramite_proceso");
+                if (!empty($proceso)) {
+                    $recordatorio2 = new Recordatorio();
+                    $recordatorio2->setTramite($proceso);
+                    $recordatorio2->setUsuario($usuario);
+                    $recordatorio2->setRecordatorio($recordatorio->getRecordatorio());
+                    $recordatorio2->setHora($recordatorio->getHora());
+                    $recordatorio2->setFecha($fecha);
+                    $em->persist($recordatorio2);
+                    $em->flush();
+                }
+            }           
+            
             $referer= $request->headers->get('referer');
             return $this->redirect($referer);
         }

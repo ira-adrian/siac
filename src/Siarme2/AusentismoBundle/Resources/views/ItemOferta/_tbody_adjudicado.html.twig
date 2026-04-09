@@ -1,0 +1,41 @@
+{# Siarme\AusentismoBundle\Resources\views\Itempedido\_tbody_adjudicado.html.twig #}
+<tr>
+    <td style="width: 10%;">     
+        <div class="dropdown text-left" style="margin:0px;"> 
+                    {% include 'AusentismoBundle:ItemOferta:_menu_info_item.html.twig' with {'entidad': itemOferta, 'tipo':constant('TIPO_ENTIDAD', itemOferta ) } %}
+        </div>
+    </td>
+    <td>{{ itemOferta.numero }} </td>
+    {# <td>{% if itemOferta.fecha %}{{ itemOferta.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>#}
+    <td><a data-toggle="tooltip" data-placement="top" title='Ver ítem' href="{{ path('itemoferta_show', { 'id': itemOferta.id }) }}" target="_blank">{{ itemOferta.codigo }}</a></td>
+    <td style="width: 43%;"><small>{{ itemOferta.item }}</small></td>
+    {% if itemOferta.adjudicado %}
+        <td> $ {{ itemOferta.precio | default(0) | number_format(2, ',', '.')  }} </td>
+        <td> <strong>{{ itemOferta.cantidadAdjudicada | default('-')}}</strong> </td>
+        <td class="montoAdjudicado"><strong>$ {{ itemOferta.montoAdjudicado | default(0) | number_format(2, ',', '.')  }}</strong></td>
+    {% else %} 
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+    {% endif %}
+    <td style="width: 12%;" class="estado">
+    {% if (itemOferta.oferta.expediente | default(null) | movimiento_estado(app.user)) and  itemOferta.proceso.departamentoRm == app.user.departamentoRm  %}
+                {% if itemOferta.estado %}
+                            {% if itemOferta.adjudicado %}
+                                    <a data-href="{{ path('item_oferta_adjudicar', { 'id': itemOferta.id }) }}" class="btn-adjudicar-item text-success" role="button" ><span class="glyphicon glyphicon-check" aria-hidden="true"></span><span class="estadoAdjudicado">Adjudicado</span></a>
+
+                            {% else %}
+                                    <a  data-href="{{ path('item_oferta_adjudicar', { 'id': itemOferta.id }) }}" class="btn-adjudicar-item text-muted" role="button" ><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span><span class="estadoAdjudicado">Sin Preadjudicado</span></a>
+                            {% endif %}
+               {% else %}
+                    <span class="label label-warning">No Válida</span>       
+               {% endif %}
+    {% else %}
+            {% if itemOferta.adjudicado %}
+                    <div class="text-success"><span class="glyphicon glyphicon-check" aria-hidden="true"></span><span class="estadoAdjudicado">Preadjudicado</span></div>                   
+            {% else %}
+                    <div class="text-muted"><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span><span class="estadoAdjudicado">Sin Adjudicar</span></div>
+             {% endif %}
+    {% endif %}
+    </td>
+</tr>

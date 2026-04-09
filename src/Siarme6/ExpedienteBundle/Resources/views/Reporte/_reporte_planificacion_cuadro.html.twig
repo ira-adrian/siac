@@ -1,0 +1,126 @@
+{# Siarme\ExpedienteBundle\Resources\views\Reporte\_reporte_planificacion_cuadro.html.twig #}
+{% set saf, codigoGde, reporte, organismo , planificacion = null, null, {} , {}, [] %}
+{% for item in tramites | sort((a, b) => a.organismoOrigen <=> b.organismoOrigen) %}
+    
+    {% if loop.first %}
+   
+        {% set codigoGde = item.organismoOrigen.codigoGde %}
+        {% set saf = item.organismoOrigen.saf.numeroSaf %}
+        {% if item.trimestre == 1 %}{% set planificacion = planificacion | merge([item]) %}{% endif %}
+        {% if item.trimestre == 2 %}{% set planificacion = planificacion | merge([item]) %}{% endif %}
+        {% if item.trimestre == 3 %}{% set planificacion = planificacion | merge([item]) %}{% endif %}
+        {% if item.trimestre == 4 %}{% set planificacion = planificacion | merge([item]) %}{% endif %}
+    {% elseif  codigoGde == item.organismoOrigen.codigoGde %}
+     
+        {% if item.trimestre == 1 %}{% set planificacion = planificacion | merge([item]) %}{% endif %}
+        {% if item.trimestre == 2 %}{% set planificacion = planificacion | merge([item]) %}{% endif %}
+        {% if item.trimestre == 3 %}{% set planificacion = planificacion | merge([item]) %}{% endif %}
+        {% if item.trimestre == 4 %}{% set planificacion = planificacion | merge([item]) %}{% endif %}
+    {% else %}
+   
+        {% set  organismo  = organismo | merge({saf, codigoGde, planificacion }) %}
+        {% set  reporte  = reporte | merge([organismo]) %}
+        {% set planificacion = [] %}
+        {% set codigoGde = item.organismoOrigen.codigoGde %}
+        {% set saf = item.organismoOrigen.saf.numeroSaf %}
+        {% if item.trimestre == 1 %}{% set planificacion = planificacion | merge([item]) %}{% endif %}
+        {% if item.trimestre == 2 %}{% set planificacion = planificacion | merge([item]) %}{% endif %}
+        {% if item.trimestre == 3 %}{% set planificacion = planificacion | merge([item]) %}{% endif %}
+        {% if item.trimestre == 4 %}{% set planificacion = planificacion | merge([item]) %}{% endif %}
+    {% endif %}
+    
+{% endfor %}
+    {% set  organismo  = organismo | merge({saf, codigoGde, planificacion }) %}
+        {% set  reporte  = reporte | merge([organismo]) %}
+    
+<div class="table-responsive">
+    <table id="tablaGrupoRubro" class="table table-bordered table-hover">
+            <thead class="text-center">
+             <tr>
+                <th>SAF</th>
+                <th>Organismo</th>
+                <th>1° Trimestre</th>
+                <th>2° Trimestre</th>
+                <th>3° Trimestre</th>
+                <th>4° Trimestre</th>
+                <th>Porcentaje</th>
+             </tr>
+           </thead>
+            <tbody>
+            {% set t1, t2 ,t3 , t4 = 0,0,0,0 %}
+              {% for item  in reporte | sort((a, b) => a.saf <=> b.saf) %}
+                {% set p = 0 %}
+                <tr>
+                    <td>{{item['saf']}}</td>
+                    <td>{{item['codigoGde']}}</td>
+
+                    {% for tramite in item['planificacion'] if tramite.trimestre == 1 and tramite.presupuestoOficial > 0 %}
+                        <td>{{tramite.fechaDestino | date( 'd-m-Y')}} <br> ${{ tramite.PresupuestoOficial | number_format(2, ',', '.')  }} {% set p, t1 = p + 25, t1 + 1 %} </td>
+                    {% else %}   
+                        <td> </td>
+                    {% endfor %}  
+                    {% for tramite in item['planificacion'] if tramite.trimestre == 2 and tramite.presupuestoOficial > 0 %}
+                        <td>{{tramite.fechaDestino | date( 'd-m-Y')}} <br> ${{ tramite.PresupuestoOficial | number_format(2, ',', '.')  }} {% set p, t2 = p + 25, t2 + 1 %} </td>
+                    {% else %}   
+                        <td> </td>
+                    {% endfor %} 
+                    {% for tramite in item['planificacion'] if tramite.trimestre == 3 and tramite.presupuestoOficial > 0 %}
+                        <td>{{tramite.fechaDestino | date( 'd-m-Y')}} <br> ${{ tramite.PresupuestoOficial | number_format(2, ',', '.')  }} {% set p, t3 = p + 25, t3 + 1 %}</td>
+                    {% else %}   
+                        <td> </td>
+                    {% endfor %}
+                    {% for tramite in item['planificacion'] if tramite.trimestre == 4 and tramite.presupuestoOficial > 0 %}
+                        <td>{{tramite.fechaDestino | date( 'd-m-Y')}} <br> ${{ tramite.PresupuestoOficial | number_format(2, ',', '.')  }} {% set p, t4 = p + 25, t4 + 1 %} </td>
+                    {% else %}   
+                        <td> </td>
+                    {% endfor %}
+                    <td>
+                            
+                        <div class="progress">
+                          <div class="progress-bar {% if p == 100 %} progress-bar-success {% else %} progress-bar-info {% endif %}" role="progressbar" aria-valuenow="{{p}}"
+                          aria-valuemin="0" aria-valuemax="100" style="width:{{p}}%">
+                            {{p}}%  
+                          </div>
+                        </div>
+                    </td>
+                </tr>
+              {% endfor %} 
+                <tr>
+                    <th></th>
+                    <th>Cumplieron</th>
+                    <th>{{t1}}</th>
+                    <th>{{t2}}</th>
+                    <th>{{t3}}</th>
+                    <th>{{t4}}</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th>No Cumplieron</th>
+                    <th>{{23 - t1}}</th>
+                    <th>{{23 - t2}}</th>
+                    <th>{{23 - t3}}</th>
+                    <th>{{23 - t4}}</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th>% Cumplieron</th>
+                    <th>{{ ((t1 / 23) * 100 ) | round }} %</th>
+                    <th>{{ ((t2 / 23) * 100 ) | round }} %</th>
+                    <th>{{ ((t3 / 23) * 100 ) | round }} %</th>
+                    <th>{{ ((t4 / 23) * 100 ) | round }} %</th>
+                    <th>{{ ((((t1 / 23) * 100 ) + ((t2 / 23) * 100 ) + ((t3 / 23) * 100 ) + ((t4 / 23) * 100 )) / 4) | round  }} %</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th>% NO Cumplieron</th>
+                    <th>{{ (((23 - t1) / 23) * 100 ) | round }} %</th>
+                    <th>{{ (((23 - t2) / 23) * 100 ) | round }} %</th>
+                    <th>{{ (((23 - t3) / 23) * 100 ) | round }} %</th>
+                    <th>{{ (((23 - t4) / 23) * 100 ) | round }} %</th>
+                    <th>{{ (((((23 - t1) / 23) * 100 ) + (((23 - t2) / 23) * 100 ) + (((23 - t3) / 23) * 100 ) + (((23 - t4) / 23) * 100 ) ) / 4 )| round }} %</th>
+                </tr>
+            </tbody>
+        </table>
+</div>

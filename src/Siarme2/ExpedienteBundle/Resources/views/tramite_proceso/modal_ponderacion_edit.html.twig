@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+{# Siarme\ExpedienteBundle\Resources\views\Credito\modal_new.html.twig#}
+<h3>Proceso: {{ tramite.numeroComprar | default("100-000000-N/D") }} </h3>
+<br>
+{{ form_start(edit_form,  {'action': path('proceso_ponderacion_edit', {'id':tramite.id}), 'method': 'POST'}) }}
+          {{ form_widget(edit_form) }}
+            <div class="text-right">
+                 <input class="btn btn-danger" type="submit" value="GUARDAR" />
+            </div>
+{{ form_end(edit_form) }}

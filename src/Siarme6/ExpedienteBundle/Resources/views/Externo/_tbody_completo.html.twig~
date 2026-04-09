@@ -1,0 +1,21 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\_registro_completo.html.twig#}
+            <tr>
+                {% set year = 'now' | date('Y')%}
+                <td>{{ tramite.numeroTramite }}</td>
+                <td><a  data-toggle="tooltip" data-placement="top" title='Ver'  href="{{ path('credito_tramite_show', { 'id': tramite.id }) }}">{{ tramite.ccoo | default('NO-'~ year ~ '-n/d')}}</a></td>
+                <td>{% if tramite.fechaDestino %}{{ tramite.fechaDestino|date('d-m-Y') }}{% endif %}</td>
+                <td>          
+                    <a data-toggle="tooltip" data-placement="top" title='{{ tramite.organismoOrigen}}'  target="_blank">SAF-{{ tramite.organismoOrigen.saf.numeroSaf | default("N/D")}} - {{ tramite.organismoOrigen.codigoGde | default("N/D") }}</a>
+                </td>
+                <td>
+                    {{ tramite.texto | upper }}
+                </td>
+                    {# En tramite.estadoTramite devuelve el estado con etiquetas label #}
+                {#<td>{{ tramite.PresupuestoOficial | format_currency('EUR', locale='de')  }}</td>#}
+                <td>$ {{ tramite.PresupuestoOficial | default(0) | number_format(2, ',', '.')  }}</td>
+                <td style="width:30%;">
+                    {% for credito in tramite.credito %}
+                        {{credito.texto | upper}} - $ {{credito.monto | default(0) | number_format(2, ',', '.') }} <br>
+                    {% endfor %}
+                </td>
+            </tr>

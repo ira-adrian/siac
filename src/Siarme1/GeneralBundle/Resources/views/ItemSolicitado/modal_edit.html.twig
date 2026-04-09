@@ -1,0 +1,8 @@
+{# Siarme\GeneralBundle\Resources\views\ItemSolicitado\modal_edit.html.twig #}
+
+{{ form_start(edit_form,  {'action': path('itemsolicitado_edit', {'id': itemSolicitado.id}), 'method': 'POST'}) }}
+        {{ form_widget(edit_form) }}
+          <div class="text-right">
+            <input class="btn btn-danger" onclick= "return confirm('¿Desea GUARDAR?');" type="submit" value="GUARDAR"/>
+          </div>
+{{ form_end(edit_form) }}

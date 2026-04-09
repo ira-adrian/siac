@@ -1,0 +1,17 @@
+    <p style="text-align:center;margin-left:1cm;"> 
+        <strong> <br>
+            <u>{{ documento.nombreDocumento | upper }}</u>
+        </strong> 
+    </p> 
+<p style="margin-left:1cm;" class="text-uppercase text-left"> 
+        <strong> <u>Referencia: </u></strong><small>{{documento.tramite.expediente}} - {{documento.tramite.expediente.extracto}}</small><br>
+        <strong><u>Agente: </u></strong><br>
+       {{documento.tramite.expediente.agente.apellidoNombre}} - <u><strong>CUIL N°: </strong></u>{{documento.tramite.expediente.agente.cuil}} - <u><strong>DNI N°: </strong></u> {{documento.tramite.expediente.agente.dni}}</small><br> 
+        <strong><u>Edad:</u></strong> {{ documento.tramite.expediente.agente.fechaNacimiento | age }}  - <strong><u>Antiguedad:</u></strong> {{ documento.tramite.expediente.agente.fechaInicioLaboral | age }} - <strong><u>Localidad:</u></strong> <small> {{ documento.tramite.expediente.agente.localidad | default("N/D") }}  </small> <br>
+        <strong><u>Cargos:</u></strong> <br>
+       <small>{% for cargo in documento.tramite.expediente.agente.cargo %} {{ cargo }} - {{ cargo.funcion }} {% endfor %} </small>
+        <br>        
+</p> 
+<hr>
+<p style="margin-left:1cm; margin-right:0cm; text-align:justify; font-family:&quot;Arial&quot; "><span style="font-size:16px">&nbsp;
+</span></p>

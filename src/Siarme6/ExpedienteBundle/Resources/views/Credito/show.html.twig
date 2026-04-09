@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Credito</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ credito.id }}</td>
+            </tr>
+            <tr>
+                <th>Fecha</th>
+                <td>{% if credito.fecha %}{{ credito.fecha|date('Y-m-d') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Fecharealizado</th>
+                <td>{% if credito.fechaRealizado %}{{ credito.fechaRealizado|date('Y-m-d') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Texto</th>
+                <td>{{ credito.texto }}</td>
+            </tr>
+            <tr>
+                <th>Monto</th>
+                <td>{{ credito.monto }}</td>
+            </tr>
+            <tr>
+                <th>Estado</th>
+                <td>{% if credito.estado %}Yes{% else %}No{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('credito_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('credito_edit', { 'id': credito.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

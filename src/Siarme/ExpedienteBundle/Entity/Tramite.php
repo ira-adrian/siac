@@ -161,6 +161,13 @@ class Tramite
      */
     private $sistema;
 
+   /**
+     * @var string
+     *
+     * @ORM\Column(name="color", type="string", length=30)
+     */
+    private $color;
+
     /**
      * @var int
      *
@@ -334,7 +341,7 @@ class Tramite
      * @ORM\ManyToOne(targetEntity="Siarme\ExpedienteBundle\Entity\Tramite", inversedBy="control")
      */
     private $pedido;
-
+    
     /** 
      *@ORM\OneToMany(targetEntity="Siarme\GeneralBundle\Entity\ItemSolicitado", mappedBy="tramite", cascade={"persist","remove"})
     */
@@ -349,7 +356,7 @@ class Tramite
      *@ORM\ManyToMany(targetEntity="Siarme\ExpedienteBundle\Entity\Planificacion", mappedBy="pedidos", cascade={"persist"}) 
      */
     private $planificaciones;
-
+    
     /** 
      *@ORM\OneToMany(targetEntity="Siarme\AusentismoBundle\Entity\ItemProcesoAdjudicado", mappedBy="proceso", cascade={"persist","remove"})
      * @ORM\JoinColumn(name="item_proceso_adjudicado_id", referencedColumnName="id")
@@ -581,6 +588,30 @@ class Tramite
     public function getSistema()
     {
         return $this->sistema;
+    }
+
+    /**
+     * Set color.
+     *
+     * @param string $color
+     *
+     * @return Tramite
+     */
+    public function setColor($color)
+    {
+        $this->color = $color;
+
+        return $this;
+    }
+
+    /**
+     * Get color.
+     *
+     * @return string
+     */
+    public function getColor()
+    {
+        return $this->color;
     }
 
     /**
@@ -1538,11 +1569,11 @@ class Tramite
         $i=0;
         $item1 = 0;
         foreach ($items as $item) {
-            if (($item->getTipo() == 1) or (($item->getTipo() == 2) and ($this->getProceso()->getOfertaAlternativa)))  {
+            if (($item->getTipo() == 1) or (($item->getTipo() == 2) and ($this->getProceso()->getOfertaAlternativa())))  {
                 $i++;
                 if ($i == 1) {
                     $item1 = $item;
-                } elseif (($item1->getNumero() == $item->getNumero()) and ($item1->getOferta() == $item->getOferta()) and ($this->getProceso()->getOfertaAlternativa)) {
+                } elseif (($item1->getNumero() == $item->getNumero()) and ($item1->getOferta() == $item->getOferta()) and ($this->getProceso()->getOfertaAlternativa())) {
                     if ($item1->getPrecio() > $item->getPrecio()) {
                           $total = $total + $item1->getTotal();
                     } else{
@@ -1731,6 +1762,7 @@ class Tramite
         return $this->itemOferta;
     }
 
+
     /**
      * Get oferta
      *
@@ -1796,7 +1828,7 @@ class Tramite
     {
         return $this->pedido;
     }
-
+    
     /**
      * Add itemSolicitado
      *
@@ -1908,7 +1940,7 @@ class Tramite
 
         return  $total;
     }
-
+    
     /**
      * Add planificaciones
      *

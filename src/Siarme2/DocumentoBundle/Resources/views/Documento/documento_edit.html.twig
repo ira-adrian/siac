@@ -1,0 +1,21 @@
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %}DOCUMENTO{% endblock %}
+{% block main %}
+    <!-- Ajustar a lo que se IMPRIME <div class="panel panel-default col-md-10 col-md-offset-2"> -->
+<div class="panel panel-default">
+      <div class="panel-body"> 
+                   {% if documento.tipoDocumento.slug == "licencia" %}  
+                        {{ include('DocumentoBundle::Documento/include/form_licencia.html.twig')}}
+                   {% else %}  
+                         {{ include(['DocumentoBundle::Documento/include/form_documento.html.twig', 'DocumentoBundle::Documento/include/form_'~ documento.tipoDocumento ~'.html.twig', 'DocumentoBundle::Documento/include/form_default.html.twig']) }}
+                   {% endif %}
+     </div>
+</div>                 
+{% endblock %} 
+{% block javascripts %} 
+{{ parent() }}
+    {{ include('DocumentoBundle::Documento/javascripts.html.twig') }}
+ {% endblock %} 
+ {% block footer %}
+<dir class="footer"></dir>
+{% endblock %}

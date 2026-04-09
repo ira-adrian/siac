@@ -1,0 +1,38 @@
+{# Siarme/AusentismoBundle/Resources/views/Oganismo/edit.html.twig#}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %} ORGANISMO{% endblock %}
+{% block stylesheets %}   
+     <link href="{{ asset('bundles/expediente/plugins/boostrap3/css/bootstrap_yeti.min.css') }}" type="text/css" rel="stylesheet">
+      <link href="{{ asset('bundles/expediente/plugins/select2/css/select2.min.css') }}" rel="stylesheet">     
+{% endblock %}
+
+{% block menu_li %}    
+                <li>
+                    <a href="{{ path('expediente_index') }}" role="button"> <span class="glyphicon glyphicon-list-alt"> Lista de Expts. </span></a>
+                </li>         
+ {% endblock %}   
+{% block main %}
+<div class="panel panel-default">
+    <div class="panel-heading text-center">  
+       <h4>MODIFICAR ORGANISMO</h4>
+    </div>
+  <div class="panel-body">    
+
+    {{ form_start(edit_form) }}
+        {{ form_widget(edit_form) }}
+    <div class="text-right">
+        <a  class="btn btn-danger" href="{{ path('expediente_index', { 'id': organismo.id }) }}"> CANCELAR </span></a>
+        <input class="btn btn-danger text-right" type="submit" onclick= "return confirm('¿Desea GUARDAR?');" value="GUARDAR" />
+    </div>
+    {{ form_end(edit_form) }}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %} 
+{{ parent() }}
+        <script src="{{ asset('bundles/expediente/plugins/select2/js/select2.min.js') }}"></script>
+         <script> /*-- $('select').select2({  allowClear:true, placeholder:""});*/
+          $('select').select2();
+           </script>
+{% endblock %}

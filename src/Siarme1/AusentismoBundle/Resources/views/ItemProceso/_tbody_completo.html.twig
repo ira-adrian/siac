@@ -1,0 +1,55 @@
+{# Siarme\AusentismoBundle\Resources\views\Itempedido\_tbody_completo.html.twig #}
+<tr>
+    <td>     
+        <div class="dropdown text-left hidden-print" style="margin:0px;"> 
+                    {% include 'AusentismoBundle:ItemProceso:_menu_info_item.html.twig' with {'entidad': itemProceso, 'tipo':constant('TIPO_ENTIDAD', itemProceso ) } %}
+        </div>
+    </td>
+    <td>{{ itemProceso.numero }} </td>
+    {# <td>{% if itemProceso.fecha %}{{ itemProceso.fecha|date('Y-m-d H:i:s') }}{% endif %}</td>#}
+    <td><a href="{{ path('itemproceso_show', { 'id': itemProceso.id }) }}" target="_blank">{{ itemProceso.codigo }}</a></td>
+    <td style="width: 40%;"><div id="-{{itemProceso.id}}">{{ itemProceso.item }}</div></td>
+   {# <td>{{ itemProceso.unidadMedida | default('N/D')}}</td>
+    <td>$ {{ itemProceso.precio  | default(0) | number_format(2, ',', '.')  }}</td>#}
+    <td>
+        {{ itemProceso.cantidad }}
+        {% set cantidadPedida = 0 %}
+        {% set itemPedido = null %}
+        {% for item in itemProceso.itemPedido %}
+            {% set cantidadPedida = cantidadPedida + item.cantidad %}
+        {% endfor %}
+        {% if cantidadPedida > itemProceso.cantidad  %}
+            <br><span class="glyphicon glyphicon-info-sign text-warning hidden-print"  data-toggle="tooltip" data-placement="top" title='Es MENOR a la cantidad PEDIDA {{cantidadPedida}}'><strong></strong></span>
+        {% elseif cantidadPedida < itemProceso.cantidad %}
+             <br><span class="glyphicon glyphicon-info-sign text-danger hidden-print" data-toggle="tooltip" data-placement="top" title='Es MAYOR a la cantidad PEDIDA {{cantidadPedida}} '><strong></strong></span>
+        {% endif %}
+    </td>
+    <td>
+        {% if itemProceso.cantidadAdjudicada > 0  and itemProceso.proceso.adjudicado %}
+            {{ itemProceso.cantidadAdjudicada }}
+        {% else %} 
+            -
+        {% endif %}
+    </td>
+    <td>
+        {% if itemProceso.montoAdjudicado > 0  and itemProceso.proceso.adjudicado %}
+             $ {{ itemProceso.montoAdjudicado  | default(0) | number_format(2, ',', '.')  }}
+        {% else %} 
+            -
+        {% endif %}
+    </td>
+    <td>
+       {{ include('AusentismoBundle:ItemProceso:_etiqueta_estado.html.twig') }}
+    </td>
+    <td>
+        {% set itemsPedidos =  itemProceso | item_pedido %}
+        {% for itemPedido in itemsPedidos %}
+            <span data-toggle="tooltip" data-placement="top" title="{{ itemPedido.tramite.organismoOrigen.organismo | default("n/d") }}" >
+                {{ itemPedido.tramite.organismoOrigen.codigoGde }}
+            </span>
+        {% endfor %}
+        {# if (itemProceso.proceso.expediente | default(null) | movimiento_estado(app.user)) and  itemProceso.proceso.departamentoRm == app.user.departamentoRm  %}
+          {{ include('AusentismoBundle:ItemProceso:_menu_acciones_item.html.twig') }}
+        {% endif #}
+    </td>
+</tr>

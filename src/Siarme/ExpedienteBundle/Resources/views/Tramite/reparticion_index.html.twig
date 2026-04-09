@@ -24,11 +24,11 @@
         <li role="presentation" ><a href="{{ path('expediente_reparticion_index') }}"> <span class="glyphicon glyphicon-folder-open"></span> {{modulo}}</a></li>
     {% endif %}
         <li role="presentation" class="active"><a href="{{ path('tramite_reparticion_index') }}"> <span class="glyphicon glyphicon-tasks"></span>{{modulo2}}</a></li>
-        {% if app.user.departamentoRm.slug == "dpcbs" %}
-        <li role="presentation"><a href="{{ path('tramite_oferta_index') }}"> <span class="glyphicon glyphicon-pushpin"></span> OFERTAS</a></li>
+         {% if app.user.departamentoRm.slug == "dpcbs" %}
+             <li role="presentation"><a href="{{ path('tramite_oferta_index') }}"> <span class="glyphicon glyphicon-pushpin"></span> OFERTAS</a></li>
          {% endif %}
-        {% if app.user.departamentoRm.slug == "dppr" %}
-        <li role="presentation"><a href="{{ path('tramite_control_index') }}"> <span class="glyphicon glyphicon-pushpin"></span> CONTROL</a></li>
+         {% if app.user.departamentoRm.slug == "dppr" and is_granted('ROLE_SUPERVISOR') %}
+            <li role="presentation"><a href="{{ path('tramite_control_index') }}"> <span class="glyphicon glyphicon-transfer"></span> INGRESOS</a></li>
          {% endif %}
     {% if app.user.departamentoRm.slug not in ["planificacion", "dlt"] %}
         <li role="presentation"><a style="color:#306066;" href="{{ path('general_reparticion_index', {'id': app.user.departamentoRm.id }) }}"><span class="glyphicon glyphicon-folder-open"></span> ACUERDO MARCO</a></li>

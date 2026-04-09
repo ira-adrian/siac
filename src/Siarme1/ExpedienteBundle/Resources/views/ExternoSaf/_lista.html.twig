@@ -1,0 +1,73 @@
+
+    {% set estadosConTramites, estados, tramitesPorEstado, estadoAnterior, tramiteAnterior, estadoSiguiente, nuevos, todos = {}, {}, [], 0, true, true, {}, {} %}
+    {# for tramite1 in tramites | sort((a, b) => a.estadoTramite <=> b.estadoTramite) if tramite1.tipoTramite.slug not in ["tramite_oferta", "tramite_solicitud"] #}
+    {% for tramite1 in tramites | sort((a, b) => a.estadoTramite <=> b.estadoTramite) if (tramite1.tipoTramite.slug not in ["tramite_oferta", "tramite_solicitud"]) and (tramite1.estadoTramite.slug  not in ["rectificacion", "ingresado"]) %}
+        {% set todos = todos | merge([tramite1]) %}
+        {% if tramite1.expediente.id is not defined and tramite1.estadoTramite.slug != "devuelto"  %}
+            {% set nuevos = nuevos | merge([tramite1]) %}
+        {% endif %}
+
+       {% if loop.first %}
+          {% set tramiteAnterior, estadoAnterior, tramitesPorEstado = tramite1, tramite1.estadoTramite, tramitesPorEstado | merge([tramite1]) %}
+       {% else %}
+            {% if estadoAnterior == tramite1.estadoTramite %} 
+                  {% set tramitesPorEstado = tramitesPorEstado | merge([tramite1]) %}
+            {% else %}
+
+                {% set estados = estados | merge([{estadoAnterior, tramitesPorEstado}]) %}
+                {% set estadosConTramites = estadosConTramites | merge({ (estadoAnterior.estadoTramite) : tramitesPorEstado} ) %}
+
+                {% set tramitesPorEstado = [] %}
+                {% set tramiteAnterior, estadoAnterior, tramitesPorEstado = tramite1, tramite1.estadoTramite, tramitesPorEstado | merge([tramite1]) %}
+            {% endif %}
+       {% endif %}
+    {% endfor %}
+    {% if   todos is not empty %}
+                    {% set estados = estados | merge([{estadoAnterior, tramitesPorEstado}]) %}
+                {% set estadosConTramites = estadosConTramites | merge({ (estadoAnterior.estadoTramite) : tramitesPorEstado} ) %}
+{% endif %}
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs nav-justified" role="tablist">
+    <li role="presentation" class="active"><a href="#todos" aria-controls="todos" role="tab" data-toggle="tab"> Todo ({{todos| length}})</a></li>
+    {% for  estado in estados %} 
+            {% set classNav = ""  %} 
+            <li role="presentation" class="{{classNav}}"><a class= "{{estado.estadoAnterior.class}}" href="#{{loop.index}}" aria-controls="{{loop.index}}" role="tab" data-toggle="tab">{{estado.estadoAnterior.estadoTramite}}  {% if estado.estadoAnterior.slug == "devuelto"  %} - NO CONCENTRA {% endif %} {% if estado.estadoAnterior.slug == "autorizado"  %} - PASE A DPCBS {% endif %} ({{estado.tramitesPorEstado| length}})</a></li>
+    {% endfor %}
+
+  </ul>
+
+<div class="tab-content">
+    <div role="tabpanel" class="tab-pane fade in active table-responsive" id="todos">
+              {% set notaRectifica = false %}
+              {% for tramite in todos | sort %}
+                          {% if loop.first %}
+                             <table class="table  table-hover tablaTramite">
+                                 <thead>
+                                   {{ include('ExpedienteBundle:ExternoSaf:_thead_completo.html.twig') }}         
+                                </thead>
+                              <tbody>
+                           {% endif %}
+                                  {{ include('ExpedienteBundle:ExternoSaf:_tbody_completo.html.twig') }} 
+             {% endfor %}
+                            </tbody>
+                        </table>
+     </div> 
+    {% set notaRectifica = true %}
+    {% for id, tramites in estadosConTramites %}
+           <div role="tabpanel" class="tab-pane fade table-responsive" id="{{loop.index}}">
+              {% for tramite in tramites | sort %}
+                          {% if loop.first %}
+                             <table class="table  table-hover tablaTramite">
+                                 <thead>
+                                   {{ include('ExpedienteBundle:ExternoSaf:_thead_completo.html.twig') }}         
+                                </thead>
+                              <tbody>
+                           {% endif %}
+                                  {{ include('ExpedienteBundle:ExternoSaf:_tbody_completo.html.twig') }} 
+                {% endfor %}
+                            </tbody>
+                        </table>
+         </div>
+    {% endfor %}   
+</div>

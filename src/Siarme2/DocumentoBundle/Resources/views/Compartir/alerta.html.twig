@@ -1,0 +1,4 @@
+{% set cantidad = (compartieron | length) %}
+  {% if cantidad > 0  %}
+        <span   class="glyphicon glyphicon-bell" aria-expanded="false"></span><span class="label label-success"> {{ cantidad }}</span>   
+{% endif %}

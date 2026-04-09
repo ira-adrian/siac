@@ -203,16 +203,15 @@
                             {% endif %}
                             </tr>
                         </table>
-                 </dd>   
+                 </dd> 
 <!-- Si No Control -->
- {% if tramite.estadoTramite.slug != "control" %} 
+ {% if tramite.estadoTramite.slug != "ingresado" %} 
                   <dt> Disponibilidad de Crédito Presupuestario {% if ( app.user.departamentoRm == tramite.departamentoRm ) and ( tramite.expediente | default(null) | movimiento_estado(app.user)  or tramite.expediente.id is not defined ) %} |  <a role="button" data-href="{{ path('credito_new', {'id':tramite.id})}}" class="btn-nuevoCredito"> <span  class="glyphicon glyphicon-plus-sign"></span> Nuevo </a>{% endif %} 
                   </dt> 
                   <dd>
                     {% set creditos = tramite.credito %}
                     {{ include('ExpedienteBundle:Credito:_lista.html.twig') }}
                   </dd>
-
                 <div class="hidden-print">
                 <dd >
                     {{ render(controller('DocumentoBundle:Compartir:index', { 'tipoid': tramite.id, 'tipo': constant('TIPO_ENTIDAD', tramite) } )) }} 
@@ -263,9 +262,8 @@
                     {% endif %}
                 {% endif %}
                 </dd>
-                
                 <br> 
- {% endif %}<!-- Si no control -->
+{% endif %}<!-- Si no control -->
                 <dt>Tarea&nbsp;&nbsp; 
                     {% if ( app.user.departamentoRm.slug == "dppr") %}
                         {% set mitramite = tramite_usuario(app.user, tramite) %}
@@ -377,12 +375,10 @@
 </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-    {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_panel_body.html.twig') }}
-    {#   {{ render(controller('ExpedienteBundle:Expediente:modalExpedienteNew', {'tramite_id': tramite.id}))}}#}
-
+{{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_panel_body.html.twig') }}
+{#    {{ render(controller('ExpedienteBundle:Expediente:modalExpedienteNew', {'tramite_id': tramite.id}))}}#}
 </div>
 
- 
  {{ render(controller('ExpedienteBundle:Comentario:index',
             { 'tipoid': tramite.id, 'tipo': constant('TIPO_ENTIDAD', tramite) }
         )) }}

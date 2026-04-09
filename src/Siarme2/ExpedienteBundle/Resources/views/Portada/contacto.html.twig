@@ -1,0 +1,49 @@
+{% extends 'frontend.html.twig' %}
+
+
+{% block title 'Contacto	' %}
+
+{% block body %}
+  
+  {{ parent() }}
+ <div class="container-fluid">
+<h2 class="text-center"> Informacion de Contacto</h2>
+  <div class="row">
+  	<div class="col-sm-offset-2 col-sm-8 col-md-offset-2 col-md-8  style="font-size:15px"">
+
+      <p><span class= "glyphicon glyphicon-map-marker"></span> San Fernando del Valle de Catamarca</p>
+      <p><span class="glyphicon glyphicon-pushpin">  </span> Dirección:CAPE- Pabellon 21 </p>
+      <p><span class='glyphicon glyphicon-phone'></span> Teléfono: 0383- 44....</p>
+      <p><span class="glyphicon glyphicon-envelope"></span> compras.secya@catamarca.gov.ar</p>  
+      <p> <span class="glyphicon glyphicon-time"></span> Contactenos en el Horario de 8:00 a 14:00</p>
+
+
+ <!-- Set height and width with CSS -->
+<div id="googleMap" style="height:400px; width:100%;"> </div>
+</div>
+</div>
+<!-- Add Google Maps -->
+<script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyB_eM5YBC8zYleXppdaC8-LB7Nxbdx5aSI" type="text/javascript"> </script>
+<script>
+var myCenter = new google.maps.LatLng(-28.468518, -65.784136);
+
+function initialize() {
+var mapProp = {
+center:myCenter,
+zoom:16,
+scrollwheel:false,
+draggable:false,
+mapTypeId:google.maps.MapTypeId.ROADMAP
+};
+
+var map = new google.maps.Map(document.getElementById("googleMap"),mapProp);
+
+var marker = new google.maps.Marker({ position:myCenter,});
+marker.setMap(map);
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+
+
+{% endblock %}

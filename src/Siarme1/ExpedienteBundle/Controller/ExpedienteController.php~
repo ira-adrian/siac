@@ -1,0 +1,775 @@
+<?php
+
+namespace Siarme\ExpedienteBundle\Controller;
+
+use Siarme\ExpedienteBundle\Entity\Expediente;
+use Siarme\ExpedienteBundle\Entity\Tramite;
+use Siarme\AusentismoBundle\Entity\Agente;
+use Siarme\ExpedienteBundle\Entity\DatoAT;
+use Siarme\DocumentoBundle\Entity\Historial;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+
+/**
+ * Expediente controller.
+ *
+ * @Route("expediente")
+ */
+class ExpedienteController extends Controller
+{
+    /**
+     * Lista Todo los expedientes con knp-paginator
+     *
+     * @Route("/index", name="expediente_index")
+     * @Method({"GET", "POST"})
+     */
+    public function indexAction(Request $request)
+    {
+
+
+/**         
+         $cadena = str_replace('.', '', $cons);
+         $numero= is_numeric($cadena);
+         $expt = preg_match('/(^((EX-|ex-|)([0-9]{1,8}|))(-|\/)([0-9]{4,4}$))/i', $cons);
+*/
+
+
+    $cons = trim($request->get('consulta')); 
+       $cons  = ltrim($cons , '0');
+
+        $repository = $this->getDoctrine()
+                           ->getRepository('AusentismoBundle:Agente');         
+        $query = $repository->createQueryBuilder('a'); 
+         if (!empty($cons)) {    
+
+              $query->leftJoin('a.expediente' , 'e')
+                    ->addSelect('e')
+                    ->andWhere("a.apellidoNombre like :keyword or a.dni like :keyword")
+                    ->setParameter('keyword', '%'.$cons.'%');
+            
+        $query->orderBy('e.id', 'DESC')
+              ->getQuery(); 
+
+        $paginator  = $this->get('knp_paginator');
+        $pagination = $paginator->paginate(
+            $query, /* query NOT result */
+            $request->query->getInt('page', 1)/*page number*/,
+            25 /*limit per page*/, array('wrap-queries'=>true)
+                        );
+
+        if  ($pagination->getTotalItemCount() == 1){
+             foreach ($pagination as $agente) {
+                 return $this->redirectToRoute('agente_show', array('id' => $agente->getId()));
+             }
+        }
+         } else { $pagination= 0; }
+
+
+
+/**--------------------------------------------------------------------*/
+
+       $repository = $this->getDoctrine()
+                          ->getRepository('ExpedienteBundle:Expediente');
+         
+        $consulta = $repository->createQueryBuilder('e'); 
+        if (!empty($cons)) {    
+              $consulta->leftJoin('e.agente' , 'a')
+                    ->addSelect('a')
+                    ->addSelect('a')
+                    ->Where('e.departamentoRm = :dpto')
+                    ->andWhere("concat(e.letra,'-',e.numero,'/',e.anio,' ', e.extracto) like :keyword or concat('EX-',e.numeroGde,'/',e.anioGde) like :keyword")
+                    ->setParameter('dpto', $this->getUser()->getDepartamentoRm()->getId())
+                    ->setParameter('keyword', '%'.$cons.'%')
+                    ->getQuery(); 
+           
+        $paginator2  = $this->get('knp_paginator');
+        $expedientes = $paginator2->paginate(
+            $consulta, /* query NOT result */
+            $request->query->getInt('pag', 1)/*page number*/,
+            25 /*limit per page*/, array('wrap-queries'=>true)
+                        );
+       } else { $expedientes= 0; }
+
+    if (!empty($cons) and (count($expedientes) == 0) and (count($pagination) == 0)) {
+
+        $this->get('session')->getFlashBag()->add(
+        'mensaje-warning',
+        'Buscar por NUMERO de expediente ingrese "numero/año" por ej. 1253/2019 o por "letra-numero" ej. EX-1224 <br> Debe tener en cuenta de NO agregar  "0" antes del numero  ej. EX-01224 . <br> Puede ingresar por ej. EX-1224/2019 o  si desea buscar expedientes de este año  ej.  /2019 <br> 
+         Buscar por DNI o CUIL debe ingresarlos sin "." ni "-" por Ej. 23215454 <br>
+         Ademas puede buscar por APELLIDO Y NOMBRE o solo apellido ej. VARELA'
+        );
+
+
+    }
+
+        return $this->render('ExpedienteBundle:Expediente:index.html.twig', array('pagination_agentes' => $pagination,
+          'find'=>$cons,
+          'pagination_expedientes'=>$expedientes,
+          'expedientes'=> true,
+         //'tiposTramites' => $tiposTramites,
+         // 'turnoshoy' => $turnoshoy,
+       ));
+    }
+
+//ESTE ES LO ULTIMO
+ /**
+     * Lists all datoAT entities.
+     *
+     * @Route("/turnos/index", name="turnos_index")
+     * @Method("GET")
+     */
+    public function turnosIndexAction(Request $request)
+    {
+        $repository = $this->getDoctrine()
+            ->getRepository('ExpedienteBundle:Expediente');
+         $fecha = new \DateTime('now');
+        $query = $repository->createQueryBuilder('e'); 
+              $query->join('e.clasificacion' , 'c')
+                    ->join('e.agente' , 'a')
+                    ->addSelect('a')
+                    ->join('e.datoAt' , 'dt')
+                    ->addSelect('dt')
+                    ->Where('e.departamentoRm = :dpto')
+                    ->andWhere('dt.fechaTurno >= :fecha')
+                    ->andWhere('dt.turno = :estado or dt.estado = :estado1')
+                    ->andWhere('e.estado = :estado2')
+                    ->setParameter('dpto', $this->getUser()->getDepartamentoRm()->getId())
+                    ->setParameter('estado', true)
+                    ->setParameter('estado1', "Con Turno")
+                    ->setParameter('estado2', true)
+
+                    ->setParameter('fecha', $fecha->format('Y-m-d'))
+                    ->orderBy('dt.fechaTurno', 'ASC')
+              ->getQuery(); 
+
+        $paginator  = $this->get('knp_paginator');
+        $pagination = $paginator->paginate(
+            $query, /* query NOT result */
+            $request->query->getInt('page', 1)/*page number*/,
+            20 /*limit per page*/, array('wrap-queries'=>true)
+                        );
+
+        return $this->render('ExpedienteBundle:DatoAT:turnos_index.html.twig', array('pagination' => $pagination, 'find'=>null, 'turnos'=>true,
+
+       ));
+    }
+
+ /**
+     * Lista Todo los expedientes con knp-paginator
+     *
+     * @Route("/indexturno", name="expediente_indexturno")
+     * @Method({"GET", "POST"})
+     */
+    public function indexTurnoAction(Request $request)
+    {       
+
+        $repository = $this->getDoctrine()
+            ->getRepository('ExpedienteBundle:Expediente');
+         $fecha = new \DateTime('now');
+        $query = $repository->createQueryBuilder('e'); 
+              $query->join('e.clasificacion' , 'c')
+                    ->join('e.agente' , 'a')
+                    ->addSelect('a')
+                    ->join('e.datoAt' , 'dt')
+                    ->addSelect('dt')
+                    ->Where('e.departamentoRm = :dpto')
+                    ->andWhere('dt.fechaTurno >= :fecha')
+                    ->andWhere('dt.turno = :estado or dt.estado = :estado1')
+                    ->andWhere('e.estado = :estado2')
+                    ->setParameter('dpto', $this->getUser()->getDepartamentoRm()->getId())
+                    ->setParameter('estado', true)
+                    ->setParameter('estado1', "Con Turno")
+                    ->setParameter('estado2', true)
+
+                    ->setParameter('fecha', $fecha->format('Y-m-d'))
+                    ->orderBy('dt.fechaTurno', 'ASC')
+              ->getQuery(); 
+
+        $paginator  = $this->get('knp_paginator');
+        $pagination = $paginator->paginate(
+            $query, /* query NOT result */
+            $request->query->getInt('page', 1)/*page number*/,
+            20 /*limit per page*/, array('wrap-queries'=>true)
+                        );
+
+    //dump($pagination);
+     // exit();
+        $find=null;
+        //$tiposTramites = $this->getDoctrine()->getManager()->getRepository('ExpedienteBundle:TipoTramite')->findAll();
+        // parameters to template
+        return $this->render('ExpedienteBundle:Expediente:_panel_expediente.html.twig', array('pagination' => $pagination, 'find' => $find,
+         //'tiposTramites' => $tiposTramites,
+       ));
+    }
+
+    public function getTurnosHoy()
+    {   
+        $repository = $this->getDoctrine()
+            ->getRepository('ExpedienteBundle:Expediente');
+         $fecha = new \DateTime('now');
+        $query = $repository->createQueryBuilder('e'); 
+              $query->join('e.clasificacion' , 'c')
+                    ->join('e.agente' , 'a')
+                    ->addSelect('a')
+                    ->join('e.datoAt' , 'dt')
+                    ->addSelect('dt')
+                    ->Where('e.departamentoRm = :dpto')
+                    ->andWhere('dt.fechaTurno = :fecha')
+                    ->andWhere('dt.turno = :estado or dt.estado = :estado1')
+                    ->andWhere('e.estado = :estado2')
+                    ->setParameter('dpto', $this->getUser()->getDepartamentoRm()->getId())
+                    ->setParameter('estado', true)
+                    ->setParameter('estado1', "Con Turno")
+                    ->setParameter('estado2', true)
+
+                    ->setParameter('fecha', $fecha->format('Y-m-d'))
+                    ->orderBy('dt.fechaTurno', 'ASC'); 
+
+                $dql = $query->getQuery();
+        $turnos = $dql->getResult();
+        return count($turnos);
+    }
+
+ /**
+     * Creates a new expediente entity.
+     *
+     * @Route("/{id}/{tipo}/modal_new", name="expediente_modal_new")
+     * @Method({"GET", "POST"})
+     * @ParamConverter("agente", class="AusentismoBundle:Agente")
+     */
+    public function modalNewAction(Request $request , Agente $agente)
+    {  
+        //dump($agente->getCargo()); exit();
+
+    /*
+      if  ( (empty($agente->getLocalidad())) or ($agente->getCargo()->isEmpty())) {
+           
+           $this->get('session')->getFlashBag()->add(
+                    'mensaje-info',
+                    'POR FAVOR: Actualizar la <strong> LOCALIDAD </strong> o el <strong> CARGO </strong> del Agente e intente crear el EXPEDIENTE nuevamente');
+           return $this->redirectToRoute('agente_expediente_show', array('id' => $agente->getId()));
+        } */
+
+        $expediente = new Expediente();
+        $tramite= new Tramite();
+        $datoAt= new DatoAT();
+        $expediente->setEstado(true);
+        $tramite->setEstado(true);
+        $em = $this->getDoctrine()->getManager();
+        $tramite->setNumeroTramite(rand(1,100));
+        $tramite->setFechaOrigen(new \DateTime('now')); 
+        $expediente->setAnio((new \DateTime('now'))->format('Y'));
+         $expediente->setAnioGde((new \DateTime('now'))->format('Y'));  
+        $clas = $em->getRepository('ExpedienteBundle:Clasificacion')->getByClasificacion($agente->getEscalafon());
+        $expediente->setClasificacion($clas);
+        // ESTABLESCO DATOS POR DEFECTO SEGUN EL USUARIO 
+        // AUTOSEGURO = 1 O DESPACHO = 2
+        $usuario = $this->getUser();
+        $departamento  = $usuario->getDepartamentoRm();
+         $tipo = $departamento->getId();
+        if ($tipo == 1 ) { 
+            $tt = $em->getRepository('ExpedienteBundle:TipoTramite')->find(4);
+             
+           // $cl = $em->getRepository('ExpedienteBundle:Clasificacion')->find(1);
+           // $expediente->setClasificacion($cl);          
+            $expediente->setTipoTramite($tt);
+            $org = $em->getRepository('AusentismoBundle:Organismo')->find(225);
+            $tramite->setOrganismoOrigen($org);
+            $expediente->setLetra("INT");
+            $numero = $em->getRepository('DocumentoBundle:TipoDocumento')->getNumeroDoc('int');
+            $tipoDocumento = $em->getRepository('DocumentoBundle:TipoDocumento')->findOneBySlug('int');
+           } elseif ($tipo == 2 )  {
+
+             $tt = $em->getRepository('ExpedienteBundle:TipoTramite')->find(1);
+              $expediente->setExtracto('SOLICITA: '.$tt);   
+             $expediente->setTipoTramite($tt);
+              //  $cl = $em->getRepository('ExpedienteBundle:Clasificacion')->find(1);
+             // $expediente->setClasificacion($cl); 
+             $org = $em->getRepository('AusentismoBundle:Organismo')->find(228);
+             $tramite->setOrganismoOrigen($org);
+      
+              $expediente->setLetra("IN");
+              // ASIGNO NUMERO DE EXPEDIENTE INTERNO
+              $numero = $em->getRepository('DocumentoBundle:TipoDocumento')->getNumeroDoc('in');
+              $tipoDocumento = $em->getRepository('DocumentoBundle:TipoDocumento')->findOneBySlug('in'); 
+             } else {
+
+            $tt = $em->getRepository('ExpedienteBundle:TipoTramite')->find(17);
+            $expediente->setExtracto('SOLICITA: '.$tt);   
+            $expediente->setTipoTramite($tt);
+            //  $cl = $em->getRepository('ExpedienteBundle:Clasificacion')->find(1);
+            // $expediente->setClasificacion($cl); 
+            $org = $em->getRepository('AusentismoBundle:Organismo')->find(227);
+            $tramite->setOrganismoOrigen($org);
+      
+            $expediente->setLetra("LIC");
+            // ASIGNO NUMERO DE EXPEDIENTE INTERNO
+            $numero = $em->getRepository('DocumentoBundle:TipoDocumento')->getNumeroDoc('lic');
+            $tipoDocumento = $em->getRepository('DocumentoBundle:TipoDocumento')->findOneBySlug('lic');
+             
+             }
+
+
+            $expediente->setNumero($numero);
+            $expediente->setAgente($agente);
+            $tramite->setExpediente($expediente);
+            $expediente->addTramite($tramite);
+            $expediente->setDatoAt($datoAt);
+            $datoAt->setExpediente($expediente);
+             if ($tipo == 1 ) { 
+            $form = $this->createForm('Siarme\ExpedienteBundle\Form\ExpedienteType', $expediente);}
+             elseif ($tipo == 2 ){ $form = $this->createForm('Siarme\ExpedienteBundle\Form\ExpedienteDespachoType', $expediente); } 
+            else {$form = $this->createForm('Siarme\ExpedienteBundle\Form\ExpedienteDespachoType', $expediente);}
+
+        $form->handleRequest($request);
+
+        $expediente->setDepartamentoRm($departamento);      
+        if ($form->isSubmitted() && $form->isValid()) {
+           
+            if ($expediente->getNumero() == $numero) {
+              $tipoDocumento->setNumero($expediente->getNumero());
+            }
+            $expediente->setExtracto('SOLICITA: '. $expediente->getTipoTramite());
+            $em->persist($expediente);
+            $em->persist($tramite); 
+            $em->persist($datoAt);
+            $em->persist($tipoDocumento);
+            $em->flush();
+            
+            $msj= 'Se ha creado el expediente: '.$expediente;
+            $this->get('session')->getFlashBag()->add(
+                    'mensaje-info',
+                    $msj);
+         /** Las acciones pueden ser ['MODIFICADO','CREADO','ELIMINADO', 'VISTO' ]*/
+          $this->historial($expediente,'CREADO', $msj);
+            return $this->redirectToRoute('expediente_show', array('id' => $expediente->getId()));
+        }
+
+        return $this->render('ExpedienteBundle:Expediente:modal_new.html.twig', array(
+            'expediente' => $expediente,
+            'form' => $form->createView(), 
+        ));
+    }
+
+    /**
+     * Creates a new expediente entity.
+     *
+     * @Route("/{id}/{tipo}/new", name="expediente_new")
+     * @Method({"GET", "POST"})
+     * @ParamConverter("agente", class="AusentismoBundle:Agente")
+     */
+    public function newAction(Request $request , Agente $agente)
+    {  
+        //dump($agente->getCargo()); exit();
+
+
+   /** if  ( (empty($agente->getLocalidad())) or ($agente->getCargo()->isEmpty())) {
+           
+           $this->get('session')->getFlashBag()->add(
+                    'mensaje-info',
+                    'POR FAVOR: Actualizar la <strong> LOCALIDAD </strong> o el <strong> CARGO </strong> del Agente e intente crear el EXPEDIENTE nuevamente');
+           return $this->redirectToRoute('agente_expediente_show', array('id' => $agente->getId()));
+        } **/
+
+        $expediente = new Expediente();
+        $tramite= new Tramite();
+        $datoAt= new DatoAT();
+
+
+        $em = $this->getDoctrine()->getManager();
+        // PRUEBAS PARA TRAMITE
+        $tramite->setNumeroTramite(rand(1,100));
+        $tramite->setTrimestre(rand(1,4));
+        $tramite->setPresupuestoOficial(rand(5200,1000000000));
+        $tramite->setOrganismoOrigen(rand(1,40));
+        $tramite->setClase(  $em->getRepository('AusentismoBundle:Clase')->find(rand(1,40)) );
+        // FIN DE PRUEBAS 
+        $expediente->setEstado(true);
+        $tramite->setEstado(true);
+
+      
+        $tramite->setFechaOrigen(new \DateTime('now')); 
+        $expediente->setAnio((new \DateTime('now'))->format('Y'));
+         $expediente->setAnioGde((new \DateTime('now'))->format('Y'));  
+        $clas = $em->getRepository('ExpedienteBundle:Clasificacion')->getByClasificacion($agente->getEscalafon());
+        $expediente->setClasificacion($clas);
+        // ESTABLESCO DATOS POR DEFECTO SEGUN EL USUARIO 
+        // AUTOSEGURO = 1 O DESPACHO = 2
+         $usuario = $this->getUser();
+         $departamento  = $usuario->getDepartamentoRm();
+         $tipo = $departamento->getId();
+
+         if ($tipo == 1 ) { 
+            $tt = $em->getRepository('ExpedienteBundle:TipoTramite')->find(4);
+             
+           // $cl = $em->getRepository('ExpedienteBundle:Clasificacion')->find(1);
+           // $expediente->setClasificacion($cl);          
+            $expediente->setTipoTramite($tt);
+            $org = $em->getRepository('AusentismoBundle:Organismo')->find(225);
+            $tramite->setOrganismoOrigen($org);
+            $expediente->setLetra("INT");
+            $numero = $em->getRepository('DocumentoBundle:TipoDocumento')->getNumeroDoc('int');
+            $tipoDocumento = $em->getRepository('DocumentoBundle:TipoDocumento')->findOneBySlug('int');
+           } elseif ($tipo == 2 )  {
+
+             $tt = $em->getRepository('ExpedienteBundle:TipoTramite')->find(1);
+              $expediente->setExtracto('SOLICITA: '.$tt);   
+             $expediente->setTipoTramite($tt);
+              //  $cl = $em->getRepository('ExpedienteBundle:Clasificacion')->find(1);
+             // $expediente->setClasificacion($cl); 
+             $org = $em->getRepository('AusentismoBundle:Organismo')->find(228);
+             $tramite->setOrganismoOrigen($org);
+      
+              $expediente->setLetra("IN");
+              // ASIGNO NUMERO DE EXPEDIENTE INTERNO
+              $numero = $em->getRepository('DocumentoBundle:TipoDocumento')->getNumeroDoc('in');
+              $tipoDocumento = $em->getRepository('DocumentoBundle:TipoDocumento')->findOneBySlug('in'); 
+             } else {
+
+            $tt = $em->getRepository('ExpedienteBundle:TipoTramite')->find(17);
+            $expediente->setExtracto('SOLICITA: '.$tt);   
+            $expediente->setTipoTramite($tt);
+            //  $cl = $em->getRepository('ExpedienteBundle:Clasificacion')->find(1);
+            // $expediente->setClasificacion($cl); 
+            $org = $em->getRepository('AusentismoBundle:Organismo')->find(227);
+            $tramite->setOrganismoOrigen($org);
+      
+            $expediente->setLetra("LIC");
+            // ASIGNO NUMERO DE EXPEDIENTE INTERNO
+            $numero = $em->getRepository('DocumentoBundle:TipoDocumento')->getNumeroDoc('lic');
+            $tipoDocumento = $em->getRepository('DocumentoBundle:TipoDocumento')->findOneBySlug('lic');
+             
+             }
+
+
+            $expediente->setNumero($numero);
+            $expediente->setAgente($agente);
+            $tramite->setExpediente($expediente);
+            $expediente->addTramite($tramite);
+            $expediente->setDatoAt($datoAt);
+            $datoAt->setExpediente($expediente);
+
+            if ($tipo == 1 ) { 
+            $form = $this->createForm('Siarme\ExpedienteBundle\Form\ExpedienteType', $expediente);}
+             elseif ($tipo == 2 ){ $form = $this->createForm('Siarme\ExpedienteBundle\Form\ExpedienteDespachoType', $expediente); } 
+            else {$form = $this->createForm('Siarme\ExpedienteBundle\Form\ExpedienteType', $expediente);}
+      
+
+        $form->handleRequest($request);
+        $expediente->setDepartamentoRm($departamento);      
+        if ($form->isSubmitted() && $form->isValid()) {
+
+
+           if ($expediente->getNumero() == $numero) {
+              $tipoDocumento->setNumero($expediente->getNumero());
+            }
+            $em->persist($expediente);
+            $em->persist($tramite); 
+            $em->persist($datoAt);
+            $em->persist($tipoDocumento);
+            $expediente->setExtracto('SOLICITA: '. $expediente->getTipoTramite());
+            $em->flush();
+            $msj= 'Se ha creado el expediente: '.$expediente;
+            $this->get('session')->getFlashBag()->add(
+                    'mensaje-info',
+                    $msj);
+         /** Las acciones pueden ser ['MODIFICADO','CREADO','ELIMINADO', 'VISTO' ]*/
+          $this->historial($expediente,'CREADO', $msj);
+            return $this->redirectToRoute('expediente_show', array('id' => $expediente->getId()));
+
+        }
+        //recupero las pagina anterior 
+        $ant= $request->headers->get('referer');
+        return $this->render('ExpedienteBundle:Expediente:form.html.twig', array(
+            'expediente' => $expediente,
+            'form' => $form->createView(), 
+            'anterior'=>$ant,           
+        ));
+    }
+
+    /**
+     * Finds and displays a expediente entity.
+     *
+     * @Route("/{id}", name="expediente_show")
+     * @Method("GET")
+     */
+    public function showAction(Expediente $expediente)
+    {
+        $deleteForm = $this->createDeleteForm($expediente);
+        $em = $this->getDoctrine()->getManager();
+        $tiposdocumento = $em->getRepository('DocumentoBundle:TipoDocumento')->findBy(array('visible'=>true),
+    array('nombreDocumento' => 'ASC'));
+        $articulos = $em->getRepository('AusentismoBundle:Articulo')->findAll();
+         /** Las acciones pueden ser ['MODIFICADO','CREADO','ELIMINADO', 'VISTO' ]*/
+         $msj = 'Has visto el expediente '.$expediente;
+          $this->historial($expediente,'VISTO', $msj );
+
+      //dump($this->getClassName($expediente));
+    //  exit();
+        return $this->render('ExpedienteBundle:Expediente:show.html.twig', array(
+            'expediente' => $expediente,
+            'delete_form' => $deleteForm->createView(),
+            'tiposdocumento' => $tiposdocumento,
+            'articulos'=>$articulos,
+        ));
+    }
+
+
+ public function getClassName($ClassName)
+        {
+            return (new \ReflectionClass($ClassName))->getShortName();
+        }
+
+    /**
+     * Displays a form to edit an existing expediente entity.
+     *
+     * @Route("/{id}/edit", name="expediente_edit")
+     * @Method({"GET", "POST"})
+     */
+    public function editAction(Request $request, Expediente $expediente)
+    {
+        $deleteForm = $this->createDeleteForm($expediente);
+
+
+         $usuario = $this->getUser();
+         $departamento  = $usuario->getDepartamentoRm();
+         $tipo = $departamento->getId();
+
+            if ($tipo == 1 ) { 
+            $form = $this->createForm('Siarme\ExpedienteBundle\Form\ExpedienteEditType', $expediente);}
+             elseif ($tipo == 2 ){ $form = $this->createForm('Siarme\ExpedienteBundle\Form\ExpedienteEditDespachoType', $expediente); } 
+            else {$form = $this->createForm('Siarme\ExpedienteBundle\Form\ExpedienteEditDespachoType', $expediente);}
+
+        $editForm->handleRequest($request);
+
+        if ($editForm->isSubmitted() && $editForm->isValid()) {
+           
+            $tt = $expediente->getTipoTramite();
+            $expediente->setExtracto('SOLICITA: '.$tt);
+            
+            $this->getDoctrine()->getManager()->flush();
+
+            $msj= 'El expediente  '.$expediente.' <strong> Fue modificado...</strong>';
+             $this->get('session')->getFlashBag()->add(
+                    'mensaje-info', $msj);
+
+              /** Las acciones pueden ser ['MODIFICADO','CREADO','ELIMINADO', 'VISTO' ]*/
+             $this->historial($expediente,'MODIFICADO', $msj);
+            return $this->redirectToRoute('expediente_show', array('id' => $expediente->getId()));
+        }
+
+        return $this->render('ExpedienteBundle:Expediente:edit.html.twig', array(
+            'expediente' => $expediente,
+            'edit_form' => $editForm->createView(),
+            'delete_form' => $deleteForm->createView(),
+        ));
+    }
+
+    /**
+     * Displays a form to edit an existing expediente entity.
+     *
+     * @Route("/{id}/gde-edit", name="expediente_gde_edit")
+     * @Method({"GET", "POST"})
+     */
+    public function gdeEditAction(Request $request, Expediente $expediente)
+    {
+        $deleteForm = $this->createDeleteForm($expediente);
+        $usuario = $this->getUser(); 
+        $editForm = $this->createForm('Siarme\ExpedienteBundle\Form\ExpedienteGdeEditType', $expediente);
+        $editForm->handleRequest($request);
+
+        if ($editForm->isSubmitted() && $editForm->isValid()) {
+           $tt = $expediente->getTipoTramite();
+            $expediente->setExtracto('SOLICITA: '.$tt);
+            $this->getDoctrine()->getManager()->flush();
+
+            $msj= 'El numero de expediente GDE '.$expediente.' <strong> Fue actualizado...</strong>';
+             $this->get('session')->getFlashBag()->add(
+                    'mensaje-info', $msj);
+              /** Las acciones pueden ser ['MODIFICADO','CREADO','ELIMINADO', 'VISTO' ]*/
+             $this->historial($expediente,'MODIFICADO', $msj);
+            return $this->redirectToRoute('expediente_show', array('id' => $expediente->getId()));
+        }
+
+        return $this->render('ExpedienteBundle:Expediente:form_gde_edit.html.twig', array(
+            'expediente' => $expediente,
+            'edit_form' => $editForm->createView(),
+        ));
+    }
+
+ /**
+     * Displays a form to edit an existing expediente entity.
+     *
+     * @Route("/{id}/modal-edit", name="expediente_modal_edit")
+     * @Method({"GET", "POST"})
+     */
+    public function modalEditAction(Request $request, Expediente $expediente)
+    {
+        $deleteForm = $this->createDeleteForm($expediente);
+
+         $usuario = $this->getUser();
+         $departamento  = $usuario->getDepartamentoRm();
+         $tipo = $departamento->getId();
+
+            if ($tipo == 1 ) { 
+            $editForm = $this->createForm('Siarme\ExpedienteBundle\Form\ExpedienteType', $expediente);}
+             elseif ($tipo == 2 ){ $editForm = $this->createForm('Siarme\ExpedienteBundle\Form\ExpedienteDespachoType', $expediente); } 
+            else {$editForm = $this->createForm('Siarme\ExpedienteBundle\Form\ExpedienteDespachoType', $expediente);}
+
+        $editForm->handleRequest($request);
+
+        if ($editForm->isSubmitted() && $editForm->isValid()) {
+           
+            $tt = $expediente->getTipoTramite();
+            $expediente->setExtracto('SOLICITA: '.$tt);
+            
+            $this->getDoctrine()->getManager()->flush();
+             $msj= 'El expediente  '.$expediente.' <strong> Fue modificado...</strong>';
+             $this->get('session')->getFlashBag()->add(
+                    'mensaje-info',
+                    $msj );
+
+              /** Las acciones pueden ser ['MODIFICADO','CREADO','ELIMINADO', 'VISTO' ]*/
+             $this->historial($expediente,'MODIFICADO', $msj);
+            return $this->redirectToRoute('expediente_show', array('id' => $expediente->getId()));
+        }
+
+        return $this->render('ExpedienteBundle:Expediente:modal_edit.html.twig', array(
+            'expediente' => $expediente,
+            'edit_form' => $editForm->createView(),
+            'delete_form' => $deleteForm->createView(),
+        ));
+    }
+    /**
+     * Deletes a expediente entity.
+     *
+     * @Route("/{id}", name="expediente_delete")
+     * @Method("DELETE")
+     */
+    public function deleteAction(Request $request, Expediente $expediente)
+    {
+        $form = $this->createDeleteForm($expediente);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $agente = $expediente->getAgente();
+          /** Las acciones pueden ser ['MODIFICADO','CREADO', 'BORRADO', 'ELIMINADO', 'VISTO' ]*/
+          $msj =  'Ha sido eliminado definitivamente elexpediente '.$expediente;
+          $this->historial($expediente,'ELIMINADO', $msj );
+            $this->get('session')->getFlashBag()->add(
+                    'mensaje-info',$msj );
+            $em->remove($expediente);
+            $em->flush($expediente);
+
+        }
+
+        return $this->redirectToRoute('agente_show', array('id' => $agente->getId()));
+    }
+
+    /**
+     * Creates a form to delete a expediente entity.
+     *
+     * @param Expediente $expediente The expediente entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createDeleteForm(Expediente $expediente)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('expediente_delete', array('id' => $expediente->getId())))
+            ->setMethod('DELETE')
+            ->getForm()
+        ;
+    }
+
+    /**
+     * @Route("/{id}/concluir", name="expediente_concluir")
+     *
+     * @ParamConverter("expediente", class="ExpedienteBundle:Expediente")
+     */
+    public function concluirAction(Request $request, Expediente $expediente)
+    {
+        $em = $this->getDoctrine()->getManager();
+        //dump($expediente->getId());
+      //  exit();
+        $tramite = $em->getRepository('ExpedienteBundle:Tramite')->findUltimo($expediente);
+
+        $tramite->setEstado(false);
+        $tramite->setFechaDestino( new \DateTime('now') );
+        $tramite->setOrganismoDestino( $tramite->getOrganismoOrigen());
+        $tramite->setEstado(false);
+        $expediente->setEstado(false);
+        $em = $this->getDoctrine()->getManager();
+        $em->flush($tramite);
+        $em->flush($expediente);
+
+      $msj ='El Expediente '.$expediente.'<strong> se encuentra ahora en estado CERRADO.</strong>';
+
+        $this->get('session')->getFlashBag()->add(
+                    'mensaje-info',
+                    $msj);
+        /** Las acciones pueden ser ['MODIFICADO','CREADO','ELIMINADO', 'VISTO', 'ABIERTO', 'CERRADO']*/
+          $this->historial($expediente,'CERRADO', $msj);
+
+            return $this->redirectToRoute('expediente_show', array('id' => $expediente->getId()));
+    }
+
+    /**
+     * @Route("/{id}/iniciar", name="expediente_iniciar")
+     */
+    public function iniciarAction(Request $request, Expediente $expediente)
+    {
+        $usuario = $this->getUser();
+        $em = $this->getDoctrine()->getManager();
+        $tramite = new Tramite();
+        $tramite->setDepartamentoRm($usuario->getDepartamentoRm());
+        $expediente->setEstado(true);
+        $tramite->setExpediente($expediente);
+        $tramite->setEstado(true);
+    
+        if ($usuario->getDepartamentoRm()->getId() == 1) {  
+       //     $tt = $em->getRepository('ExpedienteBundle:TipoTramite')->find(4);
+        //    $tramite->setTipoTramite($tt);
+            $tramite->setFechaOrigen( new \DateTime('now') );
+            $org = $em->getRepository('AusentismoBundle:Organismo')->find(1542);
+            $tramite->setOrganismoOrigen($org);
+        } else {
+     //       $tt = $em->getRepository('ExpedienteBundle:TipoTramite')->find(1);
+   //         $tramite->setTipoTramite($tt);
+            $tramite->setFechaOrigen( new \DateTime('now') );
+            $org = $em->getRepository('AusentismoBundle:Organismo')->find(1542);
+            $tramite->setOrganismoOrigen($org);
+        }
+        
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($tramite);
+            $expediente->addTramite($tramite);
+            $em->flush();
+            $msj = 'El Expediente  '.$expediente.' <strong>se encuentra ahora en estado ABIERTO.</strong>';
+            $this->get('session')->getFlashBag()->add(
+                    'mensaje-info', $msj );
+              /** Las acciones pueden ser ['MODIFICADO','CREADO','ELIMINADO', 'VISTO', 'ABIERTO', 'CERRADO']*/
+
+             $this->historial($expediente,'ABIERTO', $msj);
+            return $this->redirectToRoute('expediente_show', array('id' => $expediente->getId()));
+       }
+
+ public function historial($entidad, $accion, $msj = null)
+    {     
+            $em = $this->getDoctrine()->getManager();
+            $historial = new Historial();
+            $historial->setTipoId($entidad->getId());
+            /** El tipo puede ser ['EXP','DOC','AG'] corresponde con las entidades Expediente, Documento, Agente */
+            $historial->setTipo($entidad::TIPO_ENTIDAD);
+            $historial->setUsuario($this->getUser());
+            $historial->setAccion($accion);
+            $historial->setTexto($msj);
+            $em->persist($historial);
+            $em->flush();
+    }
+
+}

@@ -1,0 +1,73 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\expediente_show.html.twig#}
+<div class="container"> 
+<div id="copy" class="panel panel-primary print">
+      <!-- Default panel contents -->
+      
+      <div class="panel-heading">
+      <style type="text/css" media="print">
+        @media print {
+            a[href]:after {
+                content: none !important;
+            }
+        }
+      </style> 
+          &nbsp;&nbsp;<span style="font-size: 20px" class="glyphicon glyphicon-folder-open"></span>
+          <div class="pull-right">
+                     {% if (expediente | movimiento_pendiente(app.user) ) %}
+                        <span  class="label label-warning">Ingreso</span>
+                    {% else %}
+                        Estado: <a data-toggle="tooltip" data-placement="bottom" title='Cambia el Estado' href="{{ path('movimiento_cambiar_estado', { 'id': expediente.id }) }}">{% if ( expediente | movimiento_estado(app.user))  %}<span  class="label label-primary">Activo</span>{% else %}<span  class="label label-default">Enviado</span> <span class="glyphicon glyphicon-info-sign text-danger"></span>{% endif %}</a>
+                    {% endif %}  
+          </div>
+      </div>
+      <div class="panel-body"> 
+        <dl class="text-center">
+           <dt>Expediente | CCOO</dt>
+           <dd>
+              <span class="glyphicon glyphicon-folder-open"></span> <a href="{{ path('expediente_show', { 'id': expediente.id | default(1) }) }}"><span id="expediente">{{ expediente.numeroGde | default("") }}</span></a>
+              &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;    
+              <a href="{{ path('expediente_show', { 'id': expediente.id | default(0) }) }}"><span id="ccoo">{{expediente.ccoo | default("") }}</span></a>
+            </dd>
+            <dt>Descripcion del Proceso</dt>
+            <dd>{{ expediente.extracto | upper | raw | nl2br }}</dd>
+            <dt>Presupuesto Oficial</dt>
+            <dd>$ {{ expediente.PresupuestoOficial | default(0) | number_format(2, ',', '.')  }}</dd>
+            <dd>( {{ numero_a_letras(expediente.PresupuestoOficial,2, 'pesos') }} )</dd>
+        </dl>
+    </div>
+
+<div class="panel-group" id="accordion">
+{% if (tipoTramites | length) != 0  %}
+  {% for tipoTramite in tipoTramites | reverse if tipoTramite.slug != "tramite_oferta" %}
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h4 class="panel-title text-info">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href='#{{tipoTramite}}'>
+          <span {% if loop.first %}class="glyphicon glyphicon-minus"{% else %}class="glyphicon glyphicon-plus  text-info" {% endif %} ></span> <span class="{{tipoTramite.glyphicon}}"></span>{{tipoTramite}} ({{expediente | tramite_por_expediente_tipo( tipoTramite ) | length }})
+        </a>
+      </h4>
+    </div>
+    <div id="{{tipoTramite}}" class="panel-collapse collapse {% if tipoTramite.departamentoRm == app.user.departamentoRm %} in {% endif %}">
+      <div  class="panel-body ">            
+          <div class="table-responsive">           
+              <table class="table table-hover table-bordered">
+                  <thead>
+                     {{ include('ExpedienteBundle:'~ tipoTramite.slug ~':_thead_completo.html.twig') }}  
+                  </thead>
+                  <tbody>
+                  {# filtro los tramites que no tienen expedientes #}
+                 {% for tramite in tipoTramite.tramite | reverse  %}
+                     {{ include('ExpedienteBundle:'~ tramite.tipoTramite.slug ~':_tbody_completo.html.twig') }}    
+                  {% endfor %}
+
+                  </tbody>
+              </table>
+          </div>             
+      </div>
+    </div>
+  </div>
+{% endfor %}
+{% endif %}
+</div>
+</div>
+</div>

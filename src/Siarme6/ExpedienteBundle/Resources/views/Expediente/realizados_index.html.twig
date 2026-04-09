@@ -1,0 +1,53 @@
+{# Siarme\ExpedienteBundle\Resources\views\Expediente\realizados_index.html.twig #}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %}REALIZADO{% endblock %}
+{% block header %}
+  {{ include('ExpedienteBundle:Default:_breadcrumb_principal.html.twig') }}
+{% endblock %}
+{% block contenido %}
+        {{ app.session.set('modulo', 'REALIZADO') }}
+        {{ app.session.set('glyphicon', 'glyphicon glyphicon-ok') }}
+        {{ app.session.set('route', 'expedientes_realizados_index') }}
+      <div class="nav nav-tabs nav-justified" style="padding-top:5px;">
+        <li role="presentation"><a class="glyphicon glyphicon-tasks" href="{{ path('tramites_realizados_index') }}"> TAREAS {% if movimientoPendiente is defined and movimientoPendiente is not empty  %} <span class=" glyphicon-folder-open text-warning"><small>+</small></span>{% endif %}</a></li>
+        <li role="presentation" class="active"><a class="glyphicon glyphicon-folder-open" href="{{ path('expedientes_realizados_index') }}"> EXPEDIENTES</a></li>
+      </div> 
+ 
+        <table id="tablaExpediente" class="table table-hover">
+        <thead>
+            <tr>
+                <th>Informacion</th>
+                <th>N°</th>
+                <th>Descripcion</th>
+                <th>Reparticion</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        	  {% for expediente in expedientes %}
+                     {{ include('ExpedienteBundle:Expediente:_tbody_completo.html.twig') }}    
+            {% endfor %}
+        </tbody>
+      </table>
+
+{% endblock %}
+{% block javascripts %}  
+{{ parent() }}
+<!-- DataTables -->
+<script src="{{ asset('bundles/expediente/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+
+<script> 
+
+  $("#link-3").addClass('active');
+
+  $(function () { // "order": [[ 1, "desc" ]]
+    $("#tablaExpediente").DataTable({"searching": true,"lengthChange": false,"pageLength": 20,
+            "language": {
+                "url": "{{asset('bundles/expediente/plugins/datatables/extensions/language/Spanish.json')}}"
+            },
+        });
+  });
+
+</script> <!-- DataTables  -->
+{% endblock %}

@@ -1,0 +1,28 @@
+<p style="text-align:center"> 
+    San Fernando Del Valle  de Catamarca<strong>,&nbsp;
+    {% if documento.fechaDocumento %} 
+        {{ documento.fechaDocumento|
+                    date('l, j  F  Y') |replace({
+                        'January'  : 'de Enero de de ',
+                        'February' : 'de Febrero de',
+                        'March' : 'de Marzo de',
+                        'April' : 'de Abril de',
+                        'May' : 'de Mayo de',
+                        'June' : 'de Junio de',
+                        'July' : 'de Julio de',
+                        'August' : 'de Agosto de',
+                        'September' : 'de Septiembre de',
+                        'October' : 'de Octubre de',
+                        'November' : 'de Noviembre de',
+                        'December' : 'de Diciembre de',
+                        'Monday'   : ' Lunes',
+                        'Tuesday'   : ' Martes',
+                        'Wednesday'   : ' Miércoles',
+                        'Thursday'   : ' Jueves',
+                        'Friday'   : ' Viernes',
+                        'Saturday'  : ' Sábado',
+                        'Sunday'   : ' Domingo'
+                    }) 
+        }}  
+    {% endif %}&nbsp;</strong>
+</p>

@@ -37,7 +37,7 @@
        {% endif %}
         {% if ( edit or itemConsolidado is defined )  and app.user.departamentoRm.slug == "dppr" %}
             <span class="glyphicon glyphicon-ok pull-right hidden-print" style="display:none"></span>
-            <textarea class="form-control" data-href="{{ path('item_pedido_detalle', { 'id': itemPedido.id }) }}"   placeholder="Especificaciones" >{{ itemPedido.detalle | striptags }}</textarea>
+            <textarea class="form-control" data-href="{{ path('item_pedido_detalle', { 'id': itemPedido.id }) }}"   placeholder="Especificaciones" rows="2">{{ itemPedido.detalle | striptags }}</textarea>
         {% else %}
             {% if itemPedido.detalle  %}<p style="font-size:11px; padding:0px; margin:0px;" class="text-muted"><strong>{{itemPedido.detalle | striptags }}</strong></p>{% endif %}
         {% endif %}

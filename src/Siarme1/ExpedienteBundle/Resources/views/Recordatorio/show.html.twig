@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Recordatorio</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ recordatorio.id }}</td>
+            </tr>
+            <tr>
+                <th>Recordatorio</th>
+                <td>{{ recordatorio.recordatorio }}</td>
+            </tr>
+            <tr>
+                <th>Fecha</th>
+                <td>{% if recordatorio.fecha %}{{ recordatorio.fecha|date('Y-m-d') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Hora</th>
+                <td>{% if recordatorio.hora %}{{ recordatorio.hora|date('H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Publico</th>
+                <td>{% if recordatorio.publico %}Yes{% else %}No{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Texto</th>
+                <td>{{ recordatorio.texto }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('recordatorio_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('recordatorio_edit', { 'id': recordatorio.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

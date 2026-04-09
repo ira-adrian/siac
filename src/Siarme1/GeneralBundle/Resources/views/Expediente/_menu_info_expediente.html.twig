@@ -1,0 +1,29 @@
+{# Siarme\ExpedienteBundle\Resources\views\Expediente\_menu_info_expediente.html.twig#}
+
+{% if expediente.tramite | length > 0 %}
+    <span data-toggle="tooltip" data-placement="top" title="Tramites">
+    <a class="dropdown-toggle previous hidden-print" data-toggle="dropdown" role="button" aria-expanded="false"><span  class="glyphicon glyphicon-tasks text-info" aria-hidden="false"><small>{{ expediente.tramite | length }}</small></span></a>
+       <ul  class="dropdown-menu"  style="width:500px;">  <!-- dropdown-menu -->  
+                                
+         		  <ul class="list-group" style="margin:2px;" >   <!-- list-group --> 
+                   {% for tramite in expediente.tramite  %}    
+                        <li class="list-group-item">
+                            <a  class='{{ tramite.tipoTramite.glyphicon}}' href="{{ path('tramite_show', { 'id': tramite.id }) }}" target="_blank"><strong>{{ tramite.tipoTramite}}-{{ tramite.numeroTramite }}</strong></a> - {{ tramite.organismoOrigen.codigoGde | default("N/D") }}&nbsp;|  {{ tramite.trimestre }}° Trimestre  | {% if tramite.fecha %}{{ tramite.fecha |long_time }}{% endif %} |  {% for tarea in tramite.tarea | reverse %}  
+                            {% if loop.last and tarea.esResponsable | default(false) %} 
+                                    {% set title = "Responsable: " ~ tarea.usuario.agente.apellidoNombre | default( tarea.usuario.departamentoRm ) %} 
+                                         {% if ( app.user.id == tarea.usuario.id  | default(null) ) %}
+                                                     <small><span data-toggle="tooltip" data-placement="top" title='{{ title | default(null)}}' class='glyphicon glyphicon-user text-info' aria-hidden="true">
+                                                     </span></small>  {{ tarea.usuario.usuario }} 
+                                          {% else %}       
+                                                   <small> <span data-toggle="tooltip" data-placement="top" title='{{ title | default(null)}}' class='glyphicon glyphicon-user text-muted' aria-hidden="true"></span></small> {{ tarea.usuario.usuario }}
+                                          {% endif %} 
+                           {% endif %}   
+                   {% endfor %} 
+                        </li>
+                    {% endfor %}
+                  </ul> <!-- list-group --> 
+                
+        </ul> <!-- dropdown-menu -->  
+     </span>
+ {% endif %} 
+

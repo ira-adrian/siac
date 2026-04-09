@@ -1,0 +1,49 @@
+ {# menu es un array con todo el menu no se pasa ningun objeto 
+tiene la estructura 
+array(): 
+      autoseguro:
+              slug: autoseguro
+              nombre: AUTOSEFURO
+              cantidad: 26
+              clasificacion:
+                    varios:
+                          slug: varios
+                          nombre: VARIOS
+                          cantidad: 15
+                    policia:...
+              .
+              .
+              .
+              documentos:
+                    citacion: 
+                            slug: ...
+        .
+        .
+        .            
+      despacho: ... 
+ #}
+ {% for departamento in menu %}
+    <small>
+
+        <ul class="nav nav-list"  role="navigation">
+          <li class="nav-header" > <a class="h5 bg-primary text-center" href="{{ path('expediente_departamento_clasificacion', { 'slugd': departamento.slug}) }}"> {{departamento.nombre}} <span class="badge">{{departamento.cantidad  }}</span></a></li>
+         
+          {% for  clasificacion in departamento.clasificaciones %}
+
+            <li><a href="{{ path('expediente_departamento_clasificacion', { 'slugd': departamento.slug, 'slugc':clasificacion.slug }) }}"> {{ clasificacion.nombre }} <span class="badge">{{ clasificacion.cantidad}}  </span></a></li>
+
+          {% endfor %}
+              
+          {% for documento in departamento.documentos %}
+
+          <li > <a class="h5 bg-info text-center" href="{{ path('expediente_departamento_documento', { 'slugd': departamento.slug ,'slugdc': documento.slug }) }}"> {{documento.nombre}} <span class="badge alert-danger"> {{ documento.cantidad}}</span></a></li>  
+
+          {% endfor %}
+        </ul>
+
+    </small>
+{% endfor %}
+
+ <ul class="nav nav-list">
+
+</ul>

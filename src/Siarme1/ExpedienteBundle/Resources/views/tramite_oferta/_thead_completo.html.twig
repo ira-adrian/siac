@@ -1,0 +1,14 @@
+{#  Siarme\ExpedienteBundle\Resources\views\Tramite\_registro.html.twig#}
+<tr>
+    {#<th>Info</th>#}
+    <th>N°</th>
+    <th>Año/mes/día</th>
+    <th>Razon Social</th>
+    <th>Cuil</th>
+    <th>Monto Ofertado</th>
+    <th>Monto Preadjudicado</th>
+{% if tramites is defined or  tareas is defined or realizadas is defined %}
+    <th>SAF</th>
+{% endif %}
+    <th>Estado</th>
+</tr>

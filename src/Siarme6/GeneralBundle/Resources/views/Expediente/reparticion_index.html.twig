@@ -1,0 +1,73 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\mis_expedientes_index.html.twig#}
+{% extends 'ExpedienteBundle:Default:layout.html.twig' %}
+{% block title %}PRINCIPAL{% endblock %}
+{% block header %}
+  {{ include('ExpedienteBundle:Default:_header.html.twig') }}
+  {{ include('ExpedienteBundle:Default:_breadcrumb_principal.html.twig') }}
+{% endblock %}
+{% block contenido %}
+ <div id="copy">
+      
+        {% if app.user.departamentoRm.slug != "dppr" %} {% set modulo ="EXPEDIENTES" %}{% else %}{% set modulo ="CCOO-DPPR" %}{% endif %}
+        {% set modulo2 = "TAREAS" %}  
+        {% for tipoTramite in app.user.departamentoRm.tipoTramite %}
+            {% if loop.first %}
+            {% set modulo2 = tipoTramite %}
+            {% endif %}
+        {% endfor %}
+
+        {{ app.session.set('modulo', "ACUERDO MARCO") }}
+        {{ app.session.set('route', 'general_reparticion_index') }}
+        {{ app.session.set('glyphicon', 'glyphicon glyphicon-briefcase') }}
+     <div class="nav nav-tabs nav-justified" style="padding-top:5px;">      
+        <li role="presentation" ><a href="{{ path('expediente_reparticion_index') }}"> <span class="glyphicon glyphicon-folder-open"></span> {{modulo}}</a></li>
+        <li role="presentation"><a href="{{ path('tramite_reparticion_index') }}"> <span class="glyphicon glyphicon-tasks"></span> {{modulo2}}</a></li>
+        <li role="presentation" class="active"><a style="color:#306066;" href="{{ path('general_reparticion_index', {'id': app.user.departamentoRm.id }) }}"><span class="glyphicon glyphicon-folder-open"></span> ACUERDO MARCO</a></li>
+        <li role="presentation"><a  href="{{ path('reporte_index', {'id': app.user.departamentoRm.id }) }}"> <span class="glyphicon glyphicon-stats"></span> REPORTE</a></li>
+        <li role="presentation"><a href="{{ path('organismo_index', {'id': app.user.departamentoRm.id }) }}"><span class="glyphicon glyphicon-tent" ></span> SAFS</a></li>
+        <li role="presentation"><a  href="{{ path('usuario_index', {'id': app.user.departamentoRm.id }) }}"> <span class="glyphicon glyphicon-user"></span> USUARIOS</a></li>
+      </div>
+      <ol class="breadcrumb hidden-print"  style="margin-bottom:1px;"> 
+        {% for year in ( ('now' | date("Y") - 2) .. ('now' | date("Y"))) %} 
+            {% if year != anio %}
+              <li><a href="{{ path('general_reparticion_index', { 'anio': year }) }}"> <span class="glyphicon glyphicon-calendar"></span>{{year}}</a></li>
+            {% else %}
+                <li class="active"> 
+                  <span class="glyphicon glyphicon-calendar text-success"></span> <strong>{{year}}</strong>
+                </li>
+            {% endif %}
+        {% endfor %}
+      </ol>
+    <div class="table-responsive">
+    <table id="tablaExpediente"  class="table table-hover">
+        <thead>
+            {{ include('GeneralBundle:Expediente:_thead_completo.html.twig') }} 
+        </thead>
+        <tbody>
+            {% for expediente in acuerdos %}
+                     {{ include('GeneralBundle:Expediente:_tbody_completo.html.twig') }}    
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div> 
+{% endblock %}
+{% block javascripts %}  
+{{ parent() }}
+<!-- DataTables -->
+<script src="{{ asset('bundles/expediente/plugins/datatables/jquery.dataTables.min.js') }}"></script>
+
+<script> 
+
+  $("#link-4").addClass('active');
+
+  $(function () { // "order": [[ 1, "desc" ]]
+    $("#tablaExpediente").DataTable({"searching": true,"lengthChange": false, "order": [[ 1, "desc" ]],"pageLength": 20,
+            "language": {
+                "url": "{{asset('bundles/expediente/plugins/datatables/extensions/language/Spanish.json')}}"
+            },
+        });
+  });
+
+</script> <!-- DataTables  -->
+{% endblock %}

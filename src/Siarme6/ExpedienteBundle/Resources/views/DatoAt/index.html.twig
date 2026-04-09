@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Datoats list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Fechaat</th>
+                <th>Numerodenuncia</th>
+                <th>Formaocurrencia</th>
+                <th>Agentecausante</th>
+                <th>Naturalezalesion</th>
+                <th>Zonaafectada</th>
+                <th>Descripcionzona</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for datoAT in datoATs %}
+            <tr>
+                <td><a href="{{ path('datoat_show', { 'id': datoAT.id }) }}">{{ datoAT.id }}</a></td>
+                <td>{% if datoAT.fechaAt %}{{ datoAT.fechaAt|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{{ datoAT.numeroDenuncia }}</td>
+                <td>{{ datoAT.formaOcurrencia }}</td>
+                <td>{{ datoAT.agenteCausante }}</td>
+                <td>{{ datoAT.naturalezaLesion }}</td>
+                <td>{{ datoAT.zonaAfectada }}</td>
+                <td>{{ datoAT.descripcionZona }}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('datoat_show', { 'id': datoAT.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('datoat_edit', { 'id': datoAT.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('datoat_new') }}">Create a new datoAT</a>
+        </li>
+    </ul>
+{% endblock %}

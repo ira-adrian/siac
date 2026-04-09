@@ -1,6 +1,6 @@
 {# Siarme/AusentismoBundle/Resources/views/Agente/index.html.twig #}
 {% extends 'ExpedienteBundle:Default:layout.html.twig' %}
-{% block title %} {{ tramite.tipoTramite }} {{ tramite.numeroTramite }} {% endblock %}
+{% block title %} INGRESO {{ tramite.numeroTramite }} {% endblock %}
 {% block contenido %}
 <div class="container">
  {% set pedidos1 = tramite.expediente | tramite_por_expediente_slug("tramite_pedido") %}
@@ -182,6 +182,18 @@
                     {{ render(controller('DocumentoBundle:Compartir:index', { 'tipoid': tramite.id, 'tipo': constant('TIPO_ENTIDAD', tramite) } )) }} 
                 </dd>
                 </div>
+                <dt>Tarea</dt>
+                <dd>
+                    {% set tareas = tramite.pedido.tarea %}
+                    <table class="table table-hover">
+                            <tbody> 
+                              {% for tarea in tareas %}
+                                    {% set tramite = tarea.tramite %}
+                                    {{ include('ExpedienteBundle:Tarea:_tbody_completo.html.twig') }}      
+                             {% endfor %}
+                            </tbody>
+                    </table>
+                </dd>
             </dl>          
  {# ---- PARA HABILITAR ----------
             {% if tramite.estadoTramite.porcentaje < 100 %}

@@ -1,0 +1,73 @@
+{# color con etiquetas para consolidar #}
+<div role="presentation" class="dropdown" >
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+      <span  class="etiqueta-estado-ingreso">
+            {% if tramite.color is empty %}
+                <div class='progress'>
+                  <div class=' text-center' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%'>
+                  </div>
+                </div>                      
+            {% else %}
+                <div class='progress'>
+                  <div class=' progress-bar progress-bar-{{tramite.color}} progress-bar-striped text-center' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%'>
+                    <span></span>
+                  </div>
+                </div>
+            {% endif %}
+       </span>
+    </a>
+    <ul class="dropdown-menu">
+                <li>
+                    <a class="btn-estado-ingreso" data-href="{{ path('tramite_cambiar_color', { 'id': tramite.id , 'slug': "ninguno" }) }}" data-etiqueta= "<div class='progress'><div role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%'></div></div>">
+                        <div class='progress'>
+                              <div role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%'>
+                              </div>
+                        </div>  
+                    </a>
+                </li>
+                <li>
+                    <a class="btn-estado-ingreso" data-href="{{ path('tramite_cambiar_color', { 'id': tramite.id , 'slug': "success" }) }}" data-etiqueta= "<div class='progress'><div class='progress-bar progress-bar-success progress-bar-striped' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%'></div></div>">
+                        <div class='progress'>
+                          <div class='progress-bar progress-bar-success progress-bar-striped' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%'>
+                          </div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a class="btn-estado-ingreso" data-href="{{ path('tramite_cambiar_color', { 'id': tramite.id , 'slug': "info" }) }}" data-etiqueta= "<div class='progress'><div class='progress-bar progress-bar-info progress-bar-striped' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%'></div></div>">                    
+                        <div class='progress'>
+                          <div class='progress-bar progress-bar-info  progress-bar-striped' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%'>
+                          </div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a class="btn-estado-ingreso" data-href="{{ path('tramite_cambiar_color', { 'id': tramite.id , 'slug': "warning" }) }}" data-etiqueta= "<div class='progress'><div class='progress-bar progress-bar-warning progress-bar-striped' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%'></div></div>">                    
+                        <div class='progress'>
+                          <div class='progress-bar progress-bar-warning  progress-bar-striped' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%'>
+                          </div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a class="btn-estado-ingreso" data-href="{{ path('tramite_cambiar_color', { 'id': tramite.id , 'slug': "danger" }) }}" data-etiqueta= "<div class='progress'><div class='progress-bar progress-bar-danger progress-bar-striped' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%'></div></div>">                    
+                        <div class='progress'>
+                          <div class='progress-bar progress-bar-danger  progress-bar-striped' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%'>
+                          </div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a class="btn-estado-ingreso" data-href="{{ path('tramite_cambiar_color', { 'id': tramite.id , 'slug': "none" }) }}" data-etiqueta= "<div class='progress'><div class='progress-bar progress-bar-none progress-bar-striped' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%'></div></div>">                
+                        <div class='progress'>
+                          <div class='progress-bar progress-bar-none progress-bar-striped' role='progressbar' aria-valuenow='100' aria-valuemin='0' aria-valuemax='100' style='width: 100%'>
+                          </div>
+                        </div>
+                    </a>
+                </li>
+    </ul>
+</div>
+
+
+
+                           

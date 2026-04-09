@@ -1,0 +1,108 @@
+{# Siarme\ExpedienteBundle\Resources\views\Tramite\_registro_completo.html.twig#}
+{% set year = 'now' | date('Y')%}
+{% set pedidos = pedidosPorOrganismoyRubro(tramite.organismoOrigen, tramite.rubro, tramite.pedido) %}
+<tr {#if tramite.departamentoRm != app.user.departamentoRm %} style="background-color:rgba(192,192,192,0.3);" data-toggle="tooltip" data-placement="top" title="Reparticion {{ tramite.departamentoRm  }}" {% elseif tramite.tareaActiva %} data-toggle="tooltip" data-placement="top" title='Tarea en curso...' style="background-color:hsla(120,60%,70%,0.3);" {% endif #}>
+	<td class="hidden-print">
+		<div
+			class="dropdown text-left hidden-print" style="margin:0px;">
+			{# El tipo puede ser ['EX','DOC','AG'] corresponde con las entidades Expediente, Documento, Agente #}
+			{% include 'DocumentoBundle:Documento:_menu_comun_informacion.html.twig' with {'entidad': tramite, 'tipo': constant('TIPO_ENTIDAD', tramite) } %}
+			{% include 'ExpedienteBundle:Tramite:_menu_info_tramite.html.twig' with {'entidad': tramite, 'tipo':constant('TIPO_ENTIDAD', tramite) } %}
+			{% if tramites is defined or mis_tramites is defined or realizadas is defined %}
+				<a href="{{ path('tramite_show', { 'id': tramite.pedido.id }) }}" target="_blank"><span class='{{ tramite.pedido.tipoTramite.glyphicon}}'></span> {{ tramite.pedido.tipoTramite }} {{ tramite.pedido.numeroTramite }}</a>
+			{% endif %}
+		</div>
+	</td>
+	<td class="hidden">{{tramite.id}}</td>
+	<td>{{ tramite.numeroTramite }}</td>
+	<td>
+		{% if tramite.fechaDestino %}
+			{{ tramite.fechaDestino|date('d-m-Y') }}
+		{% endif %}
+		</td>
+	<td style="width: 20%">
+		<a href="{{ path('tramite_show', { 'id': tramite.id }) }}" target="_blank">{{ tramite.ccoo | default('NO-'~ year ~ '-n/d')}}</a>
+        <br>
+		<i> <small> {{ tramite.texto | upper | replace({ 'Á':'A', 'É':'E', 'Í':'I', 'Ó':'O', 'Ú':'U' }) }}</small></i>
+	</td>
+	<td>
+		<a data-toggle="tooltip" data-placement="top" title='{{ tramite.organismoOrigen}}' href="{{ path('organismo_show', { 'id': tramite.organismoOrigen.id | default(0) }) }}" target="_blank">
+			<strong>{{ tramite.organismoOrigen.saf.numeroSaf | default("N/D")}}</strong>
+		</a>
+	</td>
+{% if tramites is defined or mis_tramites is defined or realizadas is defined %}
+
+
+	<td>
+		<strong>* {{ tramite.trimestre }}</strong>° T 
+		{% for pedido in pedidos %}
+			{% set year = pedido.fechaDestino | date('Y')%}
+			<br> <strong>{{ pedido.trimestre }}</strong>°T-{{year}}
+		{% endfor %}
+	</td>
+	<td>
+		* ${{ tramite.PresupuestoOficial | default(0) | number_format(2, ',', '.')  }}
+		{% for pedido in pedidos %}
+			<br> ${{ pedido.PresupuestoOficial | default(0) | number_format(2, ',', '.')  }}
+		{% endfor %}
+	</td>
+		
+	<td>
+		* {{ tramite.cantidadPedida }}
+		{% for pedido in pedidos %}
+			<br> {{ pedido.cantidadPedida }}
+		{% endfor %}
+	</td>
+
+{% endif %}
+	<td>
+		{% if ( tramite.expediente.id is defined and tramite.expediente | movimiento_estado(app.user))  %}
+			<span class="pull-left">{{ include('ExpedienteBundle:Tramite:_estado_etiqueta.html.twig') }}</span>
+		{% elseif  tramite.expediente.id is defined %}
+			<span class="label label-default">Enviado</span>
+		{% else %}
+			{% if ( app.user.departamentoRm == tramite.departamentoRm | default(null) ) %}
+				<span>{{ include('ExpedienteBundle:Tramite:_estado_etiqueta.html.twig') }}</span>
+			{% else %}
+				<span class="{{tramite.estadoTramite.class}}">{{tramite.estadoTramite }}</span>
+			{% endif %}
+			{{ tramite.fechaEstado |long_time}}
+		{% endif %}
+	</td>
+	<td>
+		{% for tarea in tramite.pedido.tarea | reverse  %}
+			{% if loop.first  %}
+				{% if  tarea.esResponsable | default(false) %}
+					{% set title = "Responsable: " ~ tarea.usuario.agente.apellidoNombre | default( tarea.usuario.departamentoRm ) %}
+				{% else %}
+					{% set title = "Colaborador: " ~ tarea.usuario.agente.apellidoNombre | default( tarea.usuario.departamentoRm ) %}
+				{% endif %}
+				<a data-toggle="tooltip" data-placement="top" title="Ver {{ title | default(null)}}" href="{{ path('agente_show', { 'id': tarea.usuario.agente.id | default(0) }) }}" target="_blank">{{ tarea.usuario.usuario | default("-") }}</a>
+			{% endif %}
+		{% endfor %}
+	</td>
+	<td>
+            {% set comentarios = tramite.id | Comentario(constant('TIPO_ENTIDAD', tramite))  %}
+                    {% if (comentarios | length > 0 ) %}
+                        {% set comentarios = comentarios | reverse %}
+                           <div> <div>
+                            <small><span>{{ comentarios[0].texto }}</span></small>  {% if   ( app.user.id == comentarios[0].usuario.id) %}&emsp;<a data-href="{{ path('comentario_eliminar', { 'id': comentarios[0].id }) }}" class="btn-eliminar-comentario text-danger"><span data-toggle="tooltip" data-placement="top" title='Quitar comentario' class="glyphicon glyphicon-trash" ></span></a>{% endif %}
+                            </div></div>
+                    {% endif %}
+                    {% if is_granted('ROLE_SUPERVISOR') or comentar %} 
+                            <form class="formulario-comentario" method="POST" data-url="{{ path('comentario_ajax_new', {'tipoid': tramite.id, 'tipo': constant('TIPO_ENTIDAD', tramite)}) }}">
+                                <div class="comentario"></div>
+                                <textarea id="textarea-comentario-{{ tramite.id }}" class="form-control comentario-texto" placeholder="Comentar" name="comentario-texto"></textarea>
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-sm btn-default comentar">
+                                        Enviar &nbsp;
+                                        <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate pull-right comentario-enviando hidden-print" style="display:none"></span>
+                                        <span class="glyphicon glyphicon-ok text-success comentario-enviado pull-right hidden-print" style="display:none"></span>
+                                        <span class="glyphicon glyphicon-remove text-danger comentario-error pull-right hidden-print" style="display:none"></span>
+                                    </button>
+                                </div>
+                            </form>
+                         {# render(controller('ExpedienteBundle:Comentario:new',{ 'tipoid': tramite.id, 'tipo': constant('TIPO_ENTIDAD', tramite) } )) #}
+                    {% endif %}
+	</td>
+</tr>

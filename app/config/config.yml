@@ -46,7 +46,7 @@ parameters:
     carpeta_xls: '%kernel.project_dir%/web/uploads/archivos_xls'
     items_comprar: '%kernel.project_dir%/web/uploads/items_comprar'
     carpeta_img: '%kernel.project_dir%/web/uploads/archivos_img'
-    institucion: 'SECRETARIA DE COMPRAS'
+    institucion: 'Secretaría de Compras'
     ministerio: 'Ministerio de Hacienda y Obra Pública'
 framework:
     #esi: ~
